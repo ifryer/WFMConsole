@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25123.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WFMConsole", "WFMConsole\WFMConsole.csproj", "{D78C8E37-288F-4ABF-AD3E-AEA283DF47B5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WFMConsole.Tests", "WFMConsole.Tests\WFMConsole.Tests.csproj", "{839F0CCD-2A29-4294-8BD9-94E3AE4E039A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D78C8E37-288F-4ABF-AD3E-AEA283DF47B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D78C8E37-288F-4ABF-AD3E-AEA283DF47B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D78C8E37-288F-4ABF-AD3E-AEA283DF47B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D78C8E37-288F-4ABF-AD3E-AEA283DF47B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{839F0CCD-2A29-4294-8BD9-94E3AE4E039A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{839F0CCD-2A29-4294-8BD9-94E3AE4E039A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{839F0CCD-2A29-4294-8BD9-94E3AE4E039A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{839F0CCD-2A29-4294-8BD9-94E3AE4E039A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,81 @@
+﻿body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+    margin-top: 20px;
+}
+
+input,
+select,
+textarea {
+    max-width: 280px;
+}
+
+/*Header*/
+.navbar-blue .container {
+    background-color: rgb(0, 118, 188);
+}
+
+.navbar-blue .navbar-brand {
+    color: white;
+    float: left;
+    height: 50px;
+    padding: 15px 15px;
+    font-size: 18px;
+    line-height: 20px;
+}
+
+
+/* Main Page */
+
+.main-area{
+    /*border-right: 1px solid blue*/
+}
+
+.underlined{
+    text-decoration: underline;
+}
+
+.center-text{
+    text-align: center
+}
+
+.timeOffForm {
+    border: 1px solid #0076bc;
+    border-radius: 5px;
+    padding: 20px;
+    padding-top: 0px;
+    margin-right:10px;
+}
+.margin-top{
+    margin-top: 25px;
+}
+
+.unpadded-left{
+    padding-left: 0
+}
+
+.unpadded-right{
+    padding-right: 0
+}
+
+.form-header {
+    margin-top: 0px;
+    text-align: center;
+    border-bottom: 1px solid #0076bc;
+    margin-left: -20px;
+    background-color: rgba(0, 118, 188, 0.78);
+    color: white;
+    margin-right: -20px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+.bordered-div {
+    border: 1px solid #3894ca;
+    margin-right: 5px;
+}

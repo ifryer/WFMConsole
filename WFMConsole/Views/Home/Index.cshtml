@@ -1,0 +1,118 @@
+﻿<div class="container container-fluid">
+    <div class="col-md-8 main-area">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="selectName">Select Name</label>
+                    <select class="form-control" id="selectNameStaff" placeholder="Select Name...">  
+                        <option selected disabled="disabled"> Select Name</option>
+                        <option value="1"> Jonathan Testerson </option>
+                        <option value="2"> David Testman </option>
+                    </select>
+                </div>
+            </div>
+            @*<div class="col-md-6">
+                <h4 style="margin-top: 30px;" class="selectedStaffName"> </h4>
+            </div>*@
+        </div>
+        <div class="row" id="ptoInfoStaff">
+            <div class="col-md-2 col-xs-2 center-text">
+                <div class="row underlined">
+                    Total PTO
+                </div>
+                <div class="row" id="totalPtoStaff">
+                    -
+                </div>
+            </div>
+            <div class="col-md-2 col-xs-2 center-text">
+                <div class="row underlined">
+                    Used PTO
+                </div>
+                <div class="row" id="usedPtoStaff">
+                    -
+                </div>
+            </div>
+            <div class="col-md-2 col-xs-2 center-text">
+                <div class="row underlined">
+                    Remaining PTO
+                </div>
+                <div class="row" id="remainingPtoStaff">
+                    -
+                </div>
+            </div>
+        </div>
+        <br />
+        <div class="row">
+            <div class="col-md-4">
+                <button class="btn btn-default" id="newTimeOffBtn"> New Time Off </button>
+            </div>
+        </div>
+        <br />
+        <div class="row timeOffForm" style="display:none;">
+            <form action="#" method="post">
+                <h4 class="form-header"> Submit Time Off Form </h4>
+                <div class="col-md-6 unpadded-left">
+                    <div class="form-group">
+                        <label for="selectNameForm">Submitting For</label>
+                        <div class="selectedStaffName"> No Staff Member Selected </div>
+                        @*<select class="form-control" id="selectNameStaffForm" placeholder="Select Name...">
+                            <option selected disabled="disabled"> Select Name</option>
+                            <option value="1"> Jonathan Testerson </option>
+                            <option value="2"> David Testman </option>
+                        </select>*@
+                    </div>
+                    <div class="form-group">
+                        <label for="timeOffUsed">Time Used</label>
+                        <input class="form-control" id="timeOffUsed" placeholder="">
+                        <div style="margin-top: 5px;">
+                            <input  type="checkbox" id="fullDayCheckbox" />
+                            <label for="fullDayCheckbox"> Full Day </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="timeOffDays">Day(s)</label>
+                        <div class="form-inline">
+                            <input class="form-control" id="timeOffDays" placeholder="">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 unpadded-left">
+                    <div class="form-group">
+                        <label for="timeOffNotes">Notes</label>
+                        <div class="form-inline">
+                            <textarea rows="5" style="max-width: 100%; width: 100%" class="form-control" id="timeOffNotes" placeholder=""></textarea>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-default pull-right" id="closeTimeOffFormBtn"> Cancel </button>
+                    <button type="submit" class="btn btn-primary pull-right" style="margin-right: 10px"> Submit </button>
+                </div>
+            </form>
+        </div>
+        <div class="row margin-top">
+            <div class="col-md-3 center-text">
+                <button class="btn btn-default"> Create Down By Report</button>
+                <p class="help-block"> Last sent <span id="DownByLastSentDate"> 11/11/1111 </span> </p>
+            </div>
+            <div class="col-md-5 center-text">
+                <button class="btn btn-default"> Create MOW Report</button>
+                <p class="help-block"> Last sent <span id="MOWLastSentDate"> 11/11/1111 </span> </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="row">
+            <div style="height: 300px; width: 100%; border: 1px solid #0076bc;" class="fake-calendar"> Google Calendar </div>   
+        </div>
+        <div class="row">
+            <div class="teamInfo">
+                <div class="center-text underlined">
+                    <h4> Team Info </h4>
+                </div>
+            </div>   
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/Scripts/index.js"></script>
+}
