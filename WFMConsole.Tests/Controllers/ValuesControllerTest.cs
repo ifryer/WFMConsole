@@ -5,10 +5,10 @@ using System.Net.Http;
 using System.Text;
 using System.Web.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using WFMConsole;
-using WFMConsole.Controllers;
+using WFMDashboard;
+using WFMDashboard.Controllers;
 
-namespace WFMConsole.Tests.Controllers
+namespace WFMDashboard.Tests.Controllers
 {
     [TestClass]
     public class ValuesControllerTest

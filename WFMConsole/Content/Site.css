@@ -32,6 +32,32 @@ textarea {
 
 /* Main Page */
 
+.small-alert-box {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    margin-bottom: 0;
+    font-size: 1.5em;
+    padding: 1em 1.3em;
+    z-index: 2000;
+    
+    
+    border: 1px solid;
+    border-radius: 5px;
+    max-width: 50vw;
+    max-height: 40vh;
+    overflow-y: auto;
+}
+
+.success-msg {
+    background-color: #d9edf7;
+    color: #31708f;
+}
+.error-msg {
+    background-color: #fddbdb;
+    color: #da1717;
+}
+
 .main-area{
     /*border-right: 1px solid blue*/
 }
@@ -44,12 +70,13 @@ textarea {
     text-align: center
 }
 
-.timeOffForm {
+.time-off-form {
     border: 1px solid #0076bc;
     border-radius: 5px;
     padding: 20px;
     padding-top: 0px;
     margin-right:10px;
+    margin-left: 15px;
 }
 .margin-top{
     margin-top: 25px;
@@ -78,4 +105,9 @@ textarea {
 .bordered-div {
     border: 1px solid #3894ca;
     margin-right: 5px;
+}
+
+.sent-label{
+    margin-left: 5%;
+    font-size: 0.8em;
 }

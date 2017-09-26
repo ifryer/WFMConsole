@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+  <EntityContainerMapping StorageEntityContainer="OnyxModelStoreContainer" CdmEntityContainer="Entities">
+    <EntitySetMapping Name="BUS_WFMDashboard_Google_Credentials">
+      <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_Google_Credentials">
+        <MappingFragment StoreEntitySet="BUS_WFMDashboard_Google_Credentials">
+          <ScalarProperty Name="Value" ColumnName="Value" />
+          <ScalarProperty Name="Key" ColumnName="Key" />
+          <ScalarProperty Name="Id" ColumnName="Id" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+  </EntityContainerMapping>
+</Mapping>

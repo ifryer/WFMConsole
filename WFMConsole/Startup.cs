@@ -3,9 +3,9 @@ using System.Threading.Tasks;
 using Microsoft.Owin;
 using Owin;
 
-[assembly: OwinStartup(typeof(WFMConsole.Startup))]
+[assembly: OwinStartup(typeof(WFMDashboard.Startup))]
 
-namespace WFMConsole
+namespace WFMDashboard
 {
     public class Startup
     {

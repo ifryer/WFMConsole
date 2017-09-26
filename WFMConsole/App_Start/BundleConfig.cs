@@ -1,7 +1,7 @@
 ﻿using System.Web;
 using System.Web.Optimization;
 
-namespace WFMConsole
+namespace WFMDashboard
 {
     public class BundleConfig
     {
@@ -9,7 +9,12 @@ namespace WFMConsole
         public static void RegisterBundles(BundleCollection bundles)
         {
             bundles.Add(new ScriptBundle("~/bundles/jquery").Include(
-                        "~/Scripts/jquery-{version}.js"));
+                        "~/Scripts/jquery-{version}.js",
+                        "~/Scripts/chosen_v1.8.2/chosen.jquery.js",
+                        "~/Scripts/jquery.timepicker.min.js",
+                        "~/Scripts/jquery-ui-1.12.1.custom/jquery-ui.js",
+                        "~/Scripts/jquery.datepair.min.js"
+                        ));
 
             // Use the development version of Modernizr to develop with and learn from. Then, when you're
             // ready for production, use the build tool at http://modernizr.com to pick only the tests you need.
@@ -22,6 +27,8 @@ namespace WFMConsole
 
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/bootstrap.css",
+                      "~/Content/jquery.timepicker.min.css",
+                      "~/Scripts/jquery-ui-1.12.1.custom/jquery-ui.css",
                       "~/Content/site.css"));
         }
     }

@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.10
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WFMConsole", "WFMConsole\WFMConsole.csproj", "{D78C8E37-288F-4ABF-AD3E-AEA283DF47B5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WFMDashboard", "WFMConsole\WFMDashboard.csproj", "{D78C8E37-288F-4ABF-AD3E-AEA283DF47B5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WFMConsole.Tests", "WFMConsole.Tests\WFMConsole.Tests.csproj", "{839F0CCD-2A29-4294-8BD9-94E3AE4E039A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WFMDashboard.Tests", "WFMConsole.Tests\WFMDashboard.Tests.csproj", "{839F0CCD-2A29-4294-8BD9-94E3AE4E039A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,5 +24,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2E95FF37-A46B-4F62-A7D0-C0520E2A5F24}
 	EndGlobalSection
 EndGlobal

@@ -6,6 +6,7 @@
     <title>@ViewBag.Title</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
+    <link rel="stylesheet" href="~/Scripts/chosen_v1.8.2/chosen.css" />
     <script src="~/Scripts/common.js"></script>
 </head>
 <body>
@@ -18,12 +19,9 @@
                     <span class="icon-bar"></span>
                 </button>
                 <a class="navbar-brand" href="/SSDDashboard/">
-                    <img style="height: 50px; margin-top: -15px; margin-left: -15px; float:left" src='/WFMConsole/Images/km_logo.jpg' />
-                    <span>WFM Console</span>
+                    <img style="height: 50px; margin-top: -15px; margin-left: -15px; float:left" src='/WFMDashboard/Images/km_logo.jpg' />
+                    <span>@ViewBag.Title</span>
                 </a>
-            </div>
-            <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav"></ul>
             </div>
         </div>
     </div>
