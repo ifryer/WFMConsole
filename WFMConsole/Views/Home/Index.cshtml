@@ -7,8 +7,6 @@
                     <label for="select-name-staff">Select Name</label>
                     <select class="form-control" id="select-name-staff" placeholder="Select Name...">  
                         <option selected disabled="disabled"> Select Name</option>
-                        <option value="1"> Jonathan Testerson </option>
-                        <option value="2"> David Testman </option>
                     </select>
                 </div>
             </div>
@@ -94,18 +92,18 @@
         <div class="row margin-top">
             <div class="col-md-4">
                 <button class="btn btn-default" id="create-down-by-report-btn"> Create Down By Report</button>
-                <p class="help-block sent-label"> Last sent <span id="down-by-last-sent-date"> 11/11/1111 </span> </p>
+                <p class="help-block sent-label"> Last sent <span id="down-by-last-sent-date"> @ViewBag.downBy </span> </p>
             </div>
             <div class="col-md-4">
                 <button class="btn btn-default" id="create-mow-report-btn"> Create MOW Report</button>
-                <p class="help-block sent-label"> Last sent <span id="mow-last-sent-date"> 11/11/1111 </span> </p>
+                <p class="help-block sent-label"> Last sent <span id="mow-last-sent-date"> @ViewBag.mow </span> </p>
             </div>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="row">
+        @*<div class="row">
             <div style="height: 300px; width: 100%; border: 1px solid #0076bc;" class="fake-calendar"> Google Calendar </div>   
-        </div>
+        </div>*@
         <div class="row">
             <div class="teamInfo">
                 <div class="center-text underlined">

@@ -155,10 +155,10 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>08/22/2017 08:50:59</publishTime>
     </File>
     <File Include="bin/WFMConsole.dll">
-      <publishTime>09/26/2017 14:35:39</publishTime>
+      <publishTime>09/28/2017 12:40:30</publishTime>
     </File>
     <File Include="bin/WFMConsole.pdb">
-      <publishTime>09/26/2017 14:35:39</publishTime>
+      <publishTime>09/28/2017 12:40:30</publishTime>
     </File>
     <File Include="client_secret.json">
       <publishTime>09/21/2017 15:07:38</publishTime>
@@ -194,7 +194,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>09/25/2017 13:37:46</publishTime>
     </File>
     <File Include="Content/Site.css">
-      <publishTime>09/26/2017 14:19:19</publishTime>
+      <publishTime>09/27/2017 09:19:23</publishTime>
     </File>
     <File Include="favicon.ico">
       <publishTime>08/22/2017 08:51:00</publishTime>
@@ -241,8 +241,14 @@ by editing this MSBuild file. In order to learn more about this please visit htt
     <File Include="Images/refresh.png">
       <publishTime>07/18/2017 13:44:22</publishTime>
     </File>
+    <File Include="log4net.config">
+      <publishTime>09/28/2017 08:19:31</publishTime>
+    </File>
     <File Include="Models/OnyxEntities.edmx.diagram">
       <publishTime>09/26/2017 11:13:16</publishTime>
+    </File>
+    <File Include="Models/SQL2012.edmx.diagram">
+      <publishTime>09/28/2017 08:43:58</publishTime>
     </File>
     <File Include="packages.config">
       <publishTime>09/21/2017 14:38:22</publishTime>
@@ -317,7 +323,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>09/26/2017 14:14:55</publishTime>
     </File>
     <File Include="Scripts/index.js">
-      <publishTime>09/26/2017 14:14:08</publishTime>
+      <publishTime>09/28/2017 10:13:40</publishTime>
     </File>
     <File Include="Scripts/jquery-1.10.2.js">
       <publishTime>08/22/2017 08:51:02</publishTime>
@@ -404,13 +410,13 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>08/22/2017 08:51:02</publishTime>
     </File>
     <File Include="Views/Home/Index.cshtml">
-      <publishTime>09/26/2017 14:12:14</publishTime>
+      <publishTime>09/28/2017 12:04:59</publishTime>
     </File>
     <File Include="Views/Shared/Error.cshtml">
       <publishTime>08/22/2017 08:51:02</publishTime>
     </File>
     <File Include="Views/Shared/_Layout.cshtml">
-      <publishTime>09/26/2017 13:40:02</publishTime>
+      <publishTime>09/28/2017 10:00:09</publishTime>
     </File>
     <File Include="Views/Web.config">
       <publishTime>09/14/2017 14:10:38</publishTime>
@@ -419,7 +425,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>08/22/2017 08:51:02</publishTime>
     </File>
     <File Include="Web.config">
-      <publishTime>09/26/2017 14:31:23</publishTime>
+      <publishTime>09/28/2017 12:40:57</publishTime>
     </File>
   </ItemGroup>
 </Project>

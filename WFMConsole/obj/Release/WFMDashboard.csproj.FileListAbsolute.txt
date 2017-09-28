@@ -24,7 +24,6 @@ C:\Projects\WFMConsole\WFMConsole\bin\Google.Apis.Core.dll
 C:\Projects\WFMConsole\WFMConsole\bin\Google.Apis.dll
 C:\Projects\WFMConsole\WFMConsole\bin\Google.Apis.PlatformServices.dll
 C:\Projects\WFMConsole\WFMConsole\bin\KonicaMinolta.Authentication.Identity.dll
-C:\Projects\WFMConsole\WFMConsole\bin\KonicaMinolta.Authentication.Identity_v4.dll
 C:\Projects\WFMConsole\WFMConsole\bin\KonicaMinolta.AuthenticationR.dll
 C:\Projects\WFMConsole\WFMConsole\bin\log4net.dll
 C:\Projects\WFMConsole\WFMConsole\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll

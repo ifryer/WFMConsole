@@ -46,6 +46,15 @@ namespace WFMConsole.Classes
             }
         }
 
+        public static async Task ClearAsyncStatic()
+        {
+            using (var context = new OnyxEntities())
+            {
+                var objectContext = ((IObjectContextAdapter)context).ObjectContext;
+                await objectContext.ExecuteStoreCommandAsync("TRUNCATE TABLE [BUS_WFMDashboard_Google_Credentials]");
+            }
+        }
+
         public async Task DeleteAsync<T>(string key)
         {
             if (string.IsNullOrEmpty(key))

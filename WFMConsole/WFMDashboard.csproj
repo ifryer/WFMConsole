@@ -76,9 +76,6 @@
     <Reference Include="KonicaMinolta.Authentication.Identity">
       <HintPath>..\..\lib\KonicaMinolta.Authentication.Identity.dll</HintPath>
     </Reference>
-    <Reference Include="KonicaMinolta.Authentication.Identity_v4">
-      <HintPath>..\..\lib\KonicaMinolta.Authentication.Identity_v4.dll</HintPath>
-    </Reference>
     <Reference Include="KonicaMinolta.AuthenticationR">
       <HintPath>..\..\lib\KonicaMinolta.AuthenticationR.dll</HintPath>
     </Reference>
@@ -178,6 +175,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Configuration\" />
     <Folder Include="Views\AuthCallback\" />
   </ItemGroup>
   <ItemGroup>
@@ -196,7 +194,13 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Classes\WFMHelper.cs" />
+    <Compile Include="Models\Agent.cs">
+      <DependentUpon>SQL2012.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\BUS_WFMDashboard_Google_Credentials.cs">
+      <DependentUpon>OnyxEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\BUS_WFMDashboard_ReportLog.cs">
       <DependentUpon>OnyxEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\OnyxEntities.Context.cs">
@@ -213,6 +217,21 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>OnyxEntities.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="Models\SQL2012.Context.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SQL2012.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\SQL2012.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SQL2012.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\SQL2012.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SQL2012.edmx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
@@ -249,10 +268,28 @@
       <DependentUpon>OnyxEntities.edmx</DependentUpon>
       <LastGenOutput>OnyxEntities.cs</LastGenOutput>
     </Content>
+    <Content Include="Models\SQL2012.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>SQL2012.edmx</DependentUpon>
+      <LastGenOutput>SQL2012.Context.cs</LastGenOutput>
+    </Content>
+    <Content Include="Models\SQL2012.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>SQL2012.edmx</DependentUpon>
+      <LastGenOutput>SQL2012.cs</LastGenOutput>
+    </Content>
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="client_secret.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="log4net.config" />
+    <EntityDeploy Include="Models\SQL2012.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>SQL2012.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+    <Content Include="Models\SQL2012.edmx.diagram">
+      <DependentUpon>SQL2012.edmx</DependentUpon>
     </Content>
     <EntityDeploy Include="Models\OnyxEntities.edmx">
       <Generator>EntityModelCodeGenerator</Generator>
@@ -261,7 +298,6 @@
     <Content Include="Models\OnyxEntities.edmx.diagram">
       <DependentUpon>OnyxEntities.edmx</DependentUpon>
     </Content>
-    <Content Include="log4net.config" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Properties\PublishProfiles\WFMDashboard To Production.pubxml" />
     <Content Include="Scripts\chosen_v1.8.2\bower.json" />

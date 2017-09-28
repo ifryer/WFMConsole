@@ -4,7 +4,7 @@
 indexScript = (function () {
 
     function initialize() {
-        $("#select-name-staff").chosen({ search_contains: true });
+        
         $("#time-off-start").timepicker({
             'defaultTimeDelta': null,
             'scrollDefault': 'now',
@@ -17,22 +17,43 @@ indexScript = (function () {
             'maxTime': '8:30pm',
             'showDuration': true
         });
-        //$("#start-end-time-off-section .time").timepicker({
-        //    'scrollDefault': 'now',
-        //    'minTime': '6:00am',
-        //    'maxTime': '8:30pm',
-        //    'showDuration': true,
-        //    'timeFormat': 'g:ia'
-        //});
+
+        $.ajax({
+            dataType: "json",
+            type: "post",
+            url: toUrl("/Home/GetStaffList"),
+            success: function (data) {
+                console.log(data)
+                if (data.success)
+                {
+                    $.each(data.nameList, function (index, item) {
+                        $("#select-name-staff").append("<option value='" + data.idList[index] + "'> " + item + " </option>")
+                    })
+                    $("#select-name-staff").chosen({ search_contains: true });
+                }
+            }
+        });
+        
         $('#start-end-time-off-section').datepair();
         $('#time-off-day').val($.datepicker.formatDate('mm/dd/yy', new Date()))
         $('#time-off-day').datepicker();
     }
 
+    $(".log-off-google").on("click", function () {
+        $.ajax({
+            dataType: "json",
+            type: "post",
+            url: toUrl("/Home/LogOutGoogle"),
+            success: function (data) {
+                console.log(data)
+            }
+        });
+    })
+
 
     $("#pto-section").on("click", "#new-time-off-btn", function () {
         $(".time-off-form").slideToggle();
-
+        $('#time-off-day').val($.datepicker.formatDate('mm/dd/yy', new Date()))
     });
 
     $("#fullDayCheckbox").on("change", function () {
@@ -76,8 +97,9 @@ indexScript = (function () {
         var fullDay = $("#fullDayCheckbox:checked").length > 0
         var notes = $("#time-off-notes").val();
 
-        var id = 5;
-        var name = "Test Name!";
+        var id = $("#select-name-staff").val();
+        var name = $("#select-name-staff option:selected").html();
+        var name = "";
         return $.ajax({
             dataType: "json",
             type: "post",

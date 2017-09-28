@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using log4net;
 using System.Reflection;
+using WFMConsole.Models;
 
 namespace WFMDashboard.Classes
 {
@@ -20,7 +21,39 @@ namespace WFMDashboard.Classes
     {
         static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        public static bool SubmitTimeOff(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, string date, bool fullDay, string startTime, string endTime, string notes, out string msg)
+        static string[] Scopes = { CalendarService.Scope.CalendarReadonly };
+        static string ApplicationName = "Google Calendar API .NET Quickstart";
+
+        public static List<string> GetStaffList(out string msg, out List<int> staffIdList)
+        {
+            var staffList = new List<string>();
+            staffIdList = new List<int>();
+            using (var db = new inContact_NGEntities())
+            {
+                var staffListDb = db.Agents.OrderBy(t => t.LastName);
+                staffList = staffListDb.Select(t => t.FirstName + " " + t.LastName).ToList();
+                staffIdList = staffListDb.Select(t => t.AgentNo).ToList();
+
+            }
+            msg = "Successfully retreived list of staff members";
+            return staffList;
+        }
+
+        public static void GetReportDates(out string downBy, out string mow)
+        {
+            using (var db = new OnyxEntities())
+            {
+                var dbDown = db.BUS_WFMDashboard_ReportLog.Where(t => t.ReportType == "down by").FirstOrDefault().LastSent;
+                downBy = dbDown.ToShortDateString() + " at " + dbDown.ToShortTimeString();
+                var dbMow = db.BUS_WFMDashboard_ReportLog.Where(t => t.ReportType == "mow").FirstOrDefault().LastSent;
+                mow = dbMow.ToShortDateString() + " at " + dbMow.ToShortTimeString();
+
+            }
+
+            return;
+        }
+
+        public static bool SubmitTimeOff(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, string name, string date, bool fullDay, string startTime, string endTime, string notes, out string msg)
         {
             try
             {
@@ -41,7 +74,7 @@ namespace WFMDashboard.Classes
 
                 
 
-                SubmitTimeOff_GoogleCalendar(googleAuth, startDateTime, endDateTime, fullDay, notes);
+                SubmitTimeOff_GoogleCalendar(googleAuth, name, startDateTime, endDateTime, fullDay, notes);
                 bool success = true;
                 return success;
             }
@@ -59,7 +92,9 @@ namespace WFMDashboard.Classes
             return success;
         }
 
-        private static bool SubmitTimeOff_GoogleCalendar(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, DateTime startDateTime, DateTime endDateTime, bool fullDay, string notes)
+        
+
+        private static bool SubmitTimeOff_GoogleCalendar(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, string name, DateTime startDateTime, DateTime endDateTime, bool fullDay, string notes)
         {
             try
             {
@@ -97,44 +132,22 @@ namespace WFMDashboard.Classes
                  }
 
 
-
                 var service = new CalendarService(new BaseClientService.Initializer()
                 {
                     HttpClientInitializer = googleAuth.Credential,
                     ApplicationName = ApplicationName,
                 });
 
-                
-
-
-                //var newEvent = new Event();
-                //newEvent.Start = new EventDateTime() { DateTime = DateTime.Now };
-                //newEvent.Description = "WFM DASHBOARD TEST EVENT";
-                //newEvent.End = new EventDateTime() { DateTime = DateTime.Now.Add(TimeSpan) };
-
-                //change primary to the calendar ID
-                //var text = service.Events.Insert(newEvent, "primary");
-
-
+               
                 Event newEvent = new Event()
                 {
-                    Summary = "WFM Dashboard Test Event",
-                    //Location = "800 Howard St., San Francisco, CA 94103",
+                    Summary = $"{name} Out",
                     Description = notes,
                     Start = start,
                     End = end,
-                    //Recurrence = new String[] { "RRULE:FREQ=DAILY;COUNT=2" },
                     Attendees = new EventAttendee[] {
                         new EventAttendee() { Email = "rtyszka@kmbs.konicaminolta.us" },
                     },
-                    //Reminders = new Event.RemindersData()
-                    //{
-                    //    UseDefault = false,
-                    //    Overrides = new EventReminder[] {
-                    //        new EventReminder() { Method = "email", Minutes = 24 * 60 },
-                    //        new EventReminder() { Method = "sms", Minutes = 10 },
-                    //    }
-                    //}
                 };
 
                 String calendarId = "primary";
@@ -146,7 +159,7 @@ namespace WFMDashboard.Classes
             }
             catch (Exception ex)
             {
-                //Log error with google calendar
+                log.Error("Error in SubmitTimeOff_GoogleCalendar", ex);
                 throw ex;
             }
         }
@@ -160,6 +173,7 @@ namespace WFMDashboard.Classes
             }
             catch (Exception ex)
             {
+                log.Error("Error in CreateDownByReport", ex);
                 return false;
             }
         }
@@ -173,6 +187,7 @@ namespace WFMDashboard.Classes
             }
             catch (Exception ex)
             {
+                log.Error("Error in CreateMOWReport", ex);
                 return false;
             }
             
@@ -187,73 +202,10 @@ namespace WFMDashboard.Classes
             }
             catch (Exception ex)
             {
+                log.Error("Error in GetTeamInfo", ex);
                 return false;
             }
             
-        }
-
-
-
-        // ------------------- FROM GOOGLE CALENDAR API DOCUMENTATION ----------------------
-
-        // If modifying these scopes, delete your previously saved credentials
-        // at ~/.credentials/calendar-dotnet-quickstart.json
-        static string[] Scopes = { CalendarService.Scope.CalendarReadonly };
-        static string ApplicationName = "Google Calendar API .NET Quickstart";
-
-        static void Main(string[] args)
-        {
-            UserCredential credential;
-
-
-
-            credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
-                new ClientSecrets
-                {
-                    ClientId = "574082988944-0f03tni3j5jjlles0prjjbdkvhog7qe4.apps.googleusercontent.com",
-                    ClientSecret = "sEcShK1KM2gvvUE7BfR6jq4g",
-
-                },
-                Scopes,
-                "user",
-                CancellationToken.None).Result;
-            //Console.WriteLine("Credential file saved to: " + credPath);
-
-            // Create Google Calendar API service.
-            var service = new CalendarService(new BaseClientService.Initializer()
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = ApplicationName,
-            });
-
-            // Define parameters of request.
-            EventsResource.ListRequest request = service.Events.List("primary");
-            request.TimeMin = DateTime.Now;
-            request.ShowDeleted = false;
-            request.SingleEvents = true;
-            request.MaxResults = 10;
-            request.OrderBy = EventsResource.ListRequest.OrderByEnum.StartTime;
-
-            // List events.
-            Events events = request.Execute();
-            Console.WriteLine("Upcoming events:");
-            if (events.Items != null && events.Items.Count > 0)
-            {
-                foreach (var eventItem in events.Items)
-                {
-                    string when = eventItem.Start.DateTime.ToString();
-                    if (String.IsNullOrEmpty(when))
-                    {
-                        when = eventItem.Start.Date;
-                    }
-                    Console.WriteLine("{0} ({1})", eventItem.Summary, when);
-                }
-            }
-            else
-            {
-                Console.WriteLine("No upcoming events found.");
-            }
-            Console.Read();
         }
 
     }

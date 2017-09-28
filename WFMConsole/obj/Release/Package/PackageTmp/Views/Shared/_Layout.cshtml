@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@ViewBag.Title</title>
+    <link rel="shortcut icon" type="image/x-icon" href="/WFMDashboard/Images/favicon.ico" />
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
     <link rel="stylesheet" href="~/Scripts/chosen_v1.8.2/chosen.css" />
@@ -18,7 +19,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="/SSDDashboard/">
+                <a class="navbar-brand" href="/WFMDashboard/">
                     <img style="height: 50px; margin-top: -15px; margin-left: -15px; float:left" src='/WFMDashboard/Images/km_logo.jpg' />
                     <span>@ViewBag.Title</span>
                 </a>
@@ -29,6 +30,7 @@
         @RenderBody()
         <hr />
         <footer>
+            <a href="/WFMDashboard/Home/LogOutGoogle" class="log-off-google small"> Log Off Google Calendar </a>
             <p>&copy; @DateTime.Now.Year - Konica Minolta</p>
         </footer>
     </div>

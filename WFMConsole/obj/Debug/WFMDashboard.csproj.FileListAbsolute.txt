@@ -17,7 +17,6 @@ C:\Projects\WFMConsole\WFMConsole\bin\Antlr3.Runtime.dll
 C:\Projects\WFMConsole\WFMConsole\bin\EntityFramework.dll
 C:\Projects\WFMConsole\WFMConsole\bin\EntityFramework.SqlServer.dll
 C:\Projects\WFMConsole\WFMConsole\bin\KonicaMinolta.Authentication.Identity.dll
-C:\Projects\WFMConsole\WFMConsole\bin\KonicaMinolta.Authentication.Identity_v4.dll
 C:\Projects\WFMConsole\WFMConsole\bin\KonicaMinolta.AuthenticationR.dll
 C:\Projects\WFMConsole\WFMConsole\bin\log4net.dll
 C:\Projects\WFMConsole\WFMConsole\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll

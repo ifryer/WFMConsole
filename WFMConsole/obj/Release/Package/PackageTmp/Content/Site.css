@@ -29,7 +29,14 @@ textarea {
     line-height: 20px;
 }
 
+.log-off-google{
+    cursor: pointer;
+    float: right;
+}
 
+.small{
+    font-size: 0.8em;
+}
 /* Main Page */
 
 .small-alert-box {

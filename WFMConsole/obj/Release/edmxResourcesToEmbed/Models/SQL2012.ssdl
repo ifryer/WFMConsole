@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="inContact_NGModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+  <EntityType Name="Agents">
+    <Key>
+      <PropertyRef Name="AgentNo" />
+    </Key>
+    <Property Name="AgentNo" Type="int" Nullable="false" />
+    <Property Name="Password" Type="nvarchar" MaxLength="20" />
+    <Property Name="TeamNo" Type="int" Nullable="false" />
+    <Property Name="FirstName" Type="nvarchar" MaxLength="50" />
+    <Property Name="LastName" Type="nvarchar" MaxLength="50" />
+    <Property Name="Email" Type="nvarchar" MaxLength="255" />
+    <Property Name="Status" Type="nvarchar" MaxLength="10" Nullable="false" />
+    <Property Name="Notes" Type="nvarchar" MaxLength="2000" />
+    <Property Name="SecurityProfileID" Type="int" Nullable="false" />
+    <Property Name="TeamName" Type="nvarchar" MaxLength="50" />
+    <Property Name="LastLogin" Type="datetime" Nullable="false" />
+    <Property Name="LastModified" Type="datetime" Nullable="false" />
+    <Property Name="CurrentState" Type="nvarchar" MaxLength="100" />
+    <Property Name="CurrentStationID" Type="int" Nullable="false" />
+    <Property Name="CurrentSkillNo" Type="int" Nullable="false" />
+    <Property Name="CurrentSkillName" Type="nvarchar" MaxLength="30" />
+    <Property Name="IsSupervisor" Type="bit" />
+    <Property Name="ReportTo" Type="int" />
+    <Property Name="NiceId" Type="int" />
+  </EntityType>
+  <EntityContainer Name="inContact_NGModelStoreContainer">
+    <EntitySet Name="Agents" EntityType="Self.Agents" Schema="dbo" store:Type="Tables" />
+  </EntityContainer>
+</Schema>

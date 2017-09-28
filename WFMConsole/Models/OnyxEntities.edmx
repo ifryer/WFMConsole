@@ -13,35 +13,65 @@
           <Property Name="Key" Type="nvarchar" MaxLength="100" Nullable="false" />
           <Property Name="Value" Type="nvarchar" MaxLength="500" Nullable="false" />
         </EntityType>
+        <EntityType Name="BUS_WFMDashboard_ReportLog">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ReportType" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="LastSent" Type="datetime" Nullable="false" />
+          <Property Name="LastSentBy" Type="nvarchar" MaxLength="100" Nullable="false" />
+        </EntityType>
         <EntityContainer Name="OnyxModelStoreContainer">
           <EntitySet Name="BUS_WFMDashboard_Google_Credentials" EntityType="Self.BUS_WFMDashboard_Google_Credentials" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="BUS_WFMDashboard_ReportLog" EntityType="Self.BUS_WFMDashboard_ReportLog" Schema="dbo" store:Type="Tables" />
         </EntityContainer>
       </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="OnyxModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
-        <EntityContainer Name="Entities" annotation:LazyLoadingEnabled="true" >
-          <EntitySet Name="BUS_WFMDashboard_Google_Credentials" EntityType="OnyxModel.BUS_WFMDashboard_Google_Credentials" />
-        </EntityContainer>
         <EntityType Name="BUS_WFMDashboard_Google_Credentials">
           <Key>
             <PropertyRef Name="Id" />
           </Key>
           <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="Key" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
-          <Property Name="Value" Type="String" Nullable="false" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="Key" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Value" Type="String" MaxLength="500" FixedLength="false" Unicode="true" Nullable="false" />
+        </EntityType>
+        <EntityContainer Name="OnyxEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="BUS_WFMDashboard_Google_Credentials" EntityType="Self.BUS_WFMDashboard_Google_Credentials" />
+          <EntitySet Name="BUS_WFMDashboard_ReportLog" EntityType="OnyxModel.BUS_WFMDashboard_ReportLog" />
+        </EntityContainer>
+        <EntityType Name="BUS_WFMDashboard_ReportLog">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ReportType" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="LastSent" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="LastSentBy" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
         </EntityType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
-        <EntityContainerMapping StorageEntityContainer="OnyxModelStoreContainer" CdmEntityContainer="Entities" >
+        <EntityContainerMapping StorageEntityContainer="OnyxModelStoreContainer" CdmEntityContainer="OnyxEntities">
           <EntitySetMapping Name="BUS_WFMDashboard_Google_Credentials">
             <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_Google_Credentials">
               <MappingFragment StoreEntitySet="BUS_WFMDashboard_Google_Credentials">
-                <ScalarProperty Name="Value" ColumnName="Value" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
                 <ScalarProperty Name="Key" ColumnName="Key" />
+                <ScalarProperty Name="Value" ColumnName="Value" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="BUS_WFMDashboard_ReportLog">
+            <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_ReportLog">
+              <MappingFragment StoreEntitySet="BUS_WFMDashboard_ReportLog">
+                <ScalarProperty Name="LastSentBy" ColumnName="LastSentBy" />
+                <ScalarProperty Name="LastSent" ColumnName="LastSent" />
+                <ScalarProperty Name="ReportType" ColumnName="ReportType" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
               </MappingFragment>
             </EntityTypeMapping>

@@ -8,7 +8,17 @@
     <Property Name="Key" Type="nvarchar" MaxLength="100" Nullable="false" />
     <Property Name="Value" Type="nvarchar" MaxLength="500" Nullable="false" />
   </EntityType>
+  <EntityType Name="BUS_WFMDashboard_ReportLog">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="ReportType" Type="nvarchar" MaxLength="100" Nullable="false" />
+    <Property Name="LastSent" Type="datetime" Nullable="false" />
+    <Property Name="LastSentBy" Type="nvarchar" MaxLength="100" Nullable="false" />
+  </EntityType>
   <EntityContainer Name="OnyxModelStoreContainer">
     <EntitySet Name="BUS_WFMDashboard_Google_Credentials" EntityType="Self.BUS_WFMDashboard_Google_Credentials" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="BUS_WFMDashboard_ReportLog" EntityType="Self.BUS_WFMDashboard_ReportLog" Schema="dbo" store:Type="Tables" />
   </EntityContainer>
 </Schema>
