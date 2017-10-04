@@ -1,0 +1,130 @@
+﻿<font face="trebuchet ms, sans-serif">
+    <p><b><u>
+        <span style="font-size:24pt;background:rgb(255,204,51)">@ViewBag.report.ReportDate</span>
+    </u></b></p>
+    <div>
+        <p><b><span style="border-bottom: 1px solid black">
+            PTO:  <span style="margin-left: 101px;">  @ViewBag.report.Sections["PTO"].TotalDown </span> 
+        </span></b></p>
+        <div style="margin-left: 45px;">
+            <div> <p style="margin:0"> <span style="font-size:10pt;line-height:115%;font-family:Arial,sans-serif">
+                (AD) - @ViewBag.report.Sections["PTO"].AD
+            </span></p> </div>
+            <div> <p style="margin:0"> <span style="font-size:10pt;line-height:115%;font-family:Arial,sans-serif">
+                (RA) - @ViewBag.report.Sections["PTO"].RA
+            </span> </p> </div>
+            <div> <p style="margin:0"> <span style="font-size:10pt;line-height:115%;font-family:Arial,sans-serif">
+                (IRC) - @ViewBag.report.Sections["PTO"].IRC
+            </span> </p> </div>
+            <div> <p style="margin:0"> <span style="font-size:10pt;line-height:115%;font-family:Arial,sans-serif">
+                (Printer/OPS) - @ViewBag.report.Sections["PTO"].PrinterOps
+            </span> </p> </div>
+            <div> <p style="margin:0"> <span style="font-size:10pt;line-height:115%;font-family:Arial,sans-serif">
+                (MGR) - @ViewBag.report.Sections["PTO"].MGR
+            </span> </p> </div>
+        </div>
+    </div>
+
+    <div>
+        <p><b><span style="border-bottom: 1px solid black">
+            Training: <span style="margin-left: 75px;"> @ViewBag.report.Sections["Training"].TotalDown </span> 
+        </span></b></p>
+        <div style="margin-left: 45px;">
+            <div> <p style="margin:0"> <span style="font-size:10pt;line-height:115%;font-family:Arial,sans-serif">
+                (AD) - @ViewBag.report.Sections["Training"].AD
+            </span> </p> </div>
+            <div> <p style="margin:0"> <span style="font-size:10pt;line-height:115%;font-family:Arial,sans-serif">
+                (RA) - @ViewBag.report.Sections["Training"].RA
+            </span> </p> </div>
+            <div> <p style="margin:0"> <span style="font-size:10pt;line-height:115%;font-family:Arial,sans-serif">
+                (IRC) - @ViewBag.report.Sections["Training"].IRC
+            </span> </p> </div>
+            <div> <p style="margin:0"><span style="font-size:10pt;line-height:115%;font-family:Arial,sans-serif">
+                (Printer/OPS) - @ViewBag.report.Sections["Training"].PrinterOps
+            </span></p> </div>
+            <div> <p style="margin:0"><span style="font-size:10pt;line-height:115%;font-family:Arial,sans-serif">
+                (MGR) - @ViewBag.report.Sections["Training"].MGR
+            </span></p> </div>
+        </div>
+    </div>
+
+    <div>
+        <p><b><span style="border-bottom: 1px solid black">
+            LOA: <span style="margin-left: 101px;"> @ViewBag.report.Sections["LOA"].TotalDown </span> 
+        </span></b></p>
+        <div style="margin-left: 45px;">
+            <div> <p style="margin:0"> <span style="font-size:10pt;line-height:115%;font-family:Arial,sans-serif">
+                (AD) - @ViewBag.report.Sections["LOA"].AD
+            </span> </p> </div>
+            <div> <p style="margin:0"> <span style="font-size:10pt;line-height:115%;font-family:Arial,sans-serif">
+                (RA) - @ViewBag.report.Sections["LOA"].RA
+            </span> </p> </div>
+            <div> <p style="margin:0"> <span style="font-size:10pt;line-height:115%;font-family:Arial,sans-serif">
+                (IRC) - @ViewBag.report.Sections["LOA"].IRC
+            </span> </p> </div>
+            <div> <p style="margin:0"><span style="font-size:10pt;line-height:115%;font-family:Arial,sans-serif">
+                (Printer/OPS) - @ViewBag.report.Sections["LOA"].PrinterOps
+            </span></p> </div>
+            <div> <p style="margin:0"><span style="font-size:10pt;line-height:115%;font-family:Arial,sans-serif">
+                (MGR) - @ViewBag.report.Sections["LOA"].MGR
+            </span></p> </div>
+        </div>
+    </div>
+
+    <div>
+        <p><b><span style="border-bottom: 1px solid black">
+            Other: <span style="margin-left: 90px;"> @ViewBag.report.Sections["Other"].TotalDown </span> 
+        </span></b></p>
+        <div style="margin-left: 45px;">
+            <div> <p style="margin:0"> <span style="font-size:10pt;line-height:115%;font-family:Arial,sans-serif">
+                (AD) - @ViewBag.report.Sections["Other"].AD
+            </span> </p> </div>
+            <div> <p style="margin:0"> <span style="font-size:10pt;line-height:115%;font-family:Arial,sans-serif">
+                (RA) - @ViewBag.report.Sections["Other"].RA
+            </span> </p> </div>
+            <div> <p style="margin:0"> <span style="font-size:10pt;line-height:115%;font-family:Arial,sans-serif">
+                (IRC) - @ViewBag.report.Sections["Other"].IRC
+            </span> </p> </div>
+            <div> <p style="margin:0"><span style="font-size:10pt;line-height:115%;font-family:Arial,sans-serif">
+                (Printer/OPS) - @ViewBag.report.Sections["Other"].PrinterOps
+            </span></p> </div>
+            <div> <p style="margin:0"><span style="font-size:10pt;line-height:115%;font-family:Arial,sans-serif">
+                (MGR) - @ViewBag.report.Sections["Other"].MGR
+            </span></p> </div>
+        </div>
+    </div>
+
+    <p style="font-size:12.8px"><u><span style="font-size:24pt;background:yellow">
+        Total Down: &nbsp;&nbsp; @ViewBag.report.TotalDown
+    </span></u></p>
+
+    <div style="font-size:12.8px"><font face="Trebuchet MS" size="4"><span style="font-size:13.5pt"><strong>
+        Today's Scheduled Tasks and Events (as of @ViewBag.report.ReportTime)
+    </strong></span></font></div>
+
+    <div style="margin-left: 20px;">
+        <table>
+            <tbody>
+                @foreach (var eventItem in ViewBag.report.Events)
+                {
+                    <tr>
+                        <td>
+                            <span style="text-decoration: underline; margin-right: 3px;" colorId="@eventItem.ColorId">
+                                @eventItem.DateRange
+                            </span>
+                        </td>
+                        <td>
+                            <div>
+                                <span style="background-color: @eventItem.Color ; margin-right:3px;"> &nbsp; </span>
+                                <span title="@eventItem.FullTitle" style="color: #96814e;">
+                                    @eventItem.Title
+                                </span>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</font>

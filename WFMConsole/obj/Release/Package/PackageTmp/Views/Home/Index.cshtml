@@ -89,14 +89,15 @@
                 </div>
             </div>
         </div>
-        <div class="row margin-top">
+        <div class="row margin-top" id="report-area">
+            <a class="btn btn-sm btn-primary" target="_blank" href="~/Home/CreateDownByReport">View Down By Report</a>
             <div class="col-md-4">
                 <button class="btn btn-default" id="create-down-by-report-btn"> Create Down By Report</button>
-                <p class="help-block sent-label"> Last sent <span id="down-by-last-sent-date"> @ViewBag.downBy </span> </p>
+                <p class="help-block sent-label"> Last sent <span id="down-by-last-sent-date"> - </span> </p>
             </div>
             <div class="col-md-4">
                 <button class="btn btn-default" id="create-mow-report-btn"> Create MOW Report</button>
-                <p class="help-block sent-label"> Last sent <span id="mow-last-sent-date"> @ViewBag.mow </span> </p>
+                <p class="help-block sent-label"> Last sent <span id="mow-last-sent-date"> - </span> </p>
             </div>
         </div>
     </div>

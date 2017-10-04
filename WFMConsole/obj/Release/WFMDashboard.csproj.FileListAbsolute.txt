@@ -75,3 +75,4 @@ C:\Projects\WFMConsole\WFMConsole\bin\System.Net.Http.xml
 C:\Projects\WFMConsole\WFMConsole\bin\System.Net.Http.WebRequest.xml
 C:\Projects\WFMConsole\WFMConsole\obj\Release\WFMDashboard.csprojResolveAssemblyReference.cache
 C:\Projects\WFMConsole\WFMConsole\bin\client_secret.json
+C:\Projects\WFMConsole\WFMConsole\bin\Mvc.Mailer.dll

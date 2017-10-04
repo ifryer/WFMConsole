@@ -24,10 +24,9 @@ namespace WFMDashboard.Controllers
 
         public async Task<ActionResult> Index(CancellationToken cancellationToken)
         {
+            log.Info("Accessing WFM Dashboard");
             var user = HttpContext.KmIdentity();
             var result = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata()).AuthorizeAsync(cancellationToken);
-            string downBy, mow;
-            WFMHelper.GetReportDates(out downBy, out mow);
             if (result.Credential != null)
             {
                 var service = new CalendarService(new BaseClientService.Initializer
@@ -36,8 +35,6 @@ namespace WFMDashboard.Controllers
                     ApplicationName = "ASP.NET MVC Sample"
                 });
                 ViewBag.Title = "WFM Dashboard A";
-                ViewBag.downBy = downBy;
-                ViewBag.mow = mow;
                 return View();
             }
             else
@@ -48,12 +45,14 @@ namespace WFMDashboard.Controllers
             }
         }
 
-        public string GetStaffList()
+        public string GetPageInfo()
         {
             var msg = "";
+            string downBy, mow;
+            WFMHelper.GetReportDates(out downBy, out mow);
             List<int> staffIdList;
             var list =  WFMHelper.GetStaffList(out msg, out staffIdList);
-            return JsonConvert.SerializeObject(new { success = msg.ToLower().Contains("success"), msg = msg, nameList = list, idList = staffIdList });
+            return JsonConvert.SerializeObject(new { success = msg.ToLower().Contains("success"), msg = msg, nameList = list, idList = staffIdList, downBy = downBy, mow = mow });
         }
 
         public string GetTeamInfo()
@@ -67,6 +66,7 @@ namespace WFMDashboard.Controllers
 
         public async Task<string> SubmitTimeOffForm(CancellationToken cancellationToken, int id, string name, string date, bool fullDay, string startTime, string endTime, string notes)
         {
+            name = name.TrimEnd(' ').TrimStart(' ');
             var user = HttpContext.KmIdentity();
             log.Info($"User {user} called SubmitTimeOffForm - Params: /r/n id: {id} \r\n name: {name} \r\n date: {date} \r\n fullDay: {fullDay} \r\n startTime: {startTime} \r\n endTime: {endTime} \r\n notes: {notes}");
             string msg = "";
@@ -80,14 +80,29 @@ namespace WFMDashboard.Controllers
 
         //Daily at 9:30 and in afternoon (once from 9-10, once at 12:30)
         //It is sent to: WFO, CSM Management. We pull the "Today's Scheduled Tasks and Events" information directly from the Gcal.
-        public string CreateDownByReport()
+        //public async Task<string> CreateDownByReport(CancellationToken cancellationToken)
+        //{
+        //    var user = HttpContext.KmIdentity();
+        //    log.Info($"User {user} created Down By Report");
+        //    string msg = "";
+        //    bool success = false;
+        //    var googleAuth = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata()).AuthorizeAsync(cancellationToken);
+        //    success = WFMHelper.CreateDownByReport(googleAuth);
+        //    return JsonConvert.SerializeObject(new { success = success, msg = msg });
+        //}
+
+        public async Task<ActionResult> CreateDownByReport(CancellationToken cancellationToken)
         {
             var user = HttpContext.KmIdentity();
             log.Info($"User {user} created Down By Report");
             string msg = "";
             bool success = false;
-            success = WFMHelper.CreateDownByReport();
-            return JsonConvert.SerializeObject(new { success = success, msg = msg });
+            var googleAuth = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata()).AuthorizeAsync(cancellationToken);
+            var report = WFMHelper.CreateDownByReport(googleAuth);
+
+            ViewBag.report = report;
+
+            return View("~/Views/Mailer/DownByReport.cshtml");
         }
 
         public string CreateMOWReport()

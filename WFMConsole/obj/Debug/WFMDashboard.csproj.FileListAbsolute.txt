@@ -75,3 +75,4 @@ C:\Projects\WFMConsole\WFMConsole\bin\System.Net.Http.dll
 C:\Projects\WFMConsole\WFMConsole\bin\System.Net.Http.WebRequest.dll
 C:\Projects\WFMConsole\WFMConsole\bin\System.Net.Http.xml
 C:\Projects\WFMConsole\WFMConsole\bin\System.Net.Http.WebRequest.xml
+C:\Projects\WFMConsole\WFMConsole\bin\Mvc.Mailer.dll

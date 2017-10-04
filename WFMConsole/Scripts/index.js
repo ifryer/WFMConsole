@@ -11,6 +11,7 @@ indexScript = (function () {
             'minTime': '6:00am',
             'maxTime': '8:30pm',
         });
+
         $("#time-off-end").timepicker({
             'defaultTimeDelta': null,
             'minTime': '6:00am',
@@ -21,13 +22,15 @@ indexScript = (function () {
         $.ajax({
             dataType: "json",
             type: "post",
-            url: toUrl("/Home/GetStaffList"),
+            url: toUrl("/Home/GetPageInfo"),
             success: function (data) {
                 console.log(data)
                 if (data.success)
                 {
+                    $("#mow-last-sent-date").html(data.mow)
+                    $("#down-by-last-sent-date").html(data.downBy)
                     $.each(data.nameList, function (index, item) {
-                        $("#select-name-staff").append("<option value='" + data.idList[index] + "'> " + item + " </option>")
+                        $("#select-name-staff").append("<option value='" + data.idList[index] + "'> " + item + " </option>");
                     })
                     $("#select-name-staff").chosen({ search_contains: true });
                 }
@@ -35,7 +38,7 @@ indexScript = (function () {
         });
         
         $('#start-end-time-off-section').datepair();
-        $('#time-off-day').val($.datepicker.formatDate('mm/dd/yy', new Date()))
+        $('#time-off-day').val($.datepicker.formatDate('mm/dd/yy', new Date()));
         $('#time-off-day').datepicker();
     }
 
@@ -62,7 +65,7 @@ indexScript = (function () {
         else
             $("#start-end-time-off-section").show();
 
-    })
+    });
 
     $("#pto-section").on("change", "#select-name-staff", function () {
         let selectedStaff = $(this).val();
@@ -85,9 +88,7 @@ indexScript = (function () {
     });
 
     $("#pto-section").on("click", "#submit-time-off-form-btn", function () {
-        submitTimeOffForm().done(function (json) {
-            console.log(json)
-        });
+        submitTimeOffForm();
     });
 
     function submitTimeOffForm() {
@@ -99,36 +100,62 @@ indexScript = (function () {
 
         var id = $("#select-name-staff").val();
         var name = $("#select-name-staff option:selected").html();
-        var name = "";
-        return $.ajax({
-            dataType: "json",
-            type: "post",
-            data: {
-                id: id,
-                name: name,
-                date: date,
-                fullDay: fullDay,
-                startTime: startTime,
-                endTime: endTime,
-                notes: notes
-            },
-            url: toUrl("Home/SubmitTimeOffForm"),
-            success: function (data) {
-                if (!data.success) {
-                    console.log("error -- " + data.msg);
-                    showSmallError(data.msg);
+        if (id == "" || id == null) {
+            showSmallError("Please select a staff member to submit time off.");
+        }
+        else {
+            $.ajax({
+                dataType: "json",
+                type: "post",
+                data: {
+                    id: id,
+                    name: name,
+                    date: date,
+                    fullDay: fullDay,
+                    startTime: startTime,
+                    endTime: endTime,
+                    notes: notes
+                },
+                url: toUrl("Home/SubmitTimeOffForm"),
+                success: function (data) {
+                    if (!data.success) {
+                        console.log("error -- " + data.msg);
+                        showSmallError(data.msg);
+                    }
+                    else {
+                        console.log(data)
+                        $(".time-off-form").slideUp();
+                        $(".time-off-form input, textarea").val("")
+                        showSmallAlert(data.msg);
+                    }
                 }
-                else
-                {
-                    $(".time-off-form").slideUp();
-                    $(".time-off-form input, textarea").val("")
-                    showSmallAlert(data.msg);
-                }
-            }
-        });
+            });
+        }
     }
 
+    //Report section
 
+    $("#report-area").on("click", "#create-down-by-report-btn", function () {
+        $.ajax({
+            dataType: "json",
+            type: "post",
+            url: toUrl("/Home/CreateDownByReport"),
+            success: function (data) {
+                console.log(data)
+            }
+        });
+    })
+
+    $("#report-area").on("click", "#create-mow-report-btn", function () {
+        $.ajax({
+            dataType: "json",
+            type: "post",
+            url: toUrl("/Home/CreateMOWReport"),
+            success: function (data) {
+                console.log(data)
+            }
+        });
+    })
 
     $(document).ready(function () {
         initialize();

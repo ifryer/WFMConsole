@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using log4net;
 using System.Reflection;
 using WFMConsole.Models;
+using WFMConsole.Classes;
 
 namespace WFMDashboard.Classes
 {
@@ -98,6 +99,9 @@ namespace WFMDashboard.Classes
         {
             try
             {
+
+                var calendarId = "kmbs.konicaminolta.us_m48bnnmmf4s08pbhm6cmkdiodo@group.calendar.google.com";
+
                 EventDateTime start = new EventDateTime();
                 EventDateTime end = new EventDateTime();
                 
@@ -139,20 +143,20 @@ namespace WFMDashboard.Classes
                 });
 
                
-                Event newEvent = new Event()
-                {
-                    Summary = $"{name} Out",
-                    Description = notes,
-                    Start = start,
-                    End = end,
-                    Attendees = new EventAttendee[] {
-                        new EventAttendee() { Email = "rtyszka@kmbs.konicaminolta.us" },
-                    },
-                };
+                //Event newEvent = new Event()
+                //{
+                //    Summary = $"{name} Out [ WFM DASHBOARD TEST EVENT ]",
+                //    Description = notes,
+                //    Start = start,
+                //    End = end,
+                //    Attendees = new EventAttendee[] {
+                //        new EventAttendee() { Email = "rtyszka@kmbs.konicaminolta.us" },
+                //    },
+                //};
 
-                String calendarId = "primary";
-                EventsResource.InsertRequest request = service.Events.Insert(newEvent, calendarId);
-                Event createdEvent = request.Execute();
+                //String calendarId = "primary";
+                //EventsResource.InsertRequest request = service.Events.Insert(newEvent, calendarId);
+                //Event createdEvent = request.Execute();
 
                 bool success = false;
                 return success;
@@ -164,18 +168,147 @@ namespace WFMDashboard.Classes
             }
         }
 
-        public static bool CreateDownByReport()
+        public static DownByReport CreateDownByReport(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth)
         {
             try
             {
-                bool success = false;
-                return success;
+                var report = GenerateDownByReport(googleAuth);
+
+
+                return report;
+
+
+                //var result = TrapModel.UpdateTrap(user.LdapUserId, updateModel.trapId, updateModel.requestId, updateModel.incidentId, updateModel.model, updateModel.description, updateModel.placement, updateModel.recommendation, updateModel.reason, out msg);
+
+                //string owner = TrapModel.GetTrapOwnerEmail(updateModel.trapId);
+
+                //string userEmail = TrapModel.GetUserEmail(user.LdapUserId);
+                //var mailer = new Mailer();
+                //var recipients = ConfigurationManager.AppSettings["UpdateDistributionList"];
+                //if (!owner.Contains(" ") && owner.Contains("@"))
+                //    recipients += "," + owner;
+                //if (!userEmail.Contains(" ") && userEmail.Contains("@"))
+                //    recipients += "," + userEmail;
+                //if (!string.IsNullOrWhiteSpace(recipients))
+                //{
+                //    var from = ConfigurationManager.AppSettings["UpdateEmailFrom"];
+                //    var mail = mailer.UpdateTrapEmail(result, recipients, from, "Trap Update");
+                //    mail.Send();
+                //}
+                //return JsonConvert.SerializeObject(new
+                //{
+                //    success = (msg.ToLower().Contains("success")),
+                //    msg = msg
+                //});
+
             }
             catch (Exception ex)
             {
                 log.Error("Error in CreateDownByReport", ex);
-                return false;
+                return null;
             }
+        }
+
+        public static DownByReport GenerateDownByReport(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth)
+        {
+            //DownByReport report = new DownByReport();
+            var calendarId = "kmbs.konicaminolta.us_m48bnnmmf4s08pbhm6cmkdiodo@group.calendar.google.com";
+
+            var service = new CalendarService(new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = googleAuth.Credential,
+                ApplicationName = ApplicationName,
+            });
+
+            // Define parameters of request.
+            EventsResource.ListRequest request = service.Events.List(calendarId);
+
+            request.TimeMin = DateTime.Today.Date; //Start of day
+            request.TimeMax = DateTime.Today.Date.AddHours(23).AddMinutes(59); //End of day
+            request.ShowDeleted = false;
+            request.SingleEvents = true;
+            //request.MaxResults = 20;
+            request.OrderBy = EventsResource.ListRequest.OrderByEnum.StartTime;
+
+            // List events.
+            Events events = request.Execute();
+
+            DownByReport report = FillDownByReport(events);
+
+            return report;
+        }
+
+        public static DownByReport FillDownByReport(Events events)
+        {
+            var report = new DownByReport();
+            var ptoDateEnd = DateTime.Now.AddDays(1).Date.ToString("yyyy-MM-dd"); //To get proper full-day events that are for today, they apparently end tomorrow. Thanks google!
+            var paidPto = events.Items.Where(t => (t.ColorId == "10" || t.ColorId == "9") && t.End.DateTime == null && t.End.Date == ptoDateEnd).ToList();
+            var fullDayTraining = events.Items.Where(t => t.ColorId == "7" && t.End.DateTime == null).ToList();
+
+            //var partialTraining = events.Items.Where(t => t.ColorId == "7" && t.End.DateTime != null).ToList();
+
+            var rangeEvents = events.Items.Where(t => t.Start.DateTime != null).OrderBy(t => t.Start.DateTime.Value.TimeOfDay).ToList();
+            foreach (var item in rangeEvents)
+            {
+                var downByEvent = new DownByEvent(item.ColorId);
+                var startString = item.Start.DateTime.Value.ToShortTimeString();
+                var endString = item.End.DateTime.Value.ToShortTimeString();
+                downByEvent.DateRange = $"{startString} - {endString}";
+                downByEvent.StartTime = item.Start.DateTime.Value;
+                downByEvent.Title = item.Summary;
+                report.Events.Add(downByEvent);
+            }
+            var darkRedEvents = events.Items.Where(t => t.ColorId == "11").ToList();
+            var lightRedEvents = events.Items.Where(t => t.ColorId == "4").ToList();
+
+            report = FillDownByReportSection(report, fullDayTraining, "Training");
+            report = FillDownByReportSection(report, paidPto, "PTO");
+
+            return report;
+        }
+
+        public static DownByReport FillDownByReportSection(DownByReport report, List<Event> events, string keyName)
+        {
+            foreach (var item in events)
+            {
+
+                var sections = item.Summary.Split('-');
+                var teamName = sections[0];
+                var staffName = sections[1];
+                report.TotalDown++;
+                report.Sections[keyName].TotalDown++;
+                if (teamName.Contains("RA"))
+                {
+                    report.Sections[keyName].RA = report.Sections[keyName].RA.TrimStart('0');
+                    report.Sections[keyName].RA += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
+                    report.Sections[keyName].RA = report.Sections[keyName].RA.TrimStart(',').TrimStart(' ');
+                }
+                if (teamName.Contains("AD"))
+                {
+                    report.Sections[keyName].AD = report.Sections[keyName].AD.TrimStart('0');
+                    report.Sections[keyName].AD += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
+                    report.Sections[keyName].AD = report.Sections[keyName].AD.TrimStart(',').TrimStart(' ');
+                }
+                if (teamName.Contains("IRC"))
+                {
+                    report.Sections[keyName].IRC = report.Sections[keyName].IRC.TrimStart('0');
+                    report.Sections[keyName].IRC += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
+                    report.Sections[keyName].IRC = report.Sections[keyName].IRC.TrimStart(',').TrimStart(' ');
+                }
+                if (teamName.ToLower().Contains("printer"))
+                {
+                    report.Sections[keyName].PrinterOps = report.Sections[keyName].PrinterOps.TrimStart('0');
+                    report.Sections[keyName].PrinterOps += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
+                    report.Sections[keyName].PrinterOps = report.Sections[keyName].PrinterOps.TrimStart(',').TrimStart(' ');
+                }
+                if (teamName.Contains("MGR"))
+                {
+                    report.Sections[keyName].MGR = report.Sections[keyName].MGR.TrimStart('0');
+                    report.Sections[keyName].MGR += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
+                    report.Sections[keyName].MGR = report.Sections[keyName].MGR.TrimStart(',').TrimStart(' ');
+                }
+            }
+            return report;
         }
 
         public static bool CreateMOWReport()
@@ -190,7 +323,6 @@ namespace WFMDashboard.Classes
                 log.Error("Error in CreateMOWReport", ex);
                 return false;
             }
-            
         }
 
         public static bool GetTeamInfo()
