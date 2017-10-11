@@ -11,6 +11,7 @@
   <EntityContainer Name="OnyxEntities" annotation:LazyLoadingEnabled="true">
     <EntitySet Name="BUS_WFMDashboard_Google_Credentials" EntityType="Self.BUS_WFMDashboard_Google_Credentials" />
     <EntitySet Name="BUS_WFMDashboard_ReportLog" EntityType="OnyxModel.BUS_WFMDashboard_ReportLog" />
+    <EntitySet Name="BUS_WFMDashboard_Event" EntityType="OnyxModel.BUS_WFMDashboard_Event" />
   </EntityContainer>
   <EntityType Name="BUS_WFMDashboard_ReportLog">
     <Key>
@@ -20,5 +21,18 @@
     <Property Name="ReportType" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
     <Property Name="LastSent" Type="DateTime" Nullable="false" Precision="3" />
     <Property Name="LastSentBy" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+  </EntityType>
+  <EntityType Name="BUS_WFMDashboard_Event">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="TeamName" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+    <Property Name="TeamId" Type="Int32" Nullable="false" />
+    <Property Name="AgentNo" Type="Int32" Nullable="false" />
+    <Property Name="EventType" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+    <Property Name="StartTime" Type="DateTime" Nullable="false" Precision="3" />
+    <Property Name="EndTime" Type="DateTime" Nullable="false" Precision="3" />
+    <Property Name="FullDay" Type="Boolean" Nullable="false" />
   </EntityType>
 </Schema>

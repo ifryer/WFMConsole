@@ -79,6 +79,12 @@
                 </div>
                 <div class="col-md-6 unpadded-left">
                     <div class="form-group">
+                        <div style="margin-top: 5px;">
+                            <input type="checkbox" id="time-off-unplanned" checked="checked" />
+                            <label for="time-off-unplanned"> Unplanned </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label for="time-off-notes">Notes</label>
                         <div class="form-inline">
                             <textarea rows="5" style="max-width: 100%; width: 100%" class="form-control" id="time-off-notes" placeholder=""></textarea>
@@ -92,11 +98,11 @@
         <div class="row margin-top" id="report-area">
             <a class="btn btn-sm btn-primary" target="_blank" href="~/Home/CreateDownByReport">View Down By Report</a>
             <div class="col-md-4">
-                <button class="btn btn-default" id="create-down-by-report-btn"> Create Down By Report</button>
+                <button class="btn btn-default" id="create-down-by-report-btn" disabled="disabled"> Create Down By Report</button>
                 <p class="help-block sent-label"> Last sent <span id="down-by-last-sent-date"> - </span> </p>
             </div>
             <div class="col-md-4">
-                <button class="btn btn-default" id="create-mow-report-btn"> Create MOW Report</button>
+                <button class="btn btn-default" id="create-mow-report-btn" disabled="disabled"> Create MOW Report</button>
                 <p class="help-block sent-label"> Last sent <span id="mow-last-sent-date"> - </span> </p>
             </div>
         </div>

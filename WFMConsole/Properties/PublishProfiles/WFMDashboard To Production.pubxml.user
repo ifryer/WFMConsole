@@ -158,10 +158,10 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>08/22/2017 08:50:59</publishTime>
     </File>
     <File Include="bin/WFMConsole.dll">
-      <publishTime>10/04/2017 09:23:43</publishTime>
+      <publishTime>10/04/2017 11:21:20</publishTime>
     </File>
     <File Include="bin/WFMConsole.pdb">
-      <publishTime>10/04/2017 09:23:43</publishTime>
+      <publishTime>10/04/2017 11:21:20</publishTime>
     </File>
     <File Include="client_secret.json">
       <publishTime>09/21/2017 15:07:38</publishTime>
@@ -326,7 +326,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>09/26/2017 14:14:55</publishTime>
     </File>
     <File Include="Scripts/index.js">
-      <publishTime>10/02/2017 12:52:26</publishTime>
+      <publishTime>10/04/2017 11:18:54</publishTime>
     </File>
     <File Include="Scripts/jquery-1.10.2.js">
       <publishTime>08/22/2017 08:51:02</publishTime>
@@ -413,7 +413,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>08/22/2017 08:51:02</publishTime>
     </File>
     <File Include="Views/Home/Index.cshtml">
-      <publishTime>10/03/2017 15:25:55</publishTime>
+      <publishTime>10/04/2017 10:48:20</publishTime>
     </File>
     <File Include="Views/Mailer/DownByReport.cshtml">
       <publishTime>10/04/2017 09:20:15</publishTime>
@@ -431,7 +431,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>08/22/2017 08:51:02</publishTime>
     </File>
     <File Include="Web.config">
-      <publishTime>10/03/2017 15:48:53</publishTime>
+      <publishTime>10/04/2017 11:21:46</publishTime>
     </File>
   </ItemGroup>
 </Project>

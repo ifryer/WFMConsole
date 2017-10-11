@@ -48,6 +48,7 @@ namespace WFMConsole.Classes
         public int TotalDown { get; set; }
         public string AD { get; set; }
         public string RA { get; set; }
+        public string POA { get; set; }
         public string IRC { get; set; }
         public string PrinterOps { get; set; }
         public string MGR { get; set; }
@@ -56,6 +57,7 @@ namespace WFMConsole.Classes
             TotalDown = 0;
             AD = "0";
             RA = "0";
+            POA = "0";
             IRC = "0";
             PrinterOps = "0";
             MGR = "0";
@@ -65,7 +67,7 @@ namespace WFMConsole.Classes
     
     public class DownByEvent
     {
-        private static Dictionary<string, string> colorList = new Dictionary<string, string>() { { "4", "#ff887c" }, { "7", "#46d6db" }, { "9", "#5484ed" }, { "10", "#51b749" }, { "11", "#dc2127" } };
+        private static Dictionary<string, string> colorList = new Dictionary<string, string>() { { "1", "#a4bbfc" }, { "2", "" }, { "3", "" }, { "4", "#ff887c" }, { "5", "" }, { "6", "" }, { "7", "#46d6db" }, { "8", "" }, { "9", "#5484ed" }, { "10", "#51b749" }, { "11", "#dc2127" }, { "12", "" }, };
         public string DateRange { get; set; }
         public DateTime StartTime { get; set; }
         public string Title { get; set; }

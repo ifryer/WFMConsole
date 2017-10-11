@@ -27,5 +27,6 @@ namespace WFMConsole.Models
     
         public virtual DbSet<BUS_WFMDashboard_Google_Credentials> BUS_WFMDashboard_Google_Credentials { get; set; }
         public virtual DbSet<BUS_WFMDashboard_ReportLog> BUS_WFMDashboard_ReportLog { get; set; }
+        public virtual DbSet<BUS_WFMDashboard_Event> BUS_WFMDashboard_Event { get; set; }
     }
 }

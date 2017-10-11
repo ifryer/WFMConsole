@@ -201,6 +201,9 @@
     <Compile Include="Models\Agent.cs">
       <DependentUpon>SQL2012.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\BUS_WFMDashboard_Event.cs">
+      <DependentUpon>OnyxEntities.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\BUS_WFMDashboard_Google_Credentials.cs">
       <DependentUpon>OnyxEntities.tt</DependentUpon>
     </Compile>

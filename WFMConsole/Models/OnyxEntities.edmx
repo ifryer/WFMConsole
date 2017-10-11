@@ -5,6 +5,19 @@
     <!-- SSDL content -->
     <edmx:StorageModels>
     <Schema Namespace="OnyxModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="BUS_WFMDashboard_Event">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="TeamName" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="TeamId" Type="int" Nullable="false" />
+          <Property Name="AgentNo" Type="int" Nullable="false" />
+          <Property Name="EventType" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="StartTime" Type="datetime" Nullable="false" />
+          <Property Name="EndTime" Type="datetime" Nullable="false" />
+          <Property Name="FullDay" Type="bit" Nullable="false" />
+        </EntityType>
         <EntityType Name="BUS_WFMDashboard_Google_Credentials">
           <Key>
             <PropertyRef Name="Id" />
@@ -23,6 +36,7 @@
           <Property Name="LastSentBy" Type="nvarchar" MaxLength="100" Nullable="false" />
         </EntityType>
         <EntityContainer Name="OnyxModelStoreContainer">
+          <EntitySet Name="BUS_WFMDashboard_Event" EntityType="Self.BUS_WFMDashboard_Event" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="BUS_WFMDashboard_Google_Credentials" EntityType="Self.BUS_WFMDashboard_Google_Credentials" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="BUS_WFMDashboard_ReportLog" EntityType="Self.BUS_WFMDashboard_ReportLog" Schema="dbo" store:Type="Tables" />
         </EntityContainer>
@@ -41,6 +55,7 @@
         <EntityContainer Name="OnyxEntities" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="BUS_WFMDashboard_Google_Credentials" EntityType="Self.BUS_WFMDashboard_Google_Credentials" />
           <EntitySet Name="BUS_WFMDashboard_ReportLog" EntityType="OnyxModel.BUS_WFMDashboard_ReportLog" />
+          <EntitySet Name="BUS_WFMDashboard_Event" EntityType="OnyxModel.BUS_WFMDashboard_Event" />
         </EntityContainer>
         <EntityType Name="BUS_WFMDashboard_ReportLog">
           <Key>
@@ -50,6 +65,19 @@
           <Property Name="ReportType" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
           <Property Name="LastSent" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="LastSentBy" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="BUS_WFMDashboard_Event">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="TeamName" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="TeamId" Type="Int32" Nullable="false" />
+          <Property Name="AgentNo" Type="Int32" Nullable="false" />
+          <Property Name="EventType" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="StartTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="EndTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="FullDay" Type="Boolean" Nullable="false" />
         </EntityType>
       </Schema>
     </edmx:ConceptualModels>
@@ -72,6 +100,20 @@
                 <ScalarProperty Name="LastSentBy" ColumnName="LastSentBy" />
                 <ScalarProperty Name="LastSent" ColumnName="LastSent" />
                 <ScalarProperty Name="ReportType" ColumnName="ReportType" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="BUS_WFMDashboard_Event">
+            <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_Event">
+              <MappingFragment StoreEntitySet="BUS_WFMDashboard_Event">
+                <ScalarProperty Name="FullDay" ColumnName="FullDay" />
+                <ScalarProperty Name="EndTime" ColumnName="EndTime" />
+                <ScalarProperty Name="StartTime" ColumnName="StartTime" />
+                <ScalarProperty Name="EventType" ColumnName="EventType" />
+                <ScalarProperty Name="AgentNo" ColumnName="AgentNo" />
+                <ScalarProperty Name="TeamId" ColumnName="TeamId" />
+                <ScalarProperty Name="TeamName" ColumnName="TeamName" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
               </MappingFragment>
             </EntityTypeMapping>

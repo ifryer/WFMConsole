@@ -34,13 +34,13 @@ namespace WFMDashboard.Controllers
                     HttpClientInitializer = result.Credential,
                     ApplicationName = "ASP.NET MVC Sample"
                 });
-                ViewBag.Title = "WFM Dashboard A";
+                ViewBag.Title = "WFM Dashboard";
                 return View();
             }
             else
             {
                 log.Info($"User {user} is logging into google calendar");
-                ViewBag.Title = "WFM Dashboard B";
+                ViewBag.Title = "WFM Dashboard";
                 return new RedirectResult(result.RedirectUri);
             }
         }
@@ -55,16 +55,16 @@ namespace WFMDashboard.Controllers
             return JsonConvert.SerializeObject(new { success = msg.ToLower().Contains("success"), msg = msg, nameList = list, idList = staffIdList, downBy = downBy, mow = mow });
         }
 
-        public string GetTeamInfo()
+        public string GetTeamInfo(int agentNo)
         {
             string msg = "";
             bool success = false;
-            var info = WFMHelper.GetTeamInfo();
+            var info = WFMHelper.GetTeamInfo(agentNo);
             return JsonConvert.SerializeObject(new { success = success, msg = msg });
         }
 
 
-        public async Task<string> SubmitTimeOffForm(CancellationToken cancellationToken, int id, string name, string date, bool fullDay, string startTime, string endTime, string notes)
+        public async Task<string> SubmitTimeOffForm(CancellationToken cancellationToken, int id, string name, string date, bool fullDay, string startTime, string endTime, string notes, string ptoType)
         {
             name = name.TrimEnd(' ').TrimStart(' ');
             var user = HttpContext.KmIdentity();
@@ -72,7 +72,7 @@ namespace WFMDashboard.Controllers
             string msg = "";
             bool success = false;
             var googleAuth = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata()).AuthorizeAsync(cancellationToken);
-            success = WFMHelper.SubmitTimeOff(googleAuth, name, date, fullDay, startTime, endTime, notes, out msg);
+            success = WFMHelper.SubmitTimeOff(googleAuth, id, name, date, fullDay, startTime, endTime, notes, ptoType, out msg);
             return JsonConvert.SerializeObject(new { success = success, msg = msg });
         }
 

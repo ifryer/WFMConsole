@@ -54,7 +54,7 @@ namespace WFMDashboard.Classes
             return;
         }
 
-        public static bool SubmitTimeOff(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, string name, string date, bool fullDay, string startTime, string endTime, string notes, out string msg)
+        public static bool SubmitTimeOff(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, int id, string name, string date, bool fullDay, string startTime, string endTime, string notes, string ptoType, out string msg)
         {
             try
             {
@@ -71,11 +71,20 @@ namespace WFMDashboard.Classes
                     return false;
                 }
 
+                Agent staffMember;
+                using (var db = new inContact_NGEntities())
+                {
+                    staffMember = db.Agents.Where(t => t.AgentNo == id).FirstOrDefault();
+                }
+
+                CreateEvent(name, startDateTime, endDateTime, fullDay, notes, ptoType, staffMember);
+
+
                 SubmitTimeOff_Nice();
 
                 
 
-                SubmitTimeOff_GoogleCalendar(googleAuth, name, startDateTime, endDateTime, fullDay, notes);
+                SubmitTimeOff_GoogleCalendar(googleAuth, name, startDateTime, endDateTime, fullDay, notes, ptoType, staffMember);
                 bool success = true;
                 return success;
             }
@@ -94,47 +103,71 @@ namespace WFMDashboard.Classes
         }
 
         
-
-        private static bool SubmitTimeOff_GoogleCalendar(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, string name, DateTime startDateTime, DateTime endDateTime, bool fullDay, string notes)
+        private static bool CreateEvent(string name, DateTime startDateTime, DateTime endDateTime, bool fullDay, string notes, string ptoType, Agent agent)
         {
             try
             {
+                BUS_WFMDashboard_Event busEvent = new BUS_WFMDashboard_Event() {
+                    AgentNo = agent.AgentNo,
+                    TeamName = agent.TeamName,
+                    TeamId = agent.TeamNo,
+                    FullDay = fullDay,
+                    EventType = ptoType,
+                    StartTime = startDateTime, 
+                    EndTime = endDateTime
+                };
+                using (var db = new OnyxEntities())
+                {
+                    db.BUS_WFMDashboard_Event.Add(busEvent);
+                    db.SaveChanges();
+                }
+                return true;
+            }
+            catch(Exception ex)
+            {
+                return false;
+            }
+        }
+        private static bool SubmitTimeOff_GoogleCalendar(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, string name, DateTime startDateTime, DateTime endDateTime, bool fullDay, string notes, string ptoType, Agent agent)
+        {
+            try
+            {
+                //var calendarId = "kmbs.konicaminolta.us_m48bnnmmf4s08pbhm6cmkdiodo@group.calendar.google.com";
+                String calendarId = "primary";
+                var team = agent.TeamName;
+                team = ProcessTeamName(team);
 
-                var calendarId = "kmbs.konicaminolta.us_m48bnnmmf4s08pbhm6cmkdiodo@group.calendar.google.com";
+                var lastName = agent.LastName;
+
+                string summary = $"*{team} - {lastName} - PTO ({ptoType}) [WFM DASHBOARD TEST EVENT]";
+                string colorId = "9"; //Color for unplanned PTO
+                if(ptoType == "Planned")
+                {
+                    colorId = "10"; //Color for planned PTO
+                }
 
                 EventDateTime start = new EventDateTime();
                 EventDateTime end = new EventDateTime();
-                
+
+                start = new EventDateTime()
+                {
+                    TimeZone = "America/New_York"
+
+                };
+                end = new EventDateTime()
+                {
+                    TimeZone = "America/New_York"
+                };
                 if (fullDay)
                 {
-                    start = new EventDateTime()
-                    {
-                        Date = startDateTime.ToString("yyyy-MM-dd"),
-                        TimeZone = "America/New_York",
-
-                    };
-                    end = new EventDateTime()
-                    {
-                        Date = endDateTime.ToString("yyyy-MM-dd"),
-                        TimeZone = "America/New_York",
-                    };
+                    start.Date = startDateTime.ToString("yyyy-MM-dd");
+                    end.Date = endDateTime.ToString("yyyy-MM-dd");
                 }
                 else
                 {
-                    
-                    start = new EventDateTime()
-                    {
-                        DateTime = startDateTime,
-                        TimeZone = "America/New_York",
-
-                    };
-                    end = new EventDateTime()
-                    {
-                        DateTime = endDateTime,
-                        TimeZone = "America/New_York",
-                    };
-                 }
-
+                    start.DateTime = startDateTime;
+                    end.DateTime = endDateTime;
+                }
 
                 var service = new CalendarService(new BaseClientService.Initializer()
                 {
@@ -142,22 +175,20 @@ namespace WFMDashboard.Classes
                     ApplicationName = ApplicationName,
                 });
 
-               
-                //Event newEvent = new Event()
-                //{
-                //    Summary = $"{name} Out [ WFM DASHBOARD TEST EVENT ]",
-                //    Description = notes,
-                //    Start = start,
-                //    End = end,
-                //    Attendees = new EventAttendee[] {
-                //        new EventAttendee() { Email = "rtyszka@kmbs.konicaminolta.us" },
-                //    },
-                //};
-
-                //String calendarId = "primary";
-                //EventsResource.InsertRequest request = service.Events.Insert(newEvent, calendarId);
-                //Event createdEvent = request.Execute();
-
+                Event newEvent = new Event()
+                {
+                    Summary = summary,
+                    Description = notes,
+                    Start = start,
+                    ColorId = colorId,
+                    End = end,
+                    Attendees = new EventAttendee[] {
+                        new EventAttendee() { Email = "rtyszka@kmbs.konicaminolta.us" },
+                    },
+                };
+                
+                EventsResource.InsertRequest request = service.Events.Insert(newEvent, calendarId);
+                Event createdEvent = request.Execute();
                 bool success = false;
                 return success;
             }
@@ -166,6 +197,32 @@ namespace WFMDashboard.Classes
                 log.Error("Error in SubmitTimeOff_GoogleCalendar", ex);
                 throw ex;
             }
+        }
+
+        public static string ProcessTeamName(string team)
+        {
+            if (team.ToLower().Contains("management"))
+            {
+                team = "MGMT";
+            }
+            if (team.ToLower().Contains("irc"))
+            {
+                team = "IRC";
+            }
+
+            if (team.ToLower().Contains("ad"))
+            {
+                team = "AD";
+            }
+            if (team.ToLower().Contains("printer"))
+            {
+                team = "Printer";
+            }
+            if (team.ToLower().Contains("ra"))
+            {
+                team = "RA";
+            }
+            return team;
         }
 
         public static DownByReport CreateDownByReport(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth)
@@ -307,6 +364,12 @@ namespace WFMDashboard.Classes
                     report.Sections[keyName].MGR += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
                     report.Sections[keyName].MGR = report.Sections[keyName].MGR.TrimStart(',').TrimStart(' ');
                 }
+                if (teamName.Contains("POA"))
+                {
+                    report.Sections[keyName].POA = report.Sections[keyName].POA.TrimStart('0');
+                    report.Sections[keyName].POA += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
+                    report.Sections[keyName].POA = report.Sections[keyName].POA.TrimStart(',').TrimStart(' ');
+                }
             }
             return report;
         }
@@ -325,10 +388,16 @@ namespace WFMDashboard.Classes
             }
         }
 
-        public static bool GetTeamInfo()
+        public static bool GetTeamInfo(int agentNo)
         {
             try
             {
+                using (var db = new inContact_NGEntities())
+                {
+                    var agent = db.Agents.Where(t => t.AgentNo == agentNo).FirstOrDefault();
+                    var team = agent.TeamNo;
+                    var teamMembers = db.Agents.Where(t => t.TeamNo == team).ToList();
+                }
                 bool success = false;
                 return success;
             }

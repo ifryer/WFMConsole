@@ -73,11 +73,40 @@ indexScript = (function () {
         $("#pto-info-staff").slideDown();
         $(".selected-staff-name").html(selectedStaffName)
 
-        let totalPto = 15;
-        let usedPto = 4
-        $("#total-pto-staff").html(totalPto);
-        $("#used-pto-staff").html(usedPto);
-        $("#remaining-pto-staff").html(totalPto - usedPto);
+        $.ajax({
+            dataType: "json",
+            type: "post",
+            //data: {
+            //    id: id,
+            //    name: name,
+            //    date: date,
+            //    fullDay: fullDay,
+            //    startTime: startTime,
+            //    endTime: endTime,
+            //    notes: notes,
+            //    ptoType: ptoType
+            //},
+            url: toUrl("Home/GetTeamInfo"),
+            success: function (data) {
+                if (!data.success) {
+                    console.log("error -- " + data.msg);
+                    showSmallError(data.msg);
+                }
+                else {
+                    console.log(data)
+                    $(".time-off-form").slideUp();
+                    $(".time-off-form input, textarea").val("")
+                    showSmallAlert(data.msg);
+                }
+            }
+        });
+
+
+        //let totalPto = 15;
+        //let usedPto = 4
+        //$("#total-pto-staff").html(totalPto);
+        //$("#used-pto-staff").html(usedPto);
+        //$("#remaining-pto-staff").html(totalPto - usedPto);
 
     });
 
@@ -92,14 +121,16 @@ indexScript = (function () {
     });
 
     function submitTimeOffForm() {
-        var date = $("#time-off-day").val();
-        var startTime = $("#time-off-start").val();
-        var endTime = $("#time-off-end").val();
-        var fullDay = $("#fullDayCheckbox:checked").length > 0
-        var notes = $("#time-off-notes").val();
-
-        var id = $("#select-name-staff").val();
-        var name = $("#select-name-staff option:selected").html();
+        let date = $("#time-off-day").val();
+        let startTime = $("#time-off-start").val();
+        let endTime = $("#time-off-end").val();
+        let fullDay = $("#fullDayCheckbox:checked").length > 0
+        let notes = $("#time-off-notes").val();
+        let ptoType = "Planned";
+        if ($("#time-off-unplanned:checked").length > 0)
+            ptoType = "Unplanned"
+        let id = $("#select-name-staff").val();
+        let name = $("#select-name-staff option:selected").html();
         if (id == "" || id == null) {
             showSmallError("Please select a staff member to submit time off.");
         }
@@ -114,7 +145,8 @@ indexScript = (function () {
                     fullDay: fullDay,
                     startTime: startTime,
                     endTime: endTime,
-                    notes: notes
+                    notes: notes,
+                    ptoType: ptoType
                 },
                 url: toUrl("Home/SubmitTimeOffForm"),
                 success: function (data) {
