@@ -22,5 +22,9 @@ namespace WFMConsole.Models
         public System.DateTime StartTime { get; set; }
         public System.DateTime EndTime { get; set; }
         public bool FullDay { get; set; }
+        public string LastName { get; set; }
+        public string Description { get; set; }
+        public string Color { get; set; }
+        public string CalendarEventId { get; set; }
     }
 }

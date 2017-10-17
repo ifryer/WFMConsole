@@ -76,8 +76,16 @@ namespace WFMConsole.Classes
         public string FullTitle { get; set; }
         public DownByEvent(string colorString)
         {
-            ColorId = colorString;
-            Color = colorList[colorString];
+            if (colorString != null)
+            {
+                ColorId = colorString;
+                Color = colorList[colorString];
+            }
+            else
+            {
+                ColorId = "0";
+                Color = "white";
+            }
         }
     }
 }

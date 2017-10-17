@@ -52,27 +52,28 @@ namespace WFMDashboard.Controllers
             WFMHelper.GetReportDates(out downBy, out mow);
             List<int> staffIdList;
             var list =  WFMHelper.GetStaffList(out msg, out staffIdList);
-            return JsonConvert.SerializeObject(new { success = msg.ToLower().Contains("success"), msg = msg, nameList = list, idList = staffIdList, downBy = downBy, mow = mow });
+            var eventList = WFMHelper.GetEventList();
+            return JsonConvert.SerializeObject(new { success = msg.ToLower().Contains("success"), msg = msg, nameList = list, idList = staffIdList, downBy = downBy, mow = mow, eventList = eventList });
         }
 
         public string GetTeamInfo(int agentNo)
         {
             string msg = "";
-            bool success = false;
-            var info = WFMHelper.GetTeamInfo(agentNo);
-            return JsonConvert.SerializeObject(new { success = success, msg = msg });
+            //bool success = false;
+            var teamInfo = WFMHelper.GetTeamInfo(agentNo);
+            return JsonConvert.SerializeObject(new { success = teamInfo != null, msg = msg, teamInfo = teamInfo });
         }
 
 
-        public async Task<string> SubmitTimeOffForm(CancellationToken cancellationToken, int id, string name, string date, bool fullDay, string startTime, string endTime, string notes, string ptoType)
+        public async Task<string> SubmitEventForm(CancellationToken cancellationToken, int id, string name, string date, bool fullDay, string startTime, string endTime, string notes, string eventType)
         {
             name = name.TrimEnd(' ').TrimStart(' ');
             var user = HttpContext.KmIdentity();
-            log.Info($"User {user} called SubmitTimeOffForm - Params: /r/n id: {id} \r\n name: {name} \r\n date: {date} \r\n fullDay: {fullDay} \r\n startTime: {startTime} \r\n endTime: {endTime} \r\n notes: {notes}");
+            log.Info($"User {user} called SubmitEventForm - Params: /r/n id: {id} \r\n name: {name} \r\n date: {date} \r\n fullDay: {fullDay} \r\n startTime: {startTime} \r\n endTime: {endTime} \r\n notes: {notes}");
             string msg = "";
             bool success = false;
             var googleAuth = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata()).AuthorizeAsync(cancellationToken);
-            success = WFMHelper.SubmitTimeOff(googleAuth, id, name, date, fullDay, startTime, endTime, notes, ptoType, out msg);
+            success = WFMHelper.SubmitEventForm(googleAuth, id, name, date, fullDay, startTime, endTime, notes, eventType, out msg);
             return JsonConvert.SerializeObject(new { success = success, msg = msg });
         }
 
@@ -100,9 +101,16 @@ namespace WFMDashboard.Controllers
             var googleAuth = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata()).AuthorizeAsync(cancellationToken);
             var report = WFMHelper.CreateDownByReport(googleAuth);
 
-            ViewBag.report = report;
+            if (report != null)
+            {
+                ViewBag.report = report;
 
-            return View("~/Views/Mailer/DownByReport.cshtml");
+                return View("~/Views/Mailer/DownByReport.cshtml");
+            }
+            else
+            {
+                return View("Index");
+            }
         }
 
         public string CreateMOWReport()

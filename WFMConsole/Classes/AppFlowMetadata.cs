@@ -8,6 +8,7 @@ using Google.Apis.Calendar;
 using Google.Apis.Util.Store;
 using Google.Apis.Calendar.v3;
 using WFMConsole.Classes;
+using System.Configuration;
 
 namespace WFMDashboard.Classes
 {
@@ -18,8 +19,8 @@ namespace WFMDashboard.Classes
             {
                 ClientSecrets = new ClientSecrets
                 {
-                    ClientId = "574082988944-0f03tni3j5jjlles0prjjbdkvhog7qe4.apps.googleusercontent.com",
-                    ClientSecret = "sEcShK1KM2gvvUE7BfR6jq4g",
+                    ClientId = ConfigurationManager.AppSettings["ClientId"],
+                    ClientSecret = ConfigurationManager.AppSettings["ClientSecret"],
                     
                 },
                 Scopes = new[] { CalendarService.Scope.Calendar },

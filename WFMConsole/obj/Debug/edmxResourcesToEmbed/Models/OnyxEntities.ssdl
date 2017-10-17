@@ -5,6 +5,7 @@
       <PropertyRef Name="Id" />
     </Key>
     <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="CalendarEventId" Type="nvarchar" MaxLength="50" Nullable="false" />
     <Property Name="TeamName" Type="nvarchar" MaxLength="100" Nullable="false" />
     <Property Name="TeamId" Type="int" Nullable="false" />
     <Property Name="AgentNo" Type="int" Nullable="false" />
@@ -12,6 +13,9 @@
     <Property Name="StartTime" Type="datetime" Nullable="false" />
     <Property Name="EndTime" Type="datetime" Nullable="false" />
     <Property Name="FullDay" Type="bit" Nullable="false" />
+    <Property Name="LastName" Type="nvarchar" MaxLength="100" Nullable="false" />
+    <Property Name="Description" Type="nvarchar" MaxLength="255" Nullable="false" />
+    <Property Name="Color" Type="nvarchar" MaxLength="20" Nullable="false" />
   </EntityType>
   <EntityType Name="BUS_WFMDashboard_Google_Credentials">
     <Key>

@@ -102,7 +102,7 @@ textarea {
     text-align: center;
     border-bottom: 1px solid #0076bc;
     margin-left: -20px;
-    background-color: rgba(0, 118, 188, 0.78);
+    background-color: rgb(0, 118, 188);
     color: white;
     margin-right: -20px;
     padding-top: 4px;
@@ -116,4 +116,45 @@ textarea {
 
 .sent-label{
     font-size: 0.8em;
+}
+
+.box-header {
+    background-color: rgb(0, 118, 188);
+    color: white;
+}
+.box-content {
+    /*border: 1px solid rgb(0, 118, 188);*/
+    font-weight: bold;
+}
+
+.box-header-label {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-size: 1.2em;
+}
+
+.box-content-row {
+    padding: 5px;
+    border-bottom: 1px solid #caebff;
+}
+
+.box-content-row-bottom {
+    padding: 5px;
+    background: #fffabc;
+}
+
+.teamInfo {
+    border: 1px solid #0076bc;
+    border-radius: 0px;
+}
+.team-info-box {
+
+}
+
+.tab-pane{
+    margin-top: 20px;
+}
+
+.schedule-table{
+    width: 100%;
 }

@@ -1,122 +1,174 @@
 ﻿<div class="small-alert-box" style="display:none"> - </div>
-<div class="container container-fluid" id="pto-section">
-    <div class="col-md-8 main-area">
-        <div class="row">
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="select-name-staff">Select Name</label>
-                    <select class="form-control" id="select-name-staff" placeholder="Select Name...">  
-                        <option selected disabled="disabled"> Select Name</option>
-                    </select>
-                </div>
-            </div>
-            @*<div class="col-md-6">
-                <h4 style="margin-top: 30px;" class="selectedStaffName"> </h4>
-            </div>*@
-        </div>
-        <div class="row" id="pto-info-staff">
-            <div class="col-md-6">
-                <div class="col-md-2 col-xs-2 center-text">
-                    <div class="row underlined">
-                        Total PTO
+<div>
+    <ul class="nav nav-tabs">
+        <li class="active">
+            <a href="#homeTab" data-toggle="tab" class="tabMenuItem" id="home-tab">
+                Home
+            </a>
+        </li>
+        <li>
+            <a href="#wfoTab" data-toggle="tab" class="tabMenuItem unloaded-all-solutions-tab" id="wfo-tab">
+                WFO
+            </a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div id="homeTab" class="tab-pane in active">
+            <div class="container container-fluid" id="pto-section">
+                <div class="col-md-8 main-area">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="select-name-staff">Select Name</label>
+                                <select class="form-control" id="select-name-staff" placeholder="Select Name...">
+                                    <option selected disabled="disabled"> Select Name</option>
+                                </select>
+                            </div>
+                        </div>
+                        @*<div class="col-md-6">
+                            <h4 style="margin-top: 30px;" class="selectedStaffName"> </h4>
+                        </div>*@
                     </div>
-                    <div class="row" id="total-pto-staff">
-                        -
-                    </div>
-                </div>
-                <div class="col-md-2 col-xs-2 center-text">
-                    <div class="row underlined">
-                        Used PTO
-                    </div>
-                    <div class="row" id="used-pto-staff">
-                        -
-                    </div>
-                </div>
-                <div class="col-md-2 col-xs-2 center-text">
-                    <div class="row underlined">
-                        Remaining PTO
-                    </div>
-                    <div class="row" id="remaining-pto-staff">
-                        -
-                    </div>
-                </div>
-            </div>
+                    <div class="row" id="pto-info-staff">
+                        <div class="col-md-6">
+                            <div class="col-md-2 col-xs-2 center-text">
+                                <div class="row underlined">
+                                    Total PTO
+                                </div>
+                                <div class="row" id="total-pto-staff">
+                                    -
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-xs-2 center-text">
+                                <div class="row underlined">
+                                    Used PTO
+                                </div>
+                                <div class="row" id="used-pto-staff">
+                                    -
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-xs-2 center-text">
+                                <div class="row underlined">
+                                    Remaining PTO
+                                </div>
+                                <div class="row" id="remaining-pto-staff">
+                                    -
+                                </div>
+                            </div>
+                        </div>
 
-        </div>
-        <br />
-        <div class="row">
-            <div class="col-md-4">
-                <button class="btn btn-default" id="new-time-off-btn"> New Time Off </button>
-            </div>
-        </div>
-        <br />
-        <div class="row">
-            <div class="row time-off-form" style="display:none;">
-                <h4 class="form-header"> Submit Time Off Form </h4>
-                <div class="col-md-6 unpadded-left">
-                    <div class="form-group">
-                        <label for="selectNameForm">Submitting For</label>
-                        <div class="selected-staff-name"> No Staff Member Selected </div>
                     </div>
-                    <div class="form-group">
-                        <label for="time-off-days">Date</label>
-                        <div class="form-inline">
-                            <input class="form-control" id="time-off-day" placeholder="">
-                        </div>
-                        <div style="margin-top: 5px;">
-                            <input type="checkbox" id="fullDayCheckbox" checked="checked" />
-                            <label for="fullDayCheckbox"> Full Day </label>
+                    <br />
+                    <div class="row">
+                        <div class="col-md-4">
+                            <button class="btn btn-default" id="new-time-off-btn"> New Time Off </button>
                         </div>
                     </div>
-                    <div class="form-group" id="start-end-time-off-section" style="display:none;">
-                        <div>
-                            <label for="time-off-start">Time</label> <br />
-                            <input class="form-control time start" id="time-off-start" style="width: 45%; display: inline-block" placeholder="">
-                            <span style="width: 5%"> to </span>
-                            <input class="form-control time end" id="time-off-end" style="width: 45%; display: inline-block" placeholder="">
+                    <br />
+                    <div class="row">
+                        <div class="row time-off-form" style="display:none;">
+                            <h4 class="form-header"> Submit Time Off Form </h4>
+                            <div class="col-md-6 unpadded-left">
+                                <div class="form-group">
+                                    <label for="selectNameForm">Submitting For</label>
+                                    <div class="selected-staff-name"> No Staff Member Selected </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="time-off-days">Date</label>
+                                    <div class="form-inline">
+                                        <input class="form-control" id="time-off-day" placeholder="">
+                                    </div>
+                                    <div style="margin-top: 5px;">
+                                        <input type="checkbox" id="fullDayCheckbox" checked="checked" />
+                                        <label for="fullDayCheckbox"> Full Day </label>
+                                    </div>
+                                </div>
+                                <div class="form-group" id="start-end-time-off-section" style="display:none;">
+                                    <div>
+                                        <label for="time-off-start">Time</label> <br />
+                                        <input class="form-control time start" id="time-off-start" style="width: 45%; display: inline-block" placeholder="">
+                                        <span style="width: 5%"> to </span>
+                                        <input class="form-control time end" id="time-off-end" style="width: 45%; display: inline-block" placeholder="">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 unpadded-left">
+                                <div class="form-group">
+                                    <div style="margin-top: 5px;">
+                                        <input type="checkbox" id="time-off-unplanned" checked="checked" />
+                                        <label for="time-off-unplanned"> Unplanned </label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="time-off-notes">Notes</label>
+                                    <div class="form-inline">
+                                        <textarea rows="5" style="max-width: 100%; width: 100%" class="form-control" id="time-off-notes" placeholder=""></textarea>
+                                    </div>
+                                </div>
+                                <button class="btn btn-default pull-right" id="close-time-off-form-btn"> Cancel </button>
+                                <button class="btn btn-primary pull-right" id="submit-time-off-form-btn" style="margin-right: 10px"> Submit </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row margin-top" id="report-area">
+                        <a class="btn btn-sm btn-primary" target="_blank" href="~/Home/CreateDownByReport">View Down By Report</a>
+                        <div class="col-md-4">
+                            <button class="btn btn-default" id="create-down-by-report-btn" disabled="disabled"> Create Down By Report</button>
+                            <p class="help-block sent-label"> Last sent <span id="down-by-last-sent-date"> - </span> </p>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-default" id="create-mow-report-btn" disabled="disabled"> Create MOW Report</button>
+                            <p class="help-block sent-label"> Last sent <span id="mow-last-sent-date"> - </span> </p>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6 unpadded-left">
-                    <div class="form-group">
-                        <div style="margin-top: 5px;">
-                            <input type="checkbox" id="time-off-unplanned" checked="checked" />
-                            <label for="time-off-unplanned"> Unplanned </label>
+                <div class="col-md-1"></div>
+                <div class="col-md-3 team-info-box">
+                    @*<div class="row">
+                            <div style="height: 300px; width: 100%; border: 1px solid #0076bc;" class="fake-calendar"> Google Calendar </div>
+                        </div>*@
+                    <div class="row">
+                        <div class="teamInfo">
+                            <div class="center-text box-header">
+                                <span class="box-header-label"> Team Info </span> <span class="box-header-label" id="team-info-name"> </span>
+                            </div>
+                            <div style="display: none" id="loading-team-info" class="center-text text-muted">
+                                Loading Team Info...
+                            </div>
+                            <div style="display:none;" id="team-info-list" class="box-content">
+                                <div class="box-content-row">
+                                    <span>
+                                        PTO:  <span id="team-info-down-pto" style="float: right"> - </span>
+                                    </span>
+                                </div>
+                                <div class="box-content-row">
+                                    <span>
+                                        Training:  <span id="team-info-down-training" style="float: right"> - </span>
+                                    </span>
+                                </div>
+                                <div class="box-content-row">
+                                    <span>
+                                        LOA:  <span id="team-info-down-loa" style="float: right"> - </span>
+                                    </span>
+                                </div>
+                                <div class="box-content-row">
+                                    <span>
+                                        Other:  <span id="team-info-down-other" style="float: right"> - </span>
+                                    </span>
+                                </div>
+                                <div class="box-content-row-bottom">
+                                    <span>
+                                        Total Down:  <span id="team-info-down-total" style="float: right"> - </span>
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label for="time-off-notes">Notes</label>
-                        <div class="form-inline">
-                            <textarea rows="5" style="max-width: 100%; width: 100%" class="form-control" id="time-off-notes" placeholder=""></textarea>
-                        </div>
-                    </div>
-                    <button class="btn btn-default pull-right" id="close-time-off-form-btn"> Cancel </button>
-                    <button class="btn btn-primary pull-right" id="submit-time-off-form-btn" style="margin-right: 10px"> Submit </button>
                 </div>
             </div>
         </div>
-        <div class="row margin-top" id="report-area">
-            <a class="btn btn-sm btn-primary" target="_blank" href="~/Home/CreateDownByReport">View Down By Report</a>
-            <div class="col-md-4">
-                <button class="btn btn-default" id="create-down-by-report-btn" disabled="disabled"> Create Down By Report</button>
-                <p class="help-block sent-label"> Last sent <span id="down-by-last-sent-date"> - </span> </p>
-            </div>
-            <div class="col-md-4">
-                <button class="btn btn-default" id="create-mow-report-btn" disabled="disabled"> Create MOW Report</button>
-                <p class="help-block sent-label"> Last sent <span id="mow-last-sent-date"> - </span> </p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        @*<div class="row">
-            <div style="height: 300px; width: 100%; border: 1px solid #0076bc;" class="fake-calendar"> Google Calendar </div>   
-        </div>*@
-        <div class="row">
-            <div class="teamInfo">
-                <div class="center-text underlined">
-                    <h4> Team Info </h4>
-                </div>
-            </div>   
+        <div id="wfoTab" class="tab-pane">
+
         </div>
     </div>
 </div>

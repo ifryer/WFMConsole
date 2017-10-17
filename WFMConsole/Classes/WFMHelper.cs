@@ -15,6 +15,7 @@ using log4net;
 using System.Reflection;
 using WFMConsole.Models;
 using WFMConsole.Classes;
+using System.Configuration;
 
 namespace WFMDashboard.Classes
 {
@@ -40,6 +41,38 @@ namespace WFMDashboard.Classes
             return staffList;
         }
 
+        public static List<WFMEventInfo> GetEventList()
+        {
+            using (var db = new OnyxEntities())
+            {
+                var eventList = new List<WFMEventInfo>();
+                var dbList = db.BUS_WFMDashboard_Event.Where(t => t.StartTime <= DateTime.Today.Date && t.EndTime > DateTime.Today.Date).ToList();
+                foreach (var item in dbList)
+                {
+                    var newEvent = new WFMEventInfo()
+                    {
+                        Description = item.Description,
+                        TeamName = item.TeamName,
+                        LastName = item.LastName,
+                        FullDay = item.FullDay,
+                        EventType = item.EventType
+                    };
+                    if(newEvent.FullDay)
+                    {
+                        newEvent.StartTime = item.StartTime.ToShortDateString();
+                        newEvent.EndTime = item.EndTime.ToShortDateString();
+                    }
+                    else
+                    {
+                        newEvent.StartTime = item.StartTime.ToShortDateString() + " " + item.StartTime.ToShortTimeString();
+                        newEvent.EndTime = item.EndTime.ToShortDateString() + " " + item.EndTime.ToShortTimeString();
+                    }
+                    eventList.Add(newEvent);
+                }
+                return eventList;
+            }
+        }
+
         public static void GetReportDates(out string downBy, out string mow)
         {
             using (var db = new OnyxEntities())
@@ -54,7 +87,7 @@ namespace WFMDashboard.Classes
             return;
         }
 
-        public static bool SubmitTimeOff(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, int id, string name, string date, bool fullDay, string startTime, string endTime, string notes, string ptoType, out string msg)
+        public static bool SubmitEventForm(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, int id, string name, string date, bool fullDay, string startTime, string endTime, string notes, string eventType, out string msg)
         {
             try
             {
@@ -77,14 +110,14 @@ namespace WFMDashboard.Classes
                     staffMember = db.Agents.Where(t => t.AgentNo == id).FirstOrDefault();
                 }
 
-                CreateEvent(name, startDateTime, endDateTime, fullDay, notes, ptoType, staffMember);
+                CreateEvent(name, startDateTime, endDateTime, fullDay, notes, eventType, staffMember);
 
 
                 SubmitTimeOff_Nice();
 
                 
 
-                SubmitTimeOff_GoogleCalendar(googleAuth, name, startDateTime, endDateTime, fullDay, notes, ptoType, staffMember);
+                SubmitTimeOff_GoogleCalendar(googleAuth, name, startDateTime, endDateTime, fullDay, notes, eventType, staffMember);
                 bool success = true;
                 return success;
             }
@@ -103,7 +136,7 @@ namespace WFMDashboard.Classes
         }
 
         
-        private static bool CreateEvent(string name, DateTime startDateTime, DateTime endDateTime, bool fullDay, string notes, string ptoType, Agent agent)
+        private static bool CreateEvent(string name, DateTime startDateTime, DateTime endDateTime, bool fullDay, string notes, string eventType, Agent agent)
         {
             try
             {
@@ -112,9 +145,10 @@ namespace WFMDashboard.Classes
                     TeamName = agent.TeamName,
                     TeamId = agent.TeamNo,
                     FullDay = fullDay,
-                    EventType = ptoType,
+                    EventType = eventType,
                     StartTime = startDateTime, 
-                    EndTime = endDateTime
+                    EndTime = endDateTime,
+                    Description = $"*{agent.TeamName} - {name} - {eventType} [WFM DASHBOARD TEST EVENT]"
                 };
                 using (var db = new OnyxEntities())
                 {
@@ -128,7 +162,7 @@ namespace WFMDashboard.Classes
                 return false;
             }
         }
-        private static bool SubmitTimeOff_GoogleCalendar(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, string name, DateTime startDateTime, DateTime endDateTime, bool fullDay, string notes, string ptoType, Agent agent)
+        private static bool SubmitTimeOff_GoogleCalendar(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, string name, DateTime startDateTime, DateTime endDateTime, bool fullDay, string notes, string eventType, Agent agent)
         {
             try
             {
@@ -139,12 +173,14 @@ namespace WFMDashboard.Classes
 
                 var lastName = agent.LastName;
 
-                string summary = $"*{team} - {lastName} - PTO ({ptoType}) [WFM DASHBOARD TEST EVENT]";
+                string summary = $"*{team} - {lastName} - {eventType} [WFM DASHBOARD TEST EVENT]";
                 string colorId = "9"; //Color for unplanned PTO
-                if(ptoType == "Planned")
-                {
-                    colorId = "10"; //Color for planned PTO
-                }
+
+                //TODO: fix the color based on the event type
+                //if(ptoType == "Planned")
+                //{
+                //    colorId = "10"; //Color for planned PTO
+                //}
 
                 EventDateTime start = new EventDateTime();
                 EventDateTime end = new EventDateTime();
@@ -269,17 +305,18 @@ namespace WFMDashboard.Classes
         public static DownByReport GenerateDownByReport(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth)
         {
             //DownByReport report = new DownByReport();
-            var calendarId = "kmbs.konicaminolta.us_m48bnnmmf4s08pbhm6cmkdiodo@group.calendar.google.com";
+            var calendarId = ConfigurationManager.AppSettings["CalendarId"];
 
             var service = new CalendarService(new BaseClientService.Initializer()
             {
                 HttpClientInitializer = googleAuth.Credential,
                 ApplicationName = ApplicationName,
+                //ApiKey = ConfigurationManager.AppSettings["ApiKey"],
             });
 
             // Define parameters of request.
             EventsResource.ListRequest request = service.Events.List(calendarId);
-
+            
             request.TimeMin = DateTime.Today.Date; //Start of day
             request.TimeMax = DateTime.Today.Date.AddHours(23).AddMinutes(59); //End of day
             request.ShowDeleted = false;
@@ -298,11 +335,16 @@ namespace WFMDashboard.Classes
         public static DownByReport FillDownByReport(Events events)
         {
             var report = new DownByReport();
-            var ptoDateEnd = DateTime.Now.AddDays(1).Date.ToString("yyyy-MM-dd"); //To get proper full-day events that are for today, they apparently end tomorrow. Thanks google!
-            var paidPto = events.Items.Where(t => (t.ColorId == "10" || t.ColorId == "9") && t.End.DateTime == null && t.End.Date == ptoDateEnd).ToList();
-            var fullDayTraining = events.Items.Where(t => t.ColorId == "7" && t.End.DateTime == null).ToList();
+            //var ptoDateEnd = DateTime.Now.AddDays(1).Date.ToString("yyyy-MM-dd"); 
+            var ptoDateEnd = DateTime.Now.AddDays(1).Date;
+            var paidPto = events.Items.Where(t => (t.ColorId == "10" || t.ColorId == "9") && t.End.DateTime == null && DateTime.Parse(t.End.Date) >= ptoDateEnd).ToList();
+            var fullDayTraining = events.Items.Where(t => t.ColorId == "7" && t.End.DateTime == null && DateTime.Parse(t.End.Date) >= ptoDateEnd).ToList();
+            fullDayTraining = fullDayTraining.Where(t => !t.Summary.ToLower().Contains("cancelled")).ToList();
+            var fullDayOther = events.Items.Where(t => t.ColorId == "11" && t.End.DateTime == null && DateTime.Parse(t.End.Date) >= ptoDateEnd).ToList();
 
             //var partialTraining = events.Items.Where(t => t.ColorId == "7" && t.End.DateTime != null).ToList();
+
+            CreateDatabaseEvents(events);
 
             var rangeEvents = events.Items.Where(t => t.Start.DateTime != null).OrderBy(t => t.Start.DateTime.Value.TimeOfDay).ToList();
             foreach (var item in rangeEvents)
@@ -318,58 +360,159 @@ namespace WFMDashboard.Classes
             var darkRedEvents = events.Items.Where(t => t.ColorId == "11").ToList();
             var lightRedEvents = events.Items.Where(t => t.ColorId == "4").ToList();
 
-            report = FillDownByReportSection(report, fullDayTraining, "Training");
-            report = FillDownByReportSection(report, paidPto, "PTO");
+            report = FillDownByReportSectionFullDay(report, fullDayTraining, "Training");
+            report = FillDownByReportSectionFullDay(report, fullDayOther, "Other");
+            report = FillDownByReportSectionFullDay(report, paidPto, "PTO");
 
             return report;
         }
 
-        public static DownByReport FillDownByReportSection(DownByReport report, List<Event> events, string keyName)
+        public static bool CreateDatabaseEvents(Events events)
         {
-            foreach (var item in events)
+            using (var db = new OnyxEntities())
+            using (var dbS = new inContact_NGEntities())
             {
+                foreach (var item in events.Items)
+                {
+                    string eventType = "Other";
+                    if(item.ColorId == "10" || item.ColorId == "9" )
+                    {
+                        eventType = "PTO";
+                    }
+                    if (item.ColorId == "7")
+                    {
+                        eventType = "Training";
+                    }
 
-                var sections = item.Summary.Split('-');
-                var teamName = sections[0];
-                var staffName = sections[1];
-                report.TotalDown++;
-                report.Sections[keyName].TotalDown++;
-                if (teamName.Contains("RA"))
-                {
-                    report.Sections[keyName].RA = report.Sections[keyName].RA.TrimStart('0');
-                    report.Sections[keyName].RA += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
-                    report.Sections[keyName].RA = report.Sections[keyName].RA.TrimStart(',').TrimStart(' ');
+                    var sections = item.Summary.Split('-');
+                    var teamName = sections[0];
+                    var staffName = sections[1];
+                    bool fullDay = true;
+
+                    var staffMember = dbS.Agents.Where(t => staffName.Contains(t.LastName.ToLower())).FirstOrDefault();
+                    if (staffMember != null)
+                    {
+                        DateTime startTime = DateTime.Now;
+                        DateTime endTime = DateTime.Now;
+                        if(item.End.Date != null)
+                        {
+                            fullDay = true;
+                            startTime = DateTime.Parse(item.Start.Date);
+                            endTime = DateTime.Parse(item.End.Date);
+                        }
+                        else
+                        {
+                            fullDay = false;
+                            startTime = item.Start.DateTime.Value;
+                            endTime = item.End.DateTime.Value;
+                        }
+                        var prevEvent = db.BUS_WFMDashboard_Event.Where(t => t.CalendarEventId == item.Id).FirstOrDefault();
+                        if (prevEvent == null)
+                        {
+                            var newEvent = new BUS_WFMDashboard_Event()
+                            {
+                                CalendarEventId = item.Id,
+                                AgentNo = staffMember.AgentNo,
+                                StartTime = startTime,
+                                EndTime = endTime,
+                                EventType = eventType,
+                                FullDay = fullDay,
+                                TeamId = staffMember.TeamNo,
+                                TeamName = staffMember.TeamName,
+                                LastName = staffName,
+                                Description = item.Summary,
+                                Color = item.ColorId
+                            };
+                            db.BUS_WFMDashboard_Event.Add(newEvent);
+                            //db.SaveChanges();
+                        }
+                        else
+                        {
+                            //TODO: Update the event here if it needs to be updated
+                        }
+                    }
                 }
-                if (teamName.Contains("AD"))
+                db.SaveChanges();
+            }
+            return true;
+        }
+
+        public static DownByReport FillDownByReportSectionFullDay(DownByReport report, List<Event> events, string eventType)
+        {
+            List<BUS_WFMDashboard_Event> eventList = new List<BUS_WFMDashboard_Event>();
+            using (var db = new OnyxEntities())
+            using(var dbS = new inContact_NGEntities())
+            {
+                foreach (var item in events)
                 {
-                    report.Sections[keyName].AD = report.Sections[keyName].AD.TrimStart('0');
-                    report.Sections[keyName].AD += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
-                    report.Sections[keyName].AD = report.Sections[keyName].AD.TrimStart(',').TrimStart(' ');
+                    var sections = item.Summary.Split('-');
+                    var teamName = sections[0];
+                    var staffName = sections[1];
+
+                    //var staffMember = dbS.Agents.Where(t => staffName.Contains(t.LastName.ToLower())).FirstOrDefault();
+                    //if(staffMember != null)
+                    //{
+                    //    var startTime = DateTime.Parse(item.Start.Date);
+                    //    var endTime = DateTime.Parse(item.End.Date);
+                    //    var prevEvent = db.BUS_WFMDashboard_Event.Where(t => t.AgentNo == staffMember.AgentNo && t.StartTime == startTime && t.EndTime == endTime).FirstOrDefault();
+                    //    if(prevEvent == null)
+                    //    {
+                    //        var newEvent = new BUS_WFMDashboard_Event()
+                    //        {
+                    //            AgentNo = staffMember.AgentNo,
+                    //            StartTime = startTime,
+                    //            EndTime = endTime,
+                    //            EventType = eventType,
+                    //            FullDay = true,
+                    //            TeamId = staffMember.TeamNo,
+                    //            TeamName = staffMember.TeamName,
+                    //            LastName = staffName,
+                    //            Description = item.Summary
+                    //        };
+                    //        db.BUS_WFMDashboard_Event.Add(newEvent);
+                    //    }
+                    //}
+
+                    report.TotalDown++;
+                    report.Sections[eventType].TotalDown++;
+                    if (teamName.Contains("RA"))
+                    {
+                        report.Sections[eventType].RA = report.Sections[eventType].RA.TrimStart('0');
+                        report.Sections[eventType].RA += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
+                        report.Sections[eventType].RA = report.Sections[eventType].RA.TrimStart(',').TrimStart(' ');
+                    }
+                    if (teamName.Contains("AD"))
+                    {
+                        report.Sections[eventType].AD = report.Sections[eventType].AD.TrimStart('0');
+                        report.Sections[eventType].AD += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
+                        report.Sections[eventType].AD = report.Sections[eventType].AD.TrimStart(',').TrimStart(' ');
+                    }
+                    if (teamName.Contains("IRC"))
+                    {
+                        report.Sections[eventType].IRC = report.Sections[eventType].IRC.TrimStart('0');
+                        report.Sections[eventType].IRC += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
+                        report.Sections[eventType].IRC = report.Sections[eventType].IRC.TrimStart(',').TrimStart(' ');
+                    }
+                    if (teamName.ToLower().Contains("printer"))
+                    {
+                        report.Sections[eventType].PrinterOps = report.Sections[eventType].PrinterOps.TrimStart('0');
+                        report.Sections[eventType].PrinterOps += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
+                        report.Sections[eventType].PrinterOps = report.Sections[eventType].PrinterOps.TrimStart(',').TrimStart(' ');
+                    }
+                    if (teamName.Contains("MGR"))
+                    {
+                        report.Sections[eventType].MGR = report.Sections[eventType].MGR.TrimStart('0');
+                        report.Sections[eventType].MGR += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
+                        report.Sections[eventType].MGR = report.Sections[eventType].MGR.TrimStart(',').TrimStart(' ');
+                    }
+                    if (teamName.Contains("POA"))
+                    {
+                        report.Sections[eventType].POA = report.Sections[eventType].POA.TrimStart('0');
+                        report.Sections[eventType].POA += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
+                        report.Sections[eventType].POA = report.Sections[eventType].POA.TrimStart(',').TrimStart(' ');
+                    }
                 }
-                if (teamName.Contains("IRC"))
-                {
-                    report.Sections[keyName].IRC = report.Sections[keyName].IRC.TrimStart('0');
-                    report.Sections[keyName].IRC += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
-                    report.Sections[keyName].IRC = report.Sections[keyName].IRC.TrimStart(',').TrimStart(' ');
-                }
-                if (teamName.ToLower().Contains("printer"))
-                {
-                    report.Sections[keyName].PrinterOps = report.Sections[keyName].PrinterOps.TrimStart('0');
-                    report.Sections[keyName].PrinterOps += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
-                    report.Sections[keyName].PrinterOps = report.Sections[keyName].PrinterOps.TrimStart(',').TrimStart(' ');
-                }
-                if (teamName.Contains("MGR"))
-                {
-                    report.Sections[keyName].MGR = report.Sections[keyName].MGR.TrimStart('0');
-                    report.Sections[keyName].MGR += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
-                    report.Sections[keyName].MGR = report.Sections[keyName].MGR.TrimStart(',').TrimStart(' ');
-                }
-                if (teamName.Contains("POA"))
-                {
-                    report.Sections[keyName].POA = report.Sections[keyName].POA.TrimStart('0');
-                    report.Sections[keyName].POA += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
-                    report.Sections[keyName].POA = report.Sections[keyName].POA.TrimStart(',').TrimStart(' ');
-                }
+                //db.SaveChanges();
             }
             return report;
         }
@@ -388,26 +531,43 @@ namespace WFMDashboard.Classes
             }
         }
 
-        public static bool GetTeamInfo(int agentNo)
+        public static TeamInfo GetTeamInfo(int agentNo)
         {
             try
             {
+                TeamInfo teamInfo = new TeamInfo();
+                int team = 0;
                 using (var db = new inContact_NGEntities())
                 {
                     var agent = db.Agents.Where(t => t.AgentNo == agentNo).FirstOrDefault();
-                    var team = agent.TeamNo;
-                    var teamMembers = db.Agents.Where(t => t.TeamNo == team).ToList();
+                    teamInfo.TeamName = agent.TeamName;
+                    team = agent.TeamNo;
+                    //var teamMembers = db.Agents.Where(t => t.TeamNo == team).ToList();
                 }
-                bool success = false;
-                return success;
+                using (var db = new OnyxEntities())
+                {
+                    var totalDown = 0;
+
+                    var events = db.BUS_WFMDashboard_Event.Where(t => t.TeamId == team && t.StartTime <= DateTime.Today.Date && t.EndTime > DateTime.Today.Date).ToList();
+                    var ptoCount = events.Where(t => t.EventType == "PTO").ToList();
+                    var trainingCount = events.Where(t => t.EventType == "Training").ToList();
+
+                    totalDown += ptoCount.Count;
+                    teamInfo.PTO = ptoCount.Count.ToString();
+
+                    totalDown += trainingCount.Count;
+                    teamInfo.Training = trainingCount.Count.ToString();
+
+                    teamInfo.TotalDown = totalDown.ToString();
+                    return teamInfo;
+                }
+                
             }
             catch (Exception ex)
             {
                 log.Error("Error in GetTeamInfo", ex);
-                return false;
+                return null;
             }
-            
         }
-
     }
 }

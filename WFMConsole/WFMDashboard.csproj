@@ -190,7 +190,9 @@
     <Compile Include="Classes\AppFlowMetadata.cs" />
     <Compile Include="Classes\AuthorizationCodeMvcAppOverride.cs" />
     <Compile Include="Classes\EfDataStore.cs" />
+    <Compile Include="Classes\WFMEventInfo.cs" />
     <Compile Include="Classes\Reports.cs" />
+    <Compile Include="Classes\TeamInfo.cs" />
     <Compile Include="Controllers\AuthCallbackController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />

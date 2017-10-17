@@ -72,12 +72,46 @@ indexScript = (function () {
         let selectedStaffName = $("#select-name-staff option:selected").text();
         $("#pto-info-staff").slideDown();
         $(".selected-staff-name").html(selectedStaffName)
+        $("#team-info-list").hide();
+        $("#loading-team-info").show();
+        $.ajax({
+            dataType: "json",
+            type: "post",
+            data: {
+                agentNo: selectedStaff,
+            },
+            url: toUrl("Home/GetTeamInfo"),
+            success: function (data) {
+                if (!data.success) {
+                    console.log("error -- " + data.msg);
+                    showSmallError(data.msg);
+                }
+                else {
+                    $("#team-info-name").html(" - " + data.teamInfo.TeamName)
 
-        let totalPto = 15;
-        let usedPto = 4
-        $("#total-pto-staff").html(totalPto);
-        $("#used-pto-staff").html(usedPto);
-        $("#remaining-pto-staff").html(totalPto - usedPto);
+                    $("#team-info-down-pto").html(data.teamInfo.PTO)
+                    $("#team-info-down-training").html(data.teamInfo.Training)
+                    $("#team-info-down-loa").html(data.teamInfo.LOA)
+                    $("#team-info-down-other").html(data.teamInfo.Other)
+                    $("#team-info-down-total").html(data.teamInfo.TotalDown)
+
+
+                    $("#team-info-list").slideDown();
+                    $("#loading-team-info").hide();
+                    console.log(data)
+                    //$(".time-off-form").slideUp();
+                    //$(".time-off-form input, textarea").val("")
+                    showSmallAlert(data.msg);
+                }
+            }
+        });
+
+
+        //let totalPto = 15;
+        //let usedPto = 4
+        //$("#total-pto-staff").html(totalPto);
+        //$("#used-pto-staff").html(usedPto);
+        //$("#remaining-pto-staff").html(totalPto - usedPto);
 
     });
 

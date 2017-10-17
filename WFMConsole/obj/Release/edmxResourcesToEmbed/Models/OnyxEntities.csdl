@@ -34,5 +34,6 @@
     <Property Name="StartTime" Type="DateTime" Nullable="false" Precision="3" />
     <Property Name="EndTime" Type="DateTime" Nullable="false" Precision="3" />
     <Property Name="FullDay" Type="Boolean" Nullable="false" />
+    <Property Name="LastName" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
   </EntityType>
 </Schema>
