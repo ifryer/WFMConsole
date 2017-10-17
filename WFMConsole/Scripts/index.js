@@ -2,7 +2,7 @@
 
 
 indexScript = (function () {
-
+    var editedEventTitle = false;
     function initialize() {
         
         $("#event-start").timepicker({
@@ -29,23 +29,40 @@ indexScript = (function () {
                 {
                     $("#mow-last-sent-date").html(data.mow)
                     $("#down-by-last-sent-date").html(data.downBy)
-                    $.each(data.nameList, function (index, item) {
-                        $("#select-name-staff").append("<option value='" + data.idList[index] + "'> " + item + " </option>");
+                    $.each(data.agentList, function (index, item) {
+                        $("#select-name-staff").append("<option teamName = '" + item.TeamName + "' lastName = '"+ item.LastName + "' value='" + item.AgentNo + "'> " + item.FirstName + " " + item.LastName + " </option>");
                     })
+                    $("#select-name-staff").chosen({ search_contains: true });
 
                     $.each(data.eventList, function (index, item) {
                         $("#schedule-table-body").append(`
-                            <tr> 
+                            <tr style='background-color:` + item.backgroundColor + `'> 
                                 <td> ` + item.LastName + ` </td>
                                 <td> ` + item.TeamName + ` </td>
-                                <td> ` + item.StartTime + ` </td>
-                                <td> ` + item.EndTime  + ` </td>
-                                <td> ` + item.Description + ` </td>
+                                <td> ` + item.start + ` </td>
+                                <td> ` + item.end  + ` </td>
+                                <td> ` + item.title + ` </td>
                                 <td> ` + item.EventType + ` </td>
                             </tr>
                         `)
                     })
-                    $("#select-name-staff").chosen({ search_contains: true });
+                    
+
+                    $('#event-calendar').fullCalendar({
+                        defaultView: 'agendaDay',
+                        header: {
+                            left: 'prev,next today',
+                            center: 'title',
+                            right: 'month,agendaWeek,agendaDay,listWeek'
+                        },
+                        height: 900,
+                        events: data.eventList,
+                        resources: [
+                            // resources go here
+                        ]
+                    })
+
+                    stopLoading();
                 }
             }
         });
@@ -54,6 +71,9 @@ indexScript = (function () {
         $('#event-day').val($.datepicker.formatDate('mm/dd/yy', new Date()));
         $('#event-day').datepicker();
     }
+    $("").on("click", function () {
+
+    })
 
     $(".log-off-google").on("click", function () {
         $.ajax({
@@ -69,7 +89,9 @@ indexScript = (function () {
 
     $("#pto-section").on("click", "#new-event-btn", function () {
         $(".event-form").slideToggle();
-        $('#event-day').val($.datepicker.formatDate('mm/dd/yy', new Date()))
+        editedEventTitle = false;
+        $("#event-type").val("PTO (Unplanned)");
+        $('#event-day').val($.datepicker.formatDate('mm/dd/yy', new Date()));
     });
 
     $("#fullDayCheckbox").on("change", function () {
@@ -80,11 +102,29 @@ indexScript = (function () {
 
     });
 
+    $("#event-title").on("keyup", function () {
+        editedEventTitle = true;
+    })
+
+    $("#pto-section").on("change", "#event-type", function () {
+        if (!editedEventTitle)
+        {
+            let selectedStaffLastName = $("#select-name-staff option:selected").attr("lastName");
+            let teamName = $("#select-name-staff option:selected").attr("teamName");
+            let eventType = $("#event-type").val();
+            $("#event-title").val("*" + teamName + " - " + selectedStaffLastName + " - " + eventType);
+        }
+    })
+
     $("#pto-section").on("change", "#select-name-staff", function () {
         let selectedStaff = $(this).val();
         let selectedStaffName = $("#select-name-staff option:selected").text();
+        let selectedStaffLastName = $("#select-name-staff option:selected").attr("lastName");
+        let teamName = $("#select-name-staff option:selected").attr("teamName");
+        let eventType = $("#event-type").val();
+        $("#event-title").val("*" + teamName + " - " + selectedStaffLastName + " - " + eventType);
         $("#pto-info-staff").slideDown();
-        $(".selected-staff-name").html(selectedStaffName)
+        $(".selected-staff-name").html(selectedStaffName);
         $("#team-info-list").hide();
         $("#loading-team-info").show();
         $.ajax({
@@ -100,15 +140,15 @@ indexScript = (function () {
                     showSmallError(data.msg);
                 }
                 else {
-                    $("#team-info-name").html(" - " + data.teamInfo.TeamName)
-                    $("#team-info-down-pto").html(data.teamInfo.PTO)
-                    $("#team-info-down-training").html(data.teamInfo.Training)
-                    $("#team-info-down-loa").html(data.teamInfo.LOA)
-                    $("#team-info-down-other").html(data.teamInfo.Other)
-                    $("#team-info-down-total").html(data.teamInfo.TotalDown)
+                    $("#team-info-name").html(" - " + data.teamInfo.TeamName);
+                    $("#team-info-down-pto").html(data.teamInfo.PTO);
+                    $("#team-info-down-training").html(data.teamInfo.Training);
+                    $("#team-info-down-loa").html(data.teamInfo.LOA);
+                    $("#team-info-down-other").html(data.teamInfo.Other);
+                    $("#team-info-down-total").html(data.teamInfo.TotalDown);
                     $("#team-info-list").slideDown();
                     $("#loading-team-info").hide();
-                    console.log(data)
+                    //console.log(data);
                     //$(".event-form").slideUp();
                     //$(".event-form input, textarea").val("")
                     showSmallAlert(data.msg);

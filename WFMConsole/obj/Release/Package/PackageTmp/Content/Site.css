@@ -77,14 +77,15 @@ textarea {
     text-align: center
 }
 
-.time-off-form {
+.event-form {
+    margin-left: 0;
     border: 1px solid #0076bc;
-    border-radius: 5px;
-    padding: 20px;
-    padding-top: 0px;
-    margin-right:10px;
-    margin-left: 15px;
+    border-radius: 3px;
+    padding: 5px;
 }
+
+
+
 .margin-top{
     margin-top: 25px;
 }
@@ -101,12 +102,11 @@ textarea {
     margin-top: 0px;
     text-align: center;
     border-bottom: 1px solid #0076bc;
-    margin-left: -20px;
     background-color: rgb(0, 118, 188);
     color: white;
-    margin-right: -20px;
     padding-top: 4px;
     padding-bottom: 4px;
+    margin: -5px -5px 5px -5px;
 }
 
 .bordered-div {
@@ -153,4 +153,8 @@ textarea {
 
 .tab-pane{
     margin-top: 20px;
+}
+
+.schedule-table{
+    width: 100%;
 }

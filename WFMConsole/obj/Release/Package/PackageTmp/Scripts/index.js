@@ -2,17 +2,17 @@
 
 
 indexScript = (function () {
-
+    var editedEventTitle = false;
     function initialize() {
         
-        $("#time-off-start").timepicker({
+        $("#event-start").timepicker({
             'defaultTimeDelta': null,
             'scrollDefault': 'now',
             'minTime': '6:00am',
             'maxTime': '8:30pm',
         });
 
-        $("#time-off-end").timepicker({
+        $("#event-end").timepicker({
             'defaultTimeDelta': null,
             'minTime': '6:00am',
             'maxTime': '8:30pm',
@@ -29,18 +29,49 @@ indexScript = (function () {
                 {
                     $("#mow-last-sent-date").html(data.mow)
                     $("#down-by-last-sent-date").html(data.downBy)
-                    $.each(data.nameList, function (index, item) {
-                        $("#select-name-staff").append("<option value='" + data.idList[index] + "'> " + item + " </option>");
+                    $.each(data.agentList, function (index, item) {
+                        $("#select-name-staff").append("<option teamName = '" + item.TeamName + "' lastName = '"+ item.LastName + "' value='" + item.AgentNo + "'> " + item.FirstName + " " + item.LastName + " </option>");
                     })
                     $("#select-name-staff").chosen({ search_contains: true });
+
+                    $.each(data.eventList, function (index, item) {
+                        $("#schedule-table-body").append(`
+                            <tr> 
+                                <td> ` + item.LastName + ` </td>
+                                <td> ` + item.TeamName + ` </td>
+                                <td> ` + item.start + ` </td>
+                                <td> ` + item.end  + ` </td>
+                                <td> ` + item.title + ` </td>
+                                <td> ` + item.EventType + ` </td>
+                            </tr>
+                        `)
+                    })
+                    
+
+                    $('#event-calendar').fullCalendar({
+                        defaultView: 'agendaDay',
+                        header: {
+                            left: 'prev,next today',
+                            center: 'title',
+                            right: 'month,agendaWeek,agendaDay,listWeek'
+                        },
+                        height: 900,
+                        events: data.eventList,
+                        resources: [
+                            // resources go here
+                        ]
+                    })
                 }
             }
         });
         
-        $('#start-end-time-off-section').datepair();
-        $('#time-off-day').val($.datepicker.formatDate('mm/dd/yy', new Date()));
-        $('#time-off-day').datepicker();
+        $('#start-end-event-section').datepair();
+        $('#event-day').val($.datepicker.formatDate('mm/dd/yy', new Date()));
+        $('#event-day').datepicker();
     }
+    $("").on("click", function () {
+
+    })
 
     $(".log-off-google").on("click", function () {
         $.ajax({
@@ -54,22 +85,41 @@ indexScript = (function () {
     })
 
 
-    $("#pto-section").on("click", "#new-time-off-btn", function () {
-        $(".time-off-form").slideToggle();
-        $('#time-off-day').val($.datepicker.formatDate('mm/dd/yy', new Date()))
+    $("#pto-section").on("click", "#new-event-btn", function () {
+        $(".event-form").slideToggle();
+        editedEventTitle = false;
+        $('#event-day').val($.datepicker.formatDate('mm/dd/yy', new Date()))
     });
 
     $("#fullDayCheckbox").on("change", function () {
         if (this.checked)
-            $("#start-end-time-off-section").hide();
+            $("#start-end-event-section").hide();
         else
-            $("#start-end-time-off-section").show();
+            $("#start-end-event-section").show();
 
     });
+
+    $("#event-title").on("keyup", function () {
+        editedEventTitle = true;
+    })
+
+    $("#pto-section").on("change", "#event-type", function () {
+        if (!editedEventTitle)
+        {
+            let selectedStaffLastName = $("#select-name-staff option:selected").attr("lastName");
+            let teamName = $("#select-name-staff option:selected").attr("teamName");
+            let eventType = $("#event-type").val()
+            $("#event-title").val("*" + teamName + " - " + selectedStaffLastName + " - " + eventType);
+        }
+    })
 
     $("#pto-section").on("change", "#select-name-staff", function () {
         let selectedStaff = $(this).val();
         let selectedStaffName = $("#select-name-staff option:selected").text();
+        let selectedStaffLastName = $("#select-name-staff option:selected").attr("lastName");
+        let teamName = $("#select-name-staff option:selected").attr("teamName");
+        let eventType = $("#event-type").val()
+        $("#event-title").val("*" + teamName + " - " + selectedStaffLastName + " - " + eventType);
         $("#pto-info-staff").slideDown();
         $(".selected-staff-name").html(selectedStaffName)
         $("#team-info-list").hide();
@@ -88,19 +138,16 @@ indexScript = (function () {
                 }
                 else {
                     $("#team-info-name").html(" - " + data.teamInfo.TeamName)
-
                     $("#team-info-down-pto").html(data.teamInfo.PTO)
                     $("#team-info-down-training").html(data.teamInfo.Training)
                     $("#team-info-down-loa").html(data.teamInfo.LOA)
                     $("#team-info-down-other").html(data.teamInfo.Other)
                     $("#team-info-down-total").html(data.teamInfo.TotalDown)
-
-
                     $("#team-info-list").slideDown();
                     $("#loading-team-info").hide();
                     console.log(data)
-                    //$(".time-off-form").slideUp();
-                    //$(".time-off-form input, textarea").val("")
+                    //$(".event-form").slideUp();
+                    //$(".event-form input, textarea").val("")
                     showSmallAlert(data.msg);
                 }
             }
@@ -116,24 +163,23 @@ indexScript = (function () {
     });
 
     //PTO Form
-    $("#pto-section").on("click", "#close-time-off-form-btn", function () {
-        $(".time-off-form").slideUp();
-        $(".time-off-form input, textarea").val("")
+    $("#pto-section").on("click", "#close-event-form-btn", function () {
+        $(".event-form").slideUp();
+        $(".event-form input, textarea").val("")
     });
 
-    $("#pto-section").on("click", "#submit-time-off-form-btn", function () {
-        submitTimeOffForm();
+    $("#pto-section").on("click", "#submit-event-form-btn", function () {
+        submitEventForm();
     });
 
-    function submitTimeOffForm() {
-        let date = $("#time-off-day").val();
-        let startTime = $("#time-off-start").val();
-        let endTime = $("#time-off-end").val();
+    function submitEventForm() {
+        let date = $("#event-day").val();
+        let startTime = $("#event-start").val();
+        let endTime = $("#event-end").val();
         let fullDay = $("#fullDayCheckbox:checked").length > 0
-        let notes = $("#time-off-notes").val();
-        let ptoType = "Planned";
-        if ($("#time-off-unplanned:checked").length > 0)
-            ptoType = "Unplanned"
+        let notes = $("#event-notes").val();
+        let eventType = $("#event-type").val();
+        let eventTitle = $("#event-title").val();
         let id = $("#select-name-staff").val();
         let name = $("#select-name-staff option:selected").html();
         if (id == "" || id == null) {
@@ -151,9 +197,9 @@ indexScript = (function () {
                     startTime: startTime,
                     endTime: endTime,
                     notes: notes,
-                    ptoType: ptoType
+                    eventType: eventType
                 },
-                url: toUrl("Home/SubmitTimeOffForm"),
+                url: toUrl("Home/SubmitEventForm"),
                 success: function (data) {
                     if (!data.success) {
                         console.log("error -- " + data.msg);
@@ -161,8 +207,8 @@ indexScript = (function () {
                     }
                     else {
                         console.log(data)
-                        $(".time-off-form").slideUp();
-                        $(".time-off-form input, textarea").val("")
+                        $(".event-form").slideUp();
+                        $(".event-form input, textarea").val("")
                         showSmallAlert(data.msg);
                     }
                 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace WFMConsole.Classes
+namespace WFMConsole.ViewModels
 {
     public class DownByReport
     {

@@ -1,4 +1,8 @@
 ﻿<div class="small-alert-box" style="display:none"> - </div>
+<div class="loading-div-back" id="loadingDivBack"></div>
+<div class="loading-div" id="loadingDiv">
+    <img src='~/Images/loading.gif' /> Loading...
+</div>
 <div>
     <ul class="nav nav-tabs">
         <li class="active">
@@ -7,8 +11,8 @@
             </a>
         </li>
         <li>
-            <a href="#eventsTab" data-toggle="tab" class="tabMenuItem" id="events-tab">
-                Events
+            <a href="#reportsTab" data-toggle="tab" class="tabMenuItem" id="events-tab">
+                Reports
             </a>
         </li>
         <li>
@@ -16,62 +20,115 @@
                 WFO
             </a>
         </li>
+        <li>
+            <a href="#eventsTab" data-toggle="tab" class="tabMenuItem" id="events-tab">
+                Events
+            </a>
+        </li>
     </ul>
     <div class="tab-content">
         <div id="homeTab" class="tab-pane in active">
             <div class="container container-fluid" id="pto-section">
-                <div class="col-md-8 main-area">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="select-name-staff">Select Name</label>
-                                <select class="form-control" id="select-name-staff" placeholder="Select Name...">
-                                    <option selected disabled="disabled"> Select Name</option>
-                                </select>
+                <div class="row">
+                    <div class="col-md-8 main-area">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="select-name-staff">Select Name</label>
+                                    <select class="form-control" id="select-name-staff" placeholder="Select Name...">
+                                        <option selected disabled="disabled"> Select Name</option>
+                                    </select>
+                                </div>
                             </div>
+                            @*<div class="col-md-6">
+                        <h4 style="margin-top: 30px;" class="selectedStaffName"> </h4>
+                    </div>*@
                         </div>
-                        @*<div class="col-md-6">
-                            <h4 style="margin-top: 30px;" class="selectedStaffName"> </h4>
-                        </div>*@
-                    </div>
-                    <div class="row" id="pto-info-staff">
-                        <div class="col-md-6">
-                            <div class="col-md-2 col-xs-2 center-text">
-                                <div class="row underlined">
-                                    Total PTO
+                        <div class="row" id="pto-info-staff">
+                            <div class="col-md-6">
+                                <div class="col-md-2 col-xs-2 center-text">
+                                    <div class="row underlined">
+                                        Total PTO
+                                    </div>
+                                    <div class="row" id="total-pto-staff">
+                                        -
+                                    </div>
                                 </div>
-                                <div class="row" id="total-pto-staff">
-                                    -
+                                <div class="col-md-2 col-xs-2 center-text">
+                                    <div class="row underlined">
+                                        Used PTO
+                                    </div>
+                                    <div class="row" id="used-pto-staff">
+                                        -
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-2 col-xs-2 center-text">
-                                <div class="row underlined">
-                                    Used PTO
-                                </div>
-                                <div class="row" id="used-pto-staff">
-                                    -
-                                </div>
-                            </div>
-                            <div class="col-md-2 col-xs-2 center-text">
-                                <div class="row underlined">
-                                    Remaining PTO
-                                </div>
-                                <div class="row" id="remaining-pto-staff">
-                                    -
+                                <div class="col-md-2 col-xs-2 center-text">
+                                    <div class="row underlined">
+                                        Remaining PTO
+                                    </div>
+                                    <div class="row" id="remaining-pto-staff">
+                                        -
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="col-md-4">
+                                <button class="btn btn-default" id="new-event-btn"> New Event </button>
+                            </div>
+                        </div>
+                        <br />
+                        
                     </div>
-                    <br />
-                    <div class="row">
-                        <div class="col-md-4">
-                            <button class="btn btn-default" id="new-event-btn"> New Time Off </button>
+                    <div class="col-md-1"></div>
+                    <div class="col-md-3 team-info-box">
+                        @*<div class="row">
+                    <div style="height: 300px; width: 100%; border: 1px solid #0076bc;" class="fake-calendar"> Google Calendar </div>
+                </div>*@
+                        <div class="row">
+                            <div class="teamInfo">
+                                <div class="center-text box-header">
+                                    <span class="box-header-label"> Team Info </span> <span class="box-header-label" id="team-info-name"> </span>
+                                </div>
+                                <div style="display: none" id="loading-team-info" class="center-text text-muted">
+                                    Loading Team Info...
+                                </div>
+                                <div style="display:none;" id="team-info-list" class="box-content">
+                                    <div class="box-content-row">
+                                        <span>
+                                            PTO:  <span id="team-info-down-pto" style="float: right"> - </span>
+                                        </span>
+                                    </div>
+                                    <div class="box-content-row">
+                                        <span>
+                                            Training:  <span id="team-info-down-training" style="float: right"> - </span>
+                                        </span>
+                                    </div>
+                                    <div class="box-content-row">
+                                        <span>
+                                            LOA:  <span id="team-info-down-loa" style="float: right"> - </span>
+                                        </span>
+                                    </div>
+                                    <div class="box-content-row">
+                                        <span>
+                                            Other:  <span id="team-info-down-other" style="float: right"> - </span>
+                                        </span>
+                                    </div>
+                                    <div class="box-content-row-bottom">
+                                        <span>
+                                            Total Down:  <span id="team-info-down-total" style="float: right"> - </span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <br />
-                    <div class="row">
-                        <div class="row event-form" style="display:none;">
+                </div>
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="event-form row" style="display:none;">
                             <h4 class="form-header"> Create Event Form </h4>
                             <div class="col-md-6 unpadded-left">
                                 <div class="form-group">
@@ -108,20 +165,14 @@
                                     <label for="event-type">Event Type</label>
                                     <div class="form-inline">
                                         <select class="form-control" id="event-type" placeholder="">
-                                            <option value="PTO (Planned)"> Planned PTO </option>
                                             <option value="PTO (Unplanned)"> Unplanned PTO </option>
+                                            <option value="PTO (Planned)"> Planned PTO </option>
                                             <option value="Training"> Training </option>
                                             <option value="LOA"> LOA </option>
                                             <option value="Other"> Other </option>
                                         </select>
                                     </div>
                                 </div>
-                                @*<div class="form-group">
-                                    <div style="margin-top: 5px;">
-                                        <input type="checkbox" id="event-unplanned" checked="checked" />
-                                        <label for="event-unplanned"> Unplanned </label>
-                                    </div>
-                                </div>*@
                                 <div class="form-group">
                                     <label for="event-notes">Notes</label>
                                     <div class="form-inline">
@@ -133,68 +184,38 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row margin-top" id="report-area">
-                        <a class="btn btn-sm btn-primary" target="_blank" href="~/Home/CreateDownByReport">View Down By Report</a>
-                        <div class="col-md-4">
-                            <button class="btn btn-default" id="create-down-by-report-btn" disabled="disabled"> Create Down By Report</button>
-                            <p class="help-block sent-label"> Last sent <span id="down-by-last-sent-date"> - </span> </p>
-                        </div>
-                        <div class="col-md-4">
-                            <button class="btn btn-default" id="create-mow-report-btn" disabled="disabled"> Create MOW Report</button>
-                            <p class="help-block sent-label"> Last sent <span id="mow-last-sent-date"> - </span> </p>
+                    <div class="col-md-1"></div>
+
+                    
+                </div>
+
+                <div class="row" style="margin-top: 10px;">
+                    <div class="col-md-12">
+                        <div id="event-calendar">
+
                         </div>
                     </div>
                 </div>
-                <div class="col-md-1"></div>
-                <div class="col-md-3 team-info-box">
-                    @*<div class="row">
-                            <div style="height: 300px; width: 100%; border: 1px solid #0076bc;" class="fake-calendar"> Google Calendar </div>
-                        </div>*@
-                    <div class="row">
-                        <div class="teamInfo">
-                            <div class="center-text box-header">
-                                <span class="box-header-label"> Team Info </span> <span class="box-header-label" id="team-info-name"> </span>
-                            </div>
-                            <div style="display: none" id="loading-team-info" class="center-text text-muted">
-                                Loading Team Info...
-                            </div>
-                            <div style="display:none;" id="team-info-list" class="box-content">
-                                <div class="box-content-row">
-                                    <span>
-                                        PTO:  <span id="team-info-down-pto" style="float: right"> - </span>
-                                    </span>
-                                </div>
-                                <div class="box-content-row">
-                                    <span>
-                                        Training:  <span id="team-info-down-training" style="float: right"> - </span>
-                                    </span>
-                                </div>
-                                <div class="box-content-row">
-                                    <span>
-                                        LOA:  <span id="team-info-down-loa" style="float: right"> - </span>
-                                    </span>
-                                </div>
-                                <div class="box-content-row">
-                                    <span>
-                                        Other:  <span id="team-info-down-other" style="float: right"> - </span>
-                                    </span>
-                                </div>
-                                <div class="box-content-row-bottom">
-                                    <span>
-                                        Total Down:  <span id="team-info-down-total" style="float: right"> - </span>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            </div>
+        </div>
+        <div id="reportsTab" class="tab-pane">
+            <div class="row margin-top" id="report-area">
+                <a class="btn btn-sm btn-primary" target="_blank" href="~/Home/CreateDownByReport">View Down By Report</a>
+                <div class="col-md-4">
+                    <button class="btn btn-default" id="create-down-by-report-btn" disabled="disabled"> Create Down By Report</button>
+                    <p class="help-block sent-label"> Last sent <span id="down-by-last-sent-date"> - </span> </p>
                 </div>
-                
+                <div class="col-md-4">
+                    <button class="btn btn-default" id="create-mow-report-btn" disabled="disabled"> Create MOW Report</button>
+                    <p class="help-block sent-label"> Last sent <span id="mow-last-sent-date"> - </span> </p>
+                </div>
             </div>
         </div>
         <div id="wfoTab" class="tab-pane">
 
         </div>
         <div id="eventsTab" class="tab-pane">
+            
             <div class="col-md-12 schedule-area">
                 <table class="schedule-table table" id="schedule-table">
                     <thead>

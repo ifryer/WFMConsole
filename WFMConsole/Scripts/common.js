@@ -7,6 +7,13 @@
     return basePath + dest;
 }
 
+function startLoading() {
+    $(".loading-div, .loading-div-back").show();
+}
+function stopLoading() {
+    $(".loading-div, .loading-div-back").hide();
+}
+
 function showSmallAlert(alertText) {
     $(".small-alert-box").removeClass("error-msg").addClass("success-msg")
     $(".small-alert-box").html(alertText).fadeIn();

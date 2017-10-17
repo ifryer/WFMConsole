@@ -50,10 +50,9 @@ namespace WFMDashboard.Controllers
             var msg = "";
             string downBy, mow;
             WFMHelper.GetReportDates(out downBy, out mow);
-            List<int> staffIdList;
-            var list =  WFMHelper.GetStaffList(out msg, out staffIdList);
+            var list =  WFMHelper.GetStaffList(out msg);
             var eventList = WFMHelper.GetEventList();
-            return JsonConvert.SerializeObject(new { success = msg.ToLower().Contains("success"), msg = msg, nameList = list, idList = staffIdList, downBy = downBy, mow = mow, eventList = eventList });
+            return JsonConvert.SerializeObject(new { success = msg.ToLower().Contains("success"), msg = msg, agentList = list, downBy = downBy, mow = mow, eventList = eventList });
         }
 
         public string GetTeamInfo(int agentNo)

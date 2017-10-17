@@ -16,6 +16,7 @@ using System.Reflection;
 using WFMConsole.Models;
 using WFMConsole.Classes;
 using System.Configuration;
+using WFMConsole.ViewModels;
 
 namespace WFMDashboard.Classes
 {
@@ -26,47 +27,41 @@ namespace WFMDashboard.Classes
         static string[] Scopes = { CalendarService.Scope.CalendarReadonly };
         static string ApplicationName = "Google Calendar API .NET Quickstart";
 
-        public static List<string> GetStaffList(out string msg, out List<int> staffIdList)
+        public static List<ViewAgent> GetStaffList(out string msg)
         {
-            var staffList = new List<string>();
-            staffIdList = new List<int>();
+            var staffList = new List<ViewAgent>();
             using (var db = new inContact_NGEntities())
             {
                 var staffListDb = db.Agents.OrderBy(t => t.LastName);
-                staffList = staffListDb.Select(t => t.FirstName + " " + t.LastName).ToList();
-                staffIdList = staffListDb.Select(t => t.AgentNo).ToList();
+                foreach (var item in staffListDb)
+                {
+                    staffList.Add(new ViewAgent(item));
+                }
+                //staffList = staffListDb.Select(t => new WFMConsole.ViewModels.ViewAgent(t)).ToList();
 
             }
             msg = "Successfully retreived list of staff members";
             return staffList;
         }
 
-        public static List<WFMEventInfo> GetEventList()
+        public static List<ViewEvent> GetEventList()
         {
             using (var db = new OnyxEntities())
             {
-                var eventList = new List<WFMEventInfo>();
-                var dbList = db.BUS_WFMDashboard_Event.Where(t => t.StartTime <= DateTime.Today.Date && t.EndTime > DateTime.Today.Date).ToList();
-                foreach (var item in dbList)
+                var eventList = new List<ViewEvent>();
+                //var dbList = db.BUS_WFMDashboard_Event.Where(t => t.StartTime <= DateTime.Today.Date && t.EndTime > DateTime.Today.Date).ToList();
+                var events = db.BUS_WFMDashboard_Event.Where(t => t.EndTime >= DateTime.Now || (t.FullDay && t.EndTime >= DateTime.Today.Date)).ToList();
+                var pastEvents = db.BUS_WFMDashboard_Event.Where(t => (t.EndTime < DateTime.Now && !t.FullDay) || (t.EndTime < DateTime.Today.Date && t.FullDay)).ToList();
+
+
+                foreach (var item in events)
                 {
-                    var newEvent = new WFMEventInfo()
-                    {
-                        Description = item.Description,
-                        TeamName = item.TeamName,
-                        LastName = item.LastName,
-                        FullDay = item.FullDay,
-                        EventType = item.EventType
-                    };
-                    if(newEvent.FullDay)
-                    {
-                        newEvent.StartTime = item.StartTime.ToShortDateString();
-                        newEvent.EndTime = item.EndTime.ToShortDateString();
-                    }
-                    else
-                    {
-                        newEvent.StartTime = item.StartTime.ToShortDateString() + " " + item.StartTime.ToShortTimeString();
-                        newEvent.EndTime = item.EndTime.ToShortDateString() + " " + item.EndTime.ToShortTimeString();
-                    }
+                    var newEvent = new ViewEvent(item, false);
+                    eventList.Add(newEvent);
+                }
+                foreach (var item in pastEvents)
+                {
+                    var newEvent = new ViewEvent(item, true);
                     eventList.Add(newEvent);
                 }
                 return eventList;
@@ -311,7 +306,7 @@ namespace WFMDashboard.Classes
             {
                 HttpClientInitializer = googleAuth.Credential,
                 ApplicationName = ApplicationName,
-                //ApiKey = ConfigurationManager.AppSettings["ApiKey"],
+                ApiKey = ConfigurationManager.AppSettings["ApiKey"],
             });
 
             // Define parameters of request.

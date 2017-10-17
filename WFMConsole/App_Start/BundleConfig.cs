@@ -11,6 +11,8 @@ namespace WFMDashboard
             bundles.Add(new ScriptBundle("~/bundles/jquery").Include(
                         "~/Scripts/jquery-{version}.js",
                         "~/Scripts/chosen_v1.8.2/chosen.jquery.js",
+                        "~/Scripts/fullcalendar-3.6.1/lib/moment.min.js",
+                        "~/Scripts/fullcalendar-3.6.1/fullcalendar.min.js",
                         "~/Scripts/jquery.timepicker.min.js",
                         "~/Scripts/jquery-ui-1.12.1.custom/jquery-ui.js",
                         "~/Scripts/jquery.datepair.min.js"
@@ -28,6 +30,7 @@ namespace WFMDashboard
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/bootstrap.css",
                       "~/Content/jquery.timepicker.min.css",
+                      "~/Scripts/fullcalendar-3.6.1/fullcalendar.min.css",
                       "~/Scripts/jquery-ui-1.12.1.custom/jquery-ui.css",
                       "~/Content/site.css"));
         }
