@@ -15,16 +15,18 @@ namespace WFMConsole.Models
     public partial class BUS_WFMDashboard_Event
     {
         public int Id { get; set; }
-        public string TeamName { get; set; }
-        public int TeamId { get; set; }
-        public int AgentNo { get; set; }
         public string EventType { get; set; }
+        public string CalendarEventId { get; set; }
+        public int AgentNo { get; set; }
+        public int TeamId { get; set; }
+        public string Description { get; set; }
+        public string TeamName { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
         public System.DateTime StartTime { get; set; }
         public System.DateTime EndTime { get; set; }
         public bool FullDay { get; set; }
-        public string LastName { get; set; }
-        public string Description { get; set; }
+        public string Notes { get; set; }
         public string Color { get; set; }
-        public string CalendarEventId { get; set; }
     }
 }

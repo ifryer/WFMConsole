@@ -8,18 +8,21 @@ namespace WFMConsole.ViewModels
 {
     public class ViewEvent
     {
+        public int Id { get; set; }
         public string start { get; set; }
         public string end { get; set; }
         public string title { get; set; }
+        public bool allDay { get; set; }
+        public string Notes { get; set; }
+        public string StartDate { get; set; }
+        public string EndDate { get; set; }
         public string StartTime { get; set; }
         public string EndTime { get; set; }
         public string TeamName { get; set; }
         public string EventType { get; set; }
-        public bool allDay { get; set; }
         public string LastName { get; set; }
         public string backgroundColor { get; set; }
         public string borderColor { get; set; }
-
         public string textColor { get; set; }
 
         private static Dictionary<string, string> colorList = new Dictionary<string, string>() { { "1", "#a4bbfc" }, { "2", "" }, { "3", "" }, { "4", "#ff887c" }, { "5", "" }, { "6", "" }, { "7", "#46d6db" }, { "8", "" }, { "9", "#5484ed" }, { "10", "#51b749" }, { "11", "#dc2127" }, { "12", "" }, };
@@ -27,24 +30,30 @@ namespace WFMConsole.ViewModels
 
         public ViewEvent(BUS_WFMDashboard_Event item, bool past)
         {
-            
+            Id = item.Id;
             title = item.Description;
             TeamName = item.TeamName;
             LastName = item.LastName;
             allDay = item.FullDay;
             EventType = item.EventType;
+            Notes = item.Notes;
             if (allDay)
             {
-                StartTime = item.StartTime.ToShortDateString();
-                EndTime = item.EndTime.ToShortDateString();
-                start = DateTime.Today.ToShortDateString();
+                StartDate = item.StartTime.ToShortDateString();
+                EndDate = item.EndTime.ToShortDateString();
+                //StartTime = item.StartTime.ToShortDateString();
+                //EndTime = item.EndTime.ToShortDateString();
+                //start = DateTime.Today.ToShortDateString();
+                start = item.StartTime.ToShortDateString();
                 end = item.EndTime.ToShortDateString();
 
             }
             else
             {
-                StartTime = item.StartTime.ToShortDateString() + " " + item.StartTime.ToShortTimeString();
-                EndTime = item.EndTime.ToShortDateString() + " " + item.EndTime.ToShortTimeString();
+                StartDate = item.StartTime.ToShortDateString();
+                EndDate = item.EndTime.ToShortDateString();
+                StartTime = item.StartTime.ToShortTimeString();
+                EndTime = item.EndTime.ToShortTimeString();
                 start = item.StartTime.ToShortDateString() + " " + item.StartTime.ToShortTimeString();
                 end = item.EndTime.ToShortDateString() + " " + item.EndTime.ToShortTimeString();
             }

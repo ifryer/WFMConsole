@@ -5,14 +5,28 @@ indexScript = (function () {
     var editedEventTitle = false;
     function initialize() {
         
-        $("#event-start").timepicker({
+        $("#event-start-time").timepicker({
             'defaultTimeDelta': null,
             'scrollDefault': 'now',
             'minTime': '6:00am',
             'maxTime': '8:30pm',
         });
 
-        $("#event-end").timepicker({
+        $("#event-end-time").timepicker({
+            'defaultTimeDelta': null,
+            'minTime': '6:00am',
+            'maxTime': '8:30pm',
+            'showDuration': true
+        });
+
+        $("#event-start-time-modal").timepicker({
+            'defaultTimeDelta': null,
+            'scrollDefault': 'now',
+            'minTime': '6:00am',
+            'maxTime': '8:30pm',
+        });
+
+        $("#event-end-time-modal").timepicker({
             'defaultTimeDelta': null,
             'minTime': '6:00am',
             'maxTime': '8:30pm',
@@ -36,7 +50,7 @@ indexScript = (function () {
 
                     $.each(data.eventList, function (index, item) {
                         $("#schedule-table-body").append(`
-                            <tr> 
+                            <tr style='background-color:` + item.backgroundColor + `'> 
                                 <td> ` + item.LastName + ` </td>
                                 <td> ` + item.TeamName + ` </td>
                                 <td> ` + item.start + ` </td>
@@ -48,30 +62,20 @@ indexScript = (function () {
                     })
                     
 
-                    $('#event-calendar').fullCalendar({
-                        defaultView: 'agendaDay',
-                        header: {
-                            left: 'prev,next today',
-                            center: 'title',
-                            right: 'month,agendaWeek,agendaDay,listWeek'
-                        },
-                        height: 900,
-                        events: data.eventList,
-                        resources: [
-                            // resources go here
-                        ]
-                    })
+                    setUpCalendar(data.eventList);
+                    
+
+                    stopLoading();
                 }
             }
         });
         
         $('#start-end-event-section').datepair();
+        $('#start-end-event-section-modal').datepair();
         $('#event-day').val($.datepicker.formatDate('mm/dd/yy', new Date()));
         $('#event-day').datepicker();
+        $('#event-day-modal').datepicker();
     }
-    $("").on("click", function () {
-
-    })
 
     $(".log-off-google").on("click", function () {
         $.ajax({
@@ -85,43 +89,21 @@ indexScript = (function () {
     })
 
 
-    $("#pto-section").on("click", "#new-event-btn", function () {
-        $(".event-form").slideToggle();
-        editedEventTitle = false;
-        $('#event-day').val($.datepicker.formatDate('mm/dd/yy', new Date()))
-    });
+    
 
-    $("#fullDayCheckbox").on("change", function () {
-        if (this.checked)
-            $("#start-end-event-section").hide();
-        else
-            $("#start-end-event-section").show();
+    
 
-    });
-
-    $("#event-title").on("keyup", function () {
-        editedEventTitle = true;
-    })
-
-    $("#pto-section").on("change", "#event-type", function () {
-        if (!editedEventTitle)
-        {
-            let selectedStaffLastName = $("#select-name-staff option:selected").attr("lastName");
-            let teamName = $("#select-name-staff option:selected").attr("teamName");
-            let eventType = $("#event-type").val()
-            $("#event-title").val("*" + teamName + " - " + selectedStaffLastName + " - " + eventType);
-        }
-    })
+    
 
     $("#pto-section").on("change", "#select-name-staff", function () {
         let selectedStaff = $(this).val();
         let selectedStaffName = $("#select-name-staff option:selected").text();
         let selectedStaffLastName = $("#select-name-staff option:selected").attr("lastName");
         let teamName = $("#select-name-staff option:selected").attr("teamName");
-        let eventType = $("#event-type").val()
+        let eventType = $("#event-type").val();
         $("#event-title").val("*" + teamName + " - " + selectedStaffLastName + " - " + eventType);
         $("#pto-info-staff").slideDown();
-        $(".selected-staff-name").html(selectedStaffName)
+        $(".selected-staff-name").html(selectedStaffName);
         $("#team-info-list").hide();
         $("#loading-team-info").show();
         $.ajax({
@@ -137,15 +119,15 @@ indexScript = (function () {
                     showSmallError(data.msg);
                 }
                 else {
-                    $("#team-info-name").html(" - " + data.teamInfo.TeamName)
-                    $("#team-info-down-pto").html(data.teamInfo.PTO)
-                    $("#team-info-down-training").html(data.teamInfo.Training)
-                    $("#team-info-down-loa").html(data.teamInfo.LOA)
-                    $("#team-info-down-other").html(data.teamInfo.Other)
-                    $("#team-info-down-total").html(data.teamInfo.TotalDown)
+                    $("#team-info-name").html(" - " + data.teamInfo.TeamName);
+                    $("#team-info-down-pto").html(data.teamInfo.PTO);
+                    $("#team-info-down-training").html(data.teamInfo.Training);
+                    $("#team-info-down-loa").html(data.teamInfo.LOA);
+                    $("#team-info-down-other").html(data.teamInfo.Other);
+                    $("#team-info-down-total").html(data.teamInfo.TotalDown);
                     $("#team-info-list").slideDown();
                     $("#loading-team-info").hide();
-                    console.log(data)
+                    //console.log(data);
                     //$(".event-form").slideUp();
                     //$(".event-form input, textarea").val("")
                     showSmallAlert(data.msg);
@@ -162,7 +144,105 @@ indexScript = (function () {
 
     });
 
-    //PTO Form
+    function setUpCalendar(eventList)
+    {
+        $('#event-calendar').fullCalendar({
+            defaultView: 'agendaDay',
+            header: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'month,agendaWeek,agendaDay,listWeek'
+            },
+            height: 900,
+            events: eventList,
+            resources: [
+                // resources go here
+            ],
+            eventClick: function (calEvent, jsEvent, view) {
+
+                console.log(calEvent)
+                console.log(jsEvent)
+                console.log(view)
+
+                let notes = calEvent.Notes;
+                let title = calEvent.title;
+                let allDay = calEvent.allDay;
+                let startDate = calEvent.StartDate;
+                let endDate = calEvent.EndDate;
+                let startTime = calEvent.StartTime;
+                let endTime = calEvent.EndTime;
+                let eventType = calEvent.EventType;
+
+                if (allDay) {
+                    $("#fullDayCheckbox-modal").attr("checked", "checked");
+                    $("#start-end-event-section-modal").hide();
+                }
+                else
+                {
+                    $("#fullDayCheckbox-modal").removeAttr("checked");
+                    $("#start-end-event-section-modal").show();
+                }
+                $("#event-title-modal").val(title);
+                $("#event-notes-modal").val(notes);
+                $("#event-start-date-modal").val(startDate);
+                $("#event-end-date-modal").val(endDate);
+                $("#event-start-time-modal").val(startTime);
+                $("#event-end-time-modal").val(endTime);
+                $("#event-type-modal").val(eventType);
+
+
+                $("#edit-calendar-event-modal").modal();
+
+                // change the border color just for fun
+                //$(this).css('border-color', 'red');
+
+            }
+        })
+    }
+
+    //Edit Event Form
+
+
+
+    $("#fullDayCheckbox-modal").on("change", function () {
+        if (this.checked)
+            $("#start-end-event-section-modal").hide();
+        else
+            $("#start-end-event-section-modal").show();
+    });
+
+
+
+    //Create Event Form
+
+    $("#pto-section").on("click", "#new-event-btn", function () {
+        $(".event-form").slideToggle();
+        editedEventTitle = false;
+        $("#event-type").val("PTO (Unplanned)");
+        $('#event-day').val($.datepicker.formatDate('mm/dd/yy', new Date()));
+    });
+
+    $("#fullDayCheckbox").on("change", function () {
+        if (this.checked)
+            $("#start-end-event-section").hide();
+        else
+            $("#start-end-event-section").show();
+
+    });
+
+    $("#event-title").on("keyup", function () {
+        editedEventTitle = true;
+    })
+
+    $("#pto-section").on("change", "#event-type", function () {
+        if (!editedEventTitle) {
+            let selectedStaffLastName = $("#select-name-staff option:selected").attr("lastName");
+            let teamName = $("#select-name-staff option:selected").attr("teamName");
+            let eventType = $("#event-type").val();
+            $("#event-title").val("*" + teamName + " - " + selectedStaffLastName + " - " + eventType);
+        }
+    })
+
     $("#pto-section").on("click", "#close-event-form-btn", function () {
         $(".event-form").slideUp();
         $(".event-form input, textarea").val("")
@@ -174,8 +254,8 @@ indexScript = (function () {
 
     function submitEventForm() {
         let date = $("#event-day").val();
-        let startTime = $("#event-start").val();
-        let endTime = $("#event-end").val();
+        let startTime = $("#event-start-time").val();
+        let endTime = $("#event-end-time").val();
         let fullDay = $("#fullDayCheckbox:checked").length > 0
         let notes = $("#event-notes").val();
         let eventType = $("#event-type").val();

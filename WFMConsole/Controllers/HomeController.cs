@@ -64,15 +64,21 @@ namespace WFMDashboard.Controllers
         }
 
 
-        public async Task<string> SubmitEventForm(CancellationToken cancellationToken, int id, string name, string date, bool fullDay, string startTime, string endTime, string notes, string eventType)
+        public async Task<string> SubmitEventForm(CancellationToken cancellationToken, int id, string title, string color, string startDate, string endDate, bool fullDay, string startTime, string endTime, string notes, string eventType)
         {
-            name = name.TrimEnd(' ').TrimStart(' ');
             var user = HttpContext.KmIdentity();
-            log.Info($"User {user} called SubmitEventForm - Params: /r/n id: {id} \r\n name: {name} \r\n date: {date} \r\n fullDay: {fullDay} \r\n startTime: {startTime} \r\n endTime: {endTime} \r\n notes: {notes}");
+            log.Info($"User {user} called SubmitEventForm - Params: /r/n id: {id} \r\n title: {title} \r\n start date: {startDate} \r\n end date: {endDate} \r\n fullDay: {fullDay} \r\n startTime: {startTime} \r\n endTime: {endTime} \r\n notes: {notes}");
             string msg = "";
             bool success = false;
             var googleAuth = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata()).AuthorizeAsync(cancellationToken);
-            success = WFMHelper.SubmitEventForm(googleAuth, id, name, date, fullDay, startTime, endTime, notes, eventType, out msg);
+            success = WFMHelper.SubmitEventForm(googleAuth, id, title, color, startDate, endDate, fullDay, startTime, endTime, notes, eventType, out msg);
+            return JsonConvert.SerializeObject(new { success = success, msg = msg });
+        }
+
+        public string DeleteEvent(int id)
+        {
+            string msg = "";
+            var success = WFMHelper.DeleteEvent(id, out msg);
             return JsonConvert.SerializeObject(new { success = success, msg = msg });
         }
 

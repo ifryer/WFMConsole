@@ -1,4 +1,70 @@
 ﻿<div class="small-alert-box" style="display:none"> - </div>
+<div class="loading-div-back" id="loadingDivBack"></div>
+<div class="loading-div" id="loadingDiv">
+    <img src='~/Images/loading.gif' /> Loading...
+</div>
+<div id="edit-calendar-event-modal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog wide" role="document">
+        <div class="modal-content">
+            <div class="modal-body" style="max-height: calc(80vh - 30px); overflow: auto;">
+                <div class="event-form-modal row">
+                    <h4 class="form-header-modal"> Edit Event Form </h4>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="event-title-modal">Title</label>
+                            <div class="form-inline">
+                                <input class="form-control" id="event-title-modal" placeholder="">
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0px;">
+                            <label for="event-start-date-modal">Date</label> <br />
+                            <input class="form-control" id="event-start-date-modal" style="width: 45%; display: inline-block" placeholder="">
+                            <span style="width: 5%"> to </span>
+                            <input class="form-control" id="event-end-date-modal" style="width: 45%; display: inline-block" placeholder="">
+                            <div style="margin-top: 5px;">
+                                <input type="checkbox" id="fullDayCheckbox-modal" checked="checked" />
+                                <label for="fullDayCheckbox-modal"> Full Day </label>
+                            </div>
+                        </div>
+                        <div class="form-group" id="start-end-event-section-modal" style="display:none;">
+                            <div>
+                                <label for="event-start-time-modal">Time</label> <br />
+                                <input class="form-control time start" id="event-start-time-modal" style="width: 45%; display: inline-block" placeholder="">
+                                <span style="width: 5%"> to </span>
+                                <input class="form-control time end" id="event-end-time-modal" style="width: 45%; display: inline-block" placeholder="">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="event-type-modal">Event Type</label>
+                            <div class="form-inline">
+                                <select class="form-control" id="event-type-modal" placeholder="">
+                                    <option value="PTO (Unplanned)"> Unplanned PTO </option>
+                                    <option value="PTO (Planned)"> Planned PTO </option>
+                                    <option value="Training"> Training </option>
+                                    <option value="LOA"> LOA </option>
+                                    <option value="Other"> Other </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="event-notes-modal">Notes</label>
+                            <div class="form-inline">
+                                <textarea rows="5" style="max-width: 100%; width: 100%" class="form-control" id="event-notes-modal" placeholder=""></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="save-event-modal"> Save</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div>
     <ul class="nav nav-tabs">
         <li class="active">
@@ -72,7 +138,7 @@
                         <br />
                         <div class="row">
                             <div class="col-md-4">
-                                <button class="btn btn-default" id="new-event-btn"> New Time Off </button>
+                                <button class="btn btn-default" id="new-event-btn"> New Event </button>
                             </div>
                         </div>
                         <br />
@@ -137,8 +203,8 @@
                                         <input class="form-control" id="event-title" placeholder="">
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <label for="event-days">Date</label>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label for="event-day">Date</label>
                                     <div class="form-inline">
                                         <input class="form-control" id="event-day" placeholder="">
                                     </div>
@@ -149,10 +215,10 @@
                                 </div>
                                 <div class="form-group" id="start-end-event-section" style="display:none;">
                                     <div>
-                                        <label for="event-start">Time</label> <br />
-                                        <input class="form-control time start" id="event-start" style="width: 45%; display: inline-block" placeholder="">
+                                        <label for="event-start-time">Time</label> <br />
+                                        <input class="form-control time start" id="event-start-time" style="width: 45%; display: inline-block" placeholder="">
                                         <span style="width: 5%"> to </span>
-                                        <input class="form-control time end" id="event-end" style="width: 45%; display: inline-block" placeholder="">
+                                        <input class="form-control time end" id="event-end-time" style="width: 45%; display: inline-block" placeholder="">
                                     </div>
                                 </div>
                             </div>
@@ -161,8 +227,8 @@
                                     <label for="event-type">Event Type</label>
                                     <div class="form-inline">
                                         <select class="form-control" id="event-type" placeholder="">
-                                            <option value="PTO (Planned)"> Planned PTO </option>
                                             <option value="PTO (Unplanned)"> Unplanned PTO </option>
+                                            <option value="PTO (Planned)"> Planned PTO </option>
                                             <option value="Training"> Training </option>
                                             <option value="LOA"> LOA </option>
                                             <option value="Other"> Other </option>

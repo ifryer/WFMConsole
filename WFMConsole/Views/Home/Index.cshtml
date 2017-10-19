@@ -3,6 +3,79 @@
 <div class="loading-div" id="loadingDiv">
     <img src='~/Images/loading.gif' /> Loading...
 </div>
+<div id="edit-calendar-event-modal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog wide" role="document">
+        <div class="modal-content">
+            <div class="modal-body" style="max-height: calc(80vh - 30px); overflow: auto;">
+                <div class="col-md-12 event-form-modal">
+                    <h4 class="form-header-modal"> Create Event Form </h4>
+                    <div class="row">
+
+                        <input style="display:none" id="editing-event-id" />
+                        <input style="display:none" id="editing-event-calendar-id" />
+                        <div class="col-md-12 unpadded-left" style="margin-bottom: 10px;">
+                            <label for="event-title-modal">Title</label>
+                            <div class="form-inline">
+                                <input class="form-control" id="event-title-modal" placeholder="">
+                            </div>
+                            <label for="event-day-modal">Date</label>
+                            <div class="form-inline" style="margin-bottom: 10px;">
+                                <input class="form-control" id="event-start-date-modal" style="width: 25%; display: inline-block" placeholder="">
+                                <input class="form-control time start" id="event-start-time-modal" disabled="disabled" style="width: 20%; display: inline-block" placeholder="">
+                                <span style="width: 5%"> to </span>
+                                <input class="form-control time end" id="event-end-time-modal" disabled="disabled" style="width: 20%; display: inline-block" placeholder="">
+                                <input class="form-control" id="event-end-date-modal" style="width: 25%; display: inline-block" placeholder="">
+
+                                @*<input class="form-control" id="event-start-date" placeholder="">*@
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 unpadded-left">
+                            <div class="form-group">
+                                <div style="margin-top: 5px;">
+                                    <input type="checkbox" id="fullDayCheckbox-modal" checked="checked" />
+                                    <label for="fullDayCheckbox-modal"> Full Day </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 unpadded-left">
+                            <div class="form-group">
+                                <label for="event-type-modal">Event Type</label>
+                                <div class="form-inline">
+                                    <select class="form-control" id="event-type-modal" placeholder="">
+                                        <option value="PTO (Unplanned)"> Unplanned PTO </option>
+                                        <option value="PTO (Planned)"> Planned PTO </option>
+                                        <option value="Training"> Training </option>
+                                        <option value="LOA"> LOA </option>
+                                        <option value="Other"> Other </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 unpadded-left">
+                            <label for="event-notes-modal">Notes</label>
+                            <div class="form-inline">
+                                <textarea rows="5" class="form-control" id="event-notes-modal" placeholder="" style="margin-bottom: 10px; resize:vertical"></textarea>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger pull-left" id="delete-event-modal-btn"> Delete Event </button>
+                <button type="button" class="btn btn-primary" id="save-event-modal-btn"> Save</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div>
     <ul class="nav nav-tabs">
         <li class="active">
@@ -127,37 +200,40 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-8">
-                        <div class="event-form row" style="display:none;">
-                            <h4 class="form-header"> Create Event Form </h4>
+                    <div class="col-md-8 event-form" style="display: none;">
+                        <h4 class="form-header"> Create Event Form </h4>
+                        <div class="row">
+
+
+                            <div class="col-md-12 unpadded-left" style="margin-bottom: 10px;">
+                                <label for="event-title">Title</label>
+                                <div class="form-inline">
+                                    <input class="form-control" id="event-title" placeholder="">
+                                </div>
+                                <label for="event-day">Date</label>
+                                <div class="form-inline" style="margin-bottom: 10px;">
+                                    <input class="form-control" id="event-start-date" style="width: 25%; display: inline-block" placeholder="">
+                                    <input class="form-control time start" id="event-start-time" disabled="disabled" style="width: 20%; display: inline-block" placeholder="">
+                                    <span style="width: 5%"> to </span>
+                                    <input class="form-control time end" id="event-end-time" disabled="disabled" style="width: 20%; display: inline-block" placeholder="">
+                                    <input class="form-control" id="event-end-date" style="width: 25%; display: inline-block" placeholder="">
+
+                                    @*<input class="form-control" id="event-start-date" placeholder="">*@
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="row">
                             <div class="col-md-6 unpadded-left">
                                 <div class="form-group">
-                                    <label for="selectNameForm">Submitting For</label>
-                                    <div class="selected-staff-name"> No Staff Member Selected </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="event-title">Title</label>
-                                    <div class="form-inline">
-                                        <input class="form-control" id="event-title" placeholder="">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="event-days">Date</label>
-                                    <div class="form-inline">
-                                        <input class="form-control" id="event-day" placeholder="">
-                                    </div>
                                     <div style="margin-top: 5px;">
                                         <input type="checkbox" id="fullDayCheckbox" checked="checked" />
                                         <label for="fullDayCheckbox"> Full Day </label>
                                     </div>
                                 </div>
-                                <div class="form-group" id="start-end-event-section" style="display:none;">
-                                    <div>
-                                        <label for="event-start">Time</label> <br />
-                                        <input class="form-control time start" id="event-start" style="width: 45%; display: inline-block" placeholder="">
-                                        <span style="width: 5%"> to </span>
-                                        <input class="form-control time end" id="event-end" style="width: 45%; display: inline-block" placeholder="">
-                                    </div>
+                                <div class="form-group">
+                                    <label for="selectNameForm">Submitting For</label>
+                                    <div class="selected-staff-name"> No Staff Member Selected </div>
                                 </div>
                             </div>
                             <div class="col-md-6 unpadded-left">
@@ -173,16 +249,20 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <label for="event-notes">Notes</label>
-                                    <div class="form-inline">
-                                        <textarea rows="5" style="max-width: 100%; width: 100%" class="form-control" id="event-notes" placeholder=""></textarea>
-                                    </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 unpadded-left">
+                                <label for="event-notes">Notes</label>
+                                <div class="form-inline">
+                                    <textarea rows="5" class="form-control" id="event-notes" placeholder="" style="margin-bottom: 10px; resize:vertical"></textarea>
                                 </div>
                                 <button class="btn btn-default pull-right" id="close-event-form-btn"> Cancel </button>
                                 <button class="btn btn-primary pull-right" id="submit-event-form-btn" style="margin-right: 10px"> Submit </button>
                             </div>
+
                         </div>
+                            
                     </div>
                     <div class="col-md-1"></div>
 

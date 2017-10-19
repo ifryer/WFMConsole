@@ -82,13 +82,15 @@ namespace WFMDashboard.Classes
             return;
         }
 
-        public static bool SubmitEventForm(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, int id, string name, string date, bool fullDay, string startTime, string endTime, string notes, string eventType, out string msg)
+        //Color IDs : 4 = Scheduled Event = Pink ----- 7 = Teal = Training ----- 9 = Blue = Unplanned PTO ----- 10 = Green = Planned PTO ----- 11 = Red = Scheduled Event
+
+        public static bool SubmitEventForm(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, int id, string title, string color, string startDateInput, string endDateInput, bool fullDay, string startTime, string endTime, string notes, string eventType, out string msg)
         {
             try
             {
                 msg = "Successfully created event";
-                var startDate = $"{date} {startTime}";
-                var endDate = $"{date} {endTime}";
+                var startDate = $"{startDateInput} {startTime}";
+                var endDate = $"{endDateInput} {endTime}";
 
                 var startDateTime = DateTime.Parse(startDate);
                 var endDateTime = DateTime.Parse(endDate);
@@ -98,21 +100,27 @@ namespace WFMDashboard.Classes
                     msg = "Start time must be before end time";
                     return false;
                 }
-
+                if(notes == null)
+                {
+                    notes = title;
+                }
                 Agent staffMember;
                 using (var db = new inContact_NGEntities())
                 {
                     staffMember = db.Agents.Where(t => t.AgentNo == id).FirstOrDefault();
                 }
+                string lastName = staffMember.LastName;
+                string firstName = staffMember.FirstName;
 
-                CreateEvent(name, startDateTime, endDateTime, fullDay, notes, eventType, staffMember);
+
+                var googleEventId = SubmitTimeOff_GoogleCalendar(googleAuth, title, lastName, color, startDateTime, endDateTime, fullDay, notes, eventType, staffMember);
+
+                CreateEvent(title, googleEventId, lastName, firstName, color, startDateTime, endDateTime, fullDay, notes, eventType, staffMember);
 
 
                 SubmitTimeOff_Nice();
 
-                
 
-                SubmitTimeOff_GoogleCalendar(googleAuth, name, startDateTime, endDateTime, fullDay, notes, eventType, staffMember);
                 bool success = true;
                 return success;
             }
@@ -124,6 +132,32 @@ namespace WFMDashboard.Classes
             }
             
         }
+
+        public static bool DeleteEvent(int id, out string msg)
+        {
+            try
+            {
+                using (var db = new OnyxEntities())
+                {
+                    var eventItem = db.BUS_WFMDashboard_Event.Where(t => t.Id == id).FirstOrDefault();
+                    var googleCalId = eventItem.CalendarEventId;
+                    db.BUS_WFMDashboard_Event.Remove(eventItem);
+                    db.SaveChanges();
+
+
+                    //TODO: Remove event from google calendar here too...
+                }
+                msg = "Successfully deleted event.";
+                return true;
+            }
+            catch(Exception ex)
+            {
+                log.Error($"Error deleting event {id}", ex);
+                msg = ex.ToString();
+                return false;
+            }
+        }
+
         private static bool SubmitTimeOff_Nice()
         {
             bool success = false;
@@ -131,7 +165,7 @@ namespace WFMDashboard.Classes
         }
 
         
-        private static bool CreateEvent(string name, DateTime startDateTime, DateTime endDateTime, bool fullDay, string notes, string eventType, Agent agent)
+        private static bool CreateEvent(string title, string eventId, string lastName, string firstName, string color, DateTime startDateTime, DateTime endDateTime, bool fullDay, string notes, string eventType, Agent agent)
         {
             try
             {
@@ -143,7 +177,12 @@ namespace WFMDashboard.Classes
                     EventType = eventType,
                     StartTime = startDateTime, 
                     EndTime = endDateTime,
-                    Description = $"*{agent.TeamName} - {name} - {eventType} [WFM DASHBOARD TEST EVENT]"
+                    Description = title,
+                    Notes = notes,
+                    LastName = lastName, 
+                    FirstName = firstName,
+                    CalendarEventId = eventId,
+                    Color = color
                 };
                 using (var db = new OnyxEntities())
                 {
@@ -157,19 +196,18 @@ namespace WFMDashboard.Classes
                 return false;
             }
         }
-        private static bool SubmitTimeOff_GoogleCalendar(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, string name, DateTime startDateTime, DateTime endDateTime, bool fullDay, string notes, string eventType, Agent agent)
+        private static string SubmitTimeOff_GoogleCalendar(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, string title, string name, string color, DateTime startDateTime, DateTime endDateTime, bool fullDay, string notes, string eventType, Agent agent)
         {
             try
             {
-                //var calendarId = "kmbs.konicaminolta.us_m48bnnmmf4s08pbhm6cmkdiodo@group.calendar.google.com";
-                String calendarId = "primary";
+                String calendarId = ConfigurationManager.AppSettings["CalendarId"];
                 var team = agent.TeamName;
                 team = ProcessTeamName(team);
 
                 var lastName = agent.LastName;
 
-                string summary = $"*{team} - {lastName} - {eventType} [WFM DASHBOARD TEST EVENT]";
-                string colorId = "9"; //Color for unplanned PTO
+                string summary = title;
+                string colorId = color; //Color for unplanned PTO
 
                 //TODO: fix the color based on the event type
                 //if(ptoType == "Planned")
@@ -220,8 +258,8 @@ namespace WFMDashboard.Classes
                 
                 EventsResource.InsertRequest request = service.Events.Insert(newEvent, calendarId);
                 Event createdEvent = request.Execute();
-                bool success = false;
-                return success;
+                //bool success = false;
+                return createdEvent.Id;
             }
             catch (Exception ex)
             {
@@ -306,7 +344,7 @@ namespace WFMDashboard.Classes
             {
                 HttpClientInitializer = googleAuth.Credential,
                 ApplicationName = ApplicationName,
-                ApiKey = ConfigurationManager.AppSettings["ApiKey"],
+                //ApiKey = ConfigurationManager.AppSettings["ApiKey"],
             });
 
             // Define parameters of request.
@@ -406,6 +444,8 @@ namespace WFMDashboard.Classes
                         {
                             var newEvent = new BUS_WFMDashboard_Event()
                             {
+                                FirstName = staffMember.FirstName,
+                                Notes = item.Description,
                                 CalendarEventId = item.Id,
                                 AgentNo = staffMember.AgentNo,
                                 StartTime = startTime,

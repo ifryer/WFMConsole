@@ -23,17 +23,19 @@
     <EntitySetMapping Name="BUS_WFMDashboard_Event">
       <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_Event">
         <MappingFragment StoreEntitySet="BUS_WFMDashboard_Event">
-          <ScalarProperty Name="CalendarEventId" ColumnName="CalendarEventId" />
           <ScalarProperty Name="Color" ColumnName="Color" />
-          <ScalarProperty Name="Description" ColumnName="Description" />
-          <ScalarProperty Name="LastName" ColumnName="LastName" />
+          <ScalarProperty Name="Notes" ColumnName="Notes" />
           <ScalarProperty Name="FullDay" ColumnName="FullDay" />
           <ScalarProperty Name="EndTime" ColumnName="EndTime" />
           <ScalarProperty Name="StartTime" ColumnName="StartTime" />
-          <ScalarProperty Name="EventType" ColumnName="EventType" />
-          <ScalarProperty Name="AgentNo" ColumnName="AgentNo" />
-          <ScalarProperty Name="TeamId" ColumnName="TeamId" />
+          <ScalarProperty Name="LastName" ColumnName="LastName" />
+          <ScalarProperty Name="FirstName" ColumnName="FirstName" />
           <ScalarProperty Name="TeamName" ColumnName="TeamName" />
+          <ScalarProperty Name="Description" ColumnName="Description" />
+          <ScalarProperty Name="TeamId" ColumnName="TeamId" />
+          <ScalarProperty Name="AgentNo" ColumnName="AgentNo" />
+          <ScalarProperty Name="CalendarEventId" ColumnName="CalendarEventId" />
+          <ScalarProperty Name="EventType" ColumnName="EventType" />
           <ScalarProperty Name="Id" ColumnName="Id" />
         </MappingFragment>
       </EntityTypeMapping>

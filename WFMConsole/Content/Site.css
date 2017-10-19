@@ -9,11 +9,11 @@
     margin-top: 20px;
 }
 
-input,
+/*input,
 select,
 textarea {
     max-width: 280px;
-}
+}*/
 
 /*Header*/
 .navbar-blue .container {
@@ -110,6 +110,7 @@ textarea {
     border: 1px solid #0076bc;
     border-radius: 3px;
     padding: 5px;
+    padding-left: 20px;
 }
 
 
@@ -134,7 +135,7 @@ textarea {
     color: white;
     padding-top: 4px;
     padding-bottom: 4px;
-    margin: -5px -5px 5px -5px;
+    margin: -5px -5px 5px -20px;
 }
 
 .bordered-div {
@@ -174,6 +175,7 @@ textarea {
 .teamInfo {
     border: 1px solid #0076bc;
     border-radius: 0px;
+    margin-bottom: 10px;
 }
 .team-info-box {
 
@@ -185,4 +187,30 @@ textarea {
 
 .schedule-table{
     width: 100%;
+}
+
+.form-header-modal {
+    margin-top: 0px;
+    text-align: center;
+    border-bottom: 1px solid #0076bc;
+    background-color: rgb(0, 118, 188);
+    color: white;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    border-radius: 4px 4px 0px 0px;
+    margin: -20px -35px 20px -35px;
+}
+
+.modal-body{
+    padding-bottom: 5px;
+}
+.modal-footer{
+    padding: 10px;
+    margin-top: 5px;
+}
+
+@media screen and (min-width: 768px){
+    .modal-dialog.wide{
+        width: 900px;
+    }
 }
