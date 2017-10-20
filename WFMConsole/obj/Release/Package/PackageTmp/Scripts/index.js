@@ -60,11 +60,8 @@ indexScript = (function () {
                             </tr>
                         `)
                     })
-                    
 
                     setUpCalendar(data.eventList);
-                    
-
                     stopLoading();
                 }
             }
@@ -88,12 +85,6 @@ indexScript = (function () {
         });
     })
 
-
-    
-
-    
-
-    
 
     $("#pto-section").on("change", "#select-name-staff", function () {
         let selectedStaff = $(this).val();
@@ -164,6 +155,8 @@ indexScript = (function () {
                 console.log(jsEvent)
                 console.log(view)
 
+                let calendarId = calEvent._id;
+                let eventId = calEvent.Id
                 let notes = calEvent.Notes;
                 let title = calEvent.title;
                 let allDay = calEvent.allDay;
@@ -174,14 +167,12 @@ indexScript = (function () {
                 let eventType = calEvent.EventType;
 
                 if (allDay) {
-                    $("#fullDayCheckbox-modal").attr("checked", "checked");
-                    $("#start-end-event-section-modal").hide();
+                    $("#event-start-time-modal, #event-end-time-modal").attr("disabled", "disabled")
                 }
-                else
-                {
-                    $("#fullDayCheckbox-modal").removeAttr("checked");
-                    $("#start-end-event-section-modal").show();
+                else {
+                    $("#event-start-time-modal, #event-end-time-modal").removeAttr("disabled", "disabled")
                 }
+
                 $("#event-title-modal").val(title);
                 $("#event-notes-modal").val(notes);
                 $("#event-start-date-modal").val(startDate);
@@ -189,8 +180,8 @@ indexScript = (function () {
                 $("#event-start-time-modal").val(startTime);
                 $("#event-end-time-modal").val(endTime);
                 $("#event-type-modal").val(eventType);
-
-
+                $("#editing-event-id").val(eventId)
+                $("#editing-event-calendar-id").val(calendarId)
                 $("#edit-calendar-event-modal").modal();
 
                 // change the border color just for fun
@@ -205,11 +196,114 @@ indexScript = (function () {
 
 
     $("#fullDayCheckbox-modal").on("change", function () {
-        if (this.checked)
-            $("#start-end-event-section-modal").hide();
-        else
-            $("#start-end-event-section-modal").show();
+        console.log(this.checked)
+        if (this.checked) {
+            $("#event-start-time-modal, #event-end-time-modal").attr("disabled", "disabled")
+        }
+        else {
+            $("#event-start-time-modal, #event-end-time-modal").removeAttr("disabled", "disabled")
+        }
     });
+
+    $(document).on("click", "#save-event-modal-btn", function () {
+        submitEditEventForm();
+    });
+
+    $(document).on("click", "#delete-event-modal-btn", function () {
+        if (confirm('Are you sure you want to delete this event?')) {
+            let eventId = $("#editing-event-id").val();
+            let calendarId = $("#editing-event-calendar-id").val();
+            console.log(calendarId)
+            console.log("0-----------0")
+            console.log(eventId)
+            $.ajax({
+                dataType: "json",
+                type: "post",
+                data: {
+                    id: eventId
+                },
+                url: toUrl("Home/DeleteEvent"),
+                success: function (data) {
+                    if (!data.success) {
+                        console.log("error -- " + data.msg);
+                        showSmallError(data.msg);
+                    }
+                    else {
+                        $("#edit-calendar-event-modal").modal("toggle")
+                        showSmallAlert(data.msg);
+                        $('#event-calendar').fullCalendar('removeEvents', calendarId);
+                    }
+                }
+            });
+        }
+    })
+
+    function submitEditEventForm() {
+        startLoading();
+        let startDate = $("#event-start-date-modal").val();
+        let endDate = $("#event-end-date-modal").val();
+
+        let startTime = $("#event-start-time-modal").val();
+        let endTime = $("#event-end-time-modal").val();
+        let fullDay = $("#fullDayCheckbox-modal:checked").length > 0
+        let notes = $("#event-notes-modal").val();
+        let eventType = $("#event-type-modal").val();
+        let eventTitle = $("#event-title-modal").val();
+        let eventId = $("#editing-event-id").val();
+
+        if (!fullDay && (startTime == null || startTime == "" || endTime == null || endTime == "")) {
+            showSmallError("Please make sure you have selected a start and end time, or checked the Full Day checkbox.");
+            return;
+        }
+
+        if (startDate == null || startDate == "") {
+            showSmallError("Please make sure you have selected a start date.");
+            return;
+        }
+        if (endDate == null || endDate == "") {
+            endDate = startDate;
+        }
+
+        let color = "7";
+
+        if (id == "" || id == null) {
+            showSmallError("Please select a staff member to submit time off.");
+            return;
+        }
+        else {
+            $.ajax({
+                dataType: "json",
+                type: "post",
+                data: {
+                    id: id,
+                    title: eventTitle,
+                    color: color,
+                    startDate: startDate,
+                    endDate: endDate,
+                    fullDay: fullDay,
+                    startTime: startTime,
+                    endTime: endTime,
+                    notes: notes,
+                    eventType: eventType
+                },
+                url: toUrl("Home/SubmitEventForm"),
+                success: function (data) {
+                    stopLoading();
+                    if (!data.success) {
+                        console.log("error -- " + data.msg);
+                        showSmallError(data.msg);
+                    }
+                    else {
+                        console.log(data)
+                        $('#event-calendar').fullCalendar('addEventSource', [data.newEvent]);
+                        $(".event-form").slideUp();
+                        $(".event-form input, textarea").val("")
+                        showSmallAlert(data.msg);
+                    }
+                }
+            });
+        }
+    }
 
 
 
@@ -219,15 +313,20 @@ indexScript = (function () {
         $(".event-form").slideToggle();
         editedEventTitle = false;
         $("#event-type").val("PTO (Unplanned)");
-        $('#event-day').val($.datepicker.formatDate('mm/dd/yy', new Date()));
+        $('#event-start-date').val($.datepicker.formatDate('mm/dd/yy', new Date()));
+        $('#event-end-date').val($.datepicker.formatDate('mm/dd/yy', new Date()));
+
     });
 
     $("#fullDayCheckbox").on("change", function () {
-        if (this.checked)
-            $("#start-end-event-section").hide();
-        else
-            $("#start-end-event-section").show();
-
+        if (this.checked) {
+            $("#event-start-time, #event-end-time").attr("disabled", "disabled")
+            //$("#start-end-event-section").hide();
+        }
+        else {
+            $("#event-start-time, #event-end-time").removeAttr("disabled", "disabled")
+            //$("#start-end-event-section").show();
+        }
     });
 
     $("#event-title").on("keyup", function () {
@@ -253,7 +352,9 @@ indexScript = (function () {
     });
 
     function submitEventForm() {
-        let date = $("#event-day").val();
+        let startDate = $("#event-start-date").val();
+        let endDate = $("#event-end-date").val();
+
         let startTime = $("#event-start-time").val();
         let endTime = $("#event-end-time").val();
         let fullDay = $("#fullDayCheckbox:checked").length > 0
@@ -261,9 +362,29 @@ indexScript = (function () {
         let eventType = $("#event-type").val();
         let eventTitle = $("#event-title").val();
         let id = $("#select-name-staff").val();
-        let name = $("#select-name-staff option:selected").html();
+
+        console.log(startTime)
+        if (!fullDay && (startTime == null || startTime == "" || endTime == null || endTime == ""))
+        {
+            console.log("!!!!!!!!")
+            showSmallError("Please make sure you have selected a start and end time, or checked the Full Day checkbox.");
+            return;
+        }
+
+        if (startDate == null || startDate == "" )
+        {
+            showSmallError("Please make sure you have selected a start date.");
+            return;
+        }
+        if (endDate == null || endDate == "")
+        {
+            endDate = startDate;
+        }
+
+        let color = "7";
         if (id == "" || id == null) {
             showSmallError("Please select a staff member to submit time off.");
+            return;
         }
         else {
             $.ajax({
@@ -271,8 +392,10 @@ indexScript = (function () {
                 type: "post",
                 data: {
                     id: id,
-                    name: name,
-                    date: date,
+                    title: eventTitle,
+                    color: color,
+                    startDate: startDate,
+                    endDate: endDate,
                     fullDay: fullDay,
                     startTime: startTime,
                     endTime: endTime,

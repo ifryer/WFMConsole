@@ -9,11 +9,11 @@
     margin-top: 20px;
 }
 
-input,
+/*input,
 select,
 textarea {
     max-width: 280px;
-}
+}*/
 
 /*Header*/
 .navbar-blue .container {
@@ -110,6 +110,7 @@ textarea {
     border: 1px solid #0076bc;
     border-radius: 3px;
     padding: 5px;
+    padding-left: 20px;
 }
 
 
@@ -134,7 +135,7 @@ textarea {
     color: white;
     padding-top: 4px;
     padding-bottom: 4px;
-    margin: -5px -5px 5px -5px;
+    margin: -5px -5px 5px -20px;
 }
 
 .bordered-div {
@@ -197,19 +198,19 @@ textarea {
     padding-top: 4px;
     padding-bottom: 4px;
     border-radius: 4px 4px 0px 0px;
-    margin: -20px -5px 20px -5px;
+    margin: -20px -35px 20px -35px;
 }
 
 .modal-body{
     padding-bottom: 5px;
 }
 .modal-footer{
-    padding: 5px;
+    padding: 10px;
     margin-top: 5px;
 }
 
 @media screen and (min-width: 768px){
     .modal-dialog.wide{
-        width: 1000px;
+        width: 900px;
     }
 }

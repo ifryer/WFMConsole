@@ -146,9 +146,15 @@ indexScript = (function () {
             },
             height: 900,
             events: eventList,
+            navLinks: true,
             resources: [
                 // resources go here
             ],
+            dayClick: function (date, jsEvent, view) {
+                console.log(date)
+                console.log(jsEvent)
+                console.log(view)
+            },
             eventClick: function (calEvent, jsEvent, view) {
 
                 console.log(calEvent)
@@ -239,6 +245,7 @@ indexScript = (function () {
     })
 
     function submitEditEventForm() {
+        startLoading();
         let startDate = $("#event-start-date-modal").val();
         let endDate = $("#event-end-date-modal").val();
 
@@ -287,12 +294,14 @@ indexScript = (function () {
                 },
                 url: toUrl("Home/SubmitEventForm"),
                 success: function (data) {
+                    stopLoading();
                     if (!data.success) {
                         console.log("error -- " + data.msg);
                         showSmallError(data.msg);
                     }
                     else {
                         console.log(data)
+                        $('#event-calendar').fullCalendar('addEventSource', [data.newEvent]);
                         $(".event-form").slideUp();
                         $(".event-form input, textarea").val("")
                         showSmallAlert(data.msg);

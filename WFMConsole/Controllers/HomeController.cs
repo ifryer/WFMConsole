@@ -69,10 +69,10 @@ namespace WFMDashboard.Controllers
             var user = HttpContext.KmIdentity();
             log.Info($"User {user} called SubmitEventForm - Params: /r/n id: {id} \r\n title: {title} \r\n start date: {startDate} \r\n end date: {endDate} \r\n fullDay: {fullDay} \r\n startTime: {startTime} \r\n endTime: {endTime} \r\n notes: {notes}");
             string msg = "";
-            bool success = false;
+            //bool success = false;
             var googleAuth = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata()).AuthorizeAsync(cancellationToken);
-            success = WFMHelper.SubmitEventForm(googleAuth, id, title, color, startDate, endDate, fullDay, startTime, endTime, notes, eventType, out msg);
-            return JsonConvert.SerializeObject(new { success = success, msg = msg });
+            var newEvent = WFMHelper.SubmitEventForm(googleAuth, id, title, color, startDate, endDate, fullDay, startTime, endTime, notes, eventType, out msg);
+            return JsonConvert.SerializeObject(new { success = newEvent != null, msg = msg, newEvent = newEvent });
         }
 
         public string DeleteEvent(int id)

@@ -84,7 +84,7 @@ namespace WFMDashboard.Classes
 
         //Color IDs : 4 = Scheduled Event = Pink ----- 7 = Teal = Training ----- 9 = Blue = Unplanned PTO ----- 10 = Green = Planned PTO ----- 11 = Red = Scheduled Event
 
-        public static bool SubmitEventForm(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, int id, string title, string color, string startDateInput, string endDateInput, bool fullDay, string startTime, string endTime, string notes, string eventType, out string msg)
+        public static ViewEvent SubmitEventForm(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, int id, string title, string color, string startDateInput, string endDateInput, bool fullDay, string startTime, string endTime, string notes, string eventType, out string msg)
         {
             try
             {
@@ -98,7 +98,7 @@ namespace WFMDashboard.Classes
                 if (endDateTime < startDateTime)
                 {
                     msg = "Start time must be before end time";
-                    return false;
+                    return null;
                 }
                 if(notes == null)
                 {
@@ -115,20 +115,19 @@ namespace WFMDashboard.Classes
 
                 var googleEventId = SubmitTimeOff_GoogleCalendar(googleAuth, title, lastName, color, startDateTime, endDateTime, fullDay, notes, eventType, staffMember);
 
-                CreateEvent(title, googleEventId, lastName, firstName, color, startDateTime, endDateTime, fullDay, notes, eventType, staffMember);
+                var eventItem = CreateEvent(title, googleEventId, lastName, firstName, color, startDateTime, endDateTime, fullDay, notes, eventType, staffMember);
 
 
                 SubmitTimeOff_Nice();
 
 
-                bool success = true;
-                return success;
+                return eventItem;
             }
             catch(Exception ex)
             {
                 //Log error
                 msg = ex.ToString();
-                return false;
+                return null;
             }
             
         }
@@ -165,7 +164,7 @@ namespace WFMDashboard.Classes
         }
 
         
-        private static bool CreateEvent(string title, string eventId, string lastName, string firstName, string color, DateTime startDateTime, DateTime endDateTime, bool fullDay, string notes, string eventType, Agent agent)
+        private static ViewEvent CreateEvent(string title, string eventId, string lastName, string firstName, string color, DateTime startDateTime, DateTime endDateTime, bool fullDay, string notes, string eventType, Agent agent)
         {
             try
             {
@@ -189,11 +188,11 @@ namespace WFMDashboard.Classes
                     db.BUS_WFMDashboard_Event.Add(busEvent);
                     db.SaveChanges();
                 }
-                return true;
+                return new ViewEvent(busEvent, false);
             }
             catch(Exception ex)
             {
-                return false;
+                return null;
             }
         }
         private static string SubmitTimeOff_GoogleCalendar(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, string title, string name, string color, DateTime startDateTime, DateTime endDateTime, bool fullDay, string notes, string eventType, Agent agent)
