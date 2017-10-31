@@ -1,27 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Schema Namespace="OnyxModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
-  <EntityType Name="BUS_WFMDashboard_Google_Credentials">
-    <Key>
-      <PropertyRef Name="Id" />
-    </Key>
-    <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-    <Property Name="Key" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
-    <Property Name="Value" Type="String" MaxLength="500" FixedLength="false" Unicode="true" Nullable="false" />
-  </EntityType>
   <EntityContainer Name="OnyxEntities" annotation:LazyLoadingEnabled="true">
-    <EntitySet Name="BUS_WFMDashboard_Google_Credentials" EntityType="Self.BUS_WFMDashboard_Google_Credentials" />
-    <EntitySet Name="BUS_WFMDashboard_ReportLog" EntityType="OnyxModel.BUS_WFMDashboard_ReportLog" />
     <EntitySet Name="BUS_WFMDashboard_Event" EntityType="OnyxModel.BUS_WFMDashboard_Event" />
+    <EntitySet Name="BUS_WFMDashboard_Google_Credentials" EntityType="OnyxModel.BUS_WFMDashboard_Google_Credentials" />
+    <EntitySet Name="BUS_WFMDashboard_ICM" EntityType="OnyxModel.BUS_WFMDashboard_ICM" />
+    <EntitySet Name="BUS_WFMDashboard_ICM_Order" EntityType="OnyxModel.BUS_WFMDashboard_ICM_Order" />
+    <EntitySet Name="BUS_WFMDashboard_ReportLog" EntityType="OnyxModel.BUS_WFMDashboard_ReportLog" />
+    <EntitySet Name="BUS_WFMDashboard_WFO_Schedule" EntityType="OnyxModel.BUS_WFMDashboard_WFO_Schedule" />
+    <EntitySet Name="BUS_WFMDashboard_LateShiftManager" EntityType="OnyxModel.BUS_WFMDashboard_LateShiftManager" />
   </EntityContainer>
-  <EntityType Name="BUS_WFMDashboard_ReportLog">
-    <Key>
-      <PropertyRef Name="Id" />
-    </Key>
-    <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-    <Property Name="ReportType" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
-    <Property Name="LastSent" Type="DateTime" Nullable="false" Precision="3" />
-    <Property Name="LastSentBy" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
-  </EntityType>
   <EntityType Name="BUS_WFMDashboard_Event">
     <Key>
       <PropertyRef Name="Id" />
@@ -40,5 +27,63 @@
     <Property Name="FullDay" Type="Boolean" Nullable="false" />
     <Property Name="Notes" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
     <Property Name="Color" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
+  </EntityType>
+  <EntityType Name="BUS_WFMDashboard_Google_Credentials">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="Key" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+    <Property Name="Value" Type="String" Nullable="false" MaxLength="500" FixedLength="false" Unicode="true" />
+  </EntityType>
+  <EntityType Name="BUS_WFMDashboard_ICM">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="Year" Type="Int32" Nullable="false" />
+    <Property Name="Month" Type="Int32" Nullable="false" />
+    <Property Name="Manager" Type="String" Nullable="false" MaxLength="150" FixedLength="false" Unicode="true" />
+    <Property Name="AgentNo" Type="Int32" Nullable="false" />
+  </EntityType>
+  <EntityType Name="BUS_WFMDashboard_ICM_Order">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="ManagerName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+    <Property Name="AgentNo" Type="Int32" Nullable="false" />
+    <Property Name="Order" Type="Int32" Nullable="false" />
+  </EntityType>
+  <EntityType Name="BUS_WFMDashboard_ReportLog">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="ReportType" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+    <Property Name="LastSent" Type="DateTime" Nullable="false" Precision="3" />
+    <Property Name="LastSentBy" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+  </EntityType>
+  <EntityType Name="BUS_WFMDashboard_WFO_Schedule">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="Task" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+    <Property Name="StartTime" Type="DateTime" Nullable="false" Precision="3" />
+    <Property Name="EndTime" Type="DateTime" Nullable="false" Precision="3" />
+    <Property Name="FirstName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+    <Property Name="LastName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+    <Property Name="AgentNo" Type="Int32" Nullable="false" />
+  </EntityType>
+  <EntityType Name="BUS_WFMDashboard_LateShiftManager">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="AgentNo" Type="Int32" Nullable="false" />
+    <Property Name="FirstName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+    <Property Name="LastName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+    <Property Name="Date" Type="DateTime" Nullable="false" Precision="0" />
   </EntityType>
 </Schema>

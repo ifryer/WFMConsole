@@ -1,25 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
   <EntityContainerMapping StorageEntityContainer="OnyxModelStoreContainer" CdmEntityContainer="OnyxEntities">
-    <EntitySetMapping Name="BUS_WFMDashboard_Google_Credentials">
-      <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_Google_Credentials">
-        <MappingFragment StoreEntitySet="BUS_WFMDashboard_Google_Credentials">
-          <ScalarProperty Name="Id" ColumnName="Id" />
-          <ScalarProperty Name="Key" ColumnName="Key" />
-          <ScalarProperty Name="Value" ColumnName="Value" />
-        </MappingFragment>
-      </EntityTypeMapping>
-    </EntitySetMapping>
-    <EntitySetMapping Name="BUS_WFMDashboard_ReportLog">
-      <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_ReportLog">
-        <MappingFragment StoreEntitySet="BUS_WFMDashboard_ReportLog">
-          <ScalarProperty Name="LastSentBy" ColumnName="LastSentBy" />
-          <ScalarProperty Name="LastSent" ColumnName="LastSent" />
-          <ScalarProperty Name="ReportType" ColumnName="ReportType" />
-          <ScalarProperty Name="Id" ColumnName="Id" />
-        </MappingFragment>
-      </EntityTypeMapping>
-    </EntitySetMapping>
     <EntitySetMapping Name="BUS_WFMDashboard_Event">
       <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_Event">
         <MappingFragment StoreEntitySet="BUS_WFMDashboard_Event">
@@ -36,6 +17,59 @@
           <ScalarProperty Name="AgentNo" ColumnName="AgentNo" />
           <ScalarProperty Name="CalendarEventId" ColumnName="CalendarEventId" />
           <ScalarProperty Name="EventType" ColumnName="EventType" />
+          <ScalarProperty Name="Id" ColumnName="Id" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="BUS_WFMDashboard_Google_Credentials">
+      <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_Google_Credentials">
+        <MappingFragment StoreEntitySet="BUS_WFMDashboard_Google_Credentials">
+          <ScalarProperty Name="Value" ColumnName="Value" />
+          <ScalarProperty Name="Key" ColumnName="Key" />
+          <ScalarProperty Name="Id" ColumnName="Id" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="BUS_WFMDashboard_ICM">
+      <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_ICM">
+        <MappingFragment StoreEntitySet="BUS_WFMDashboard_ICM">
+          <ScalarProperty Name="AgentNo" ColumnName="AgentNo" />
+          <ScalarProperty Name="Manager" ColumnName="Manager" />
+          <ScalarProperty Name="Month" ColumnName="Month" />
+          <ScalarProperty Name="Year" ColumnName="Year" />
+          <ScalarProperty Name="Id" ColumnName="Id" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="BUS_WFMDashboard_ICM_Order">
+      <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_ICM_Order">
+        <MappingFragment StoreEntitySet="BUS_WFMDashboard_ICM_Order">
+          <ScalarProperty Name="Order" ColumnName="Order" />
+          <ScalarProperty Name="AgentNo" ColumnName="AgentNo" />
+          <ScalarProperty Name="ManagerName" ColumnName="ManagerName" />
+          <ScalarProperty Name="Id" ColumnName="Id" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="BUS_WFMDashboard_ReportLog">
+      <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_ReportLog">
+        <MappingFragment StoreEntitySet="BUS_WFMDashboard_ReportLog">
+          <ScalarProperty Name="LastSentBy" ColumnName="LastSentBy" />
+          <ScalarProperty Name="LastSent" ColumnName="LastSent" />
+          <ScalarProperty Name="ReportType" ColumnName="ReportType" />
+          <ScalarProperty Name="Id" ColumnName="Id" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="BUS_WFMDashboard_WFO_Schedule">
+      <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_WFO_Schedule">
+        <MappingFragment StoreEntitySet="BUS_WFMDashboard_WFO_Schedule">
+          <ScalarProperty Name="AgentNo" ColumnName="AgentNo" />
+          <ScalarProperty Name="LastName" ColumnName="LastName" />
+          <ScalarProperty Name="FirstName" ColumnName="FirstName" />
+          <ScalarProperty Name="EndTime" ColumnName="EndTime" />
+          <ScalarProperty Name="StartTime" ColumnName="StartTime" />
+          <ScalarProperty Name="Task" ColumnName="Task" />
           <ScalarProperty Name="Id" ColumnName="Id" />
         </MappingFragment>
       </EntityTypeMapping>

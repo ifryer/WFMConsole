@@ -69,10 +69,10 @@ C:\Projects\WFMConsole\WFMConsole\bin\Google.Apis.Auth.xml
 C:\Projects\WFMConsole\WFMConsole\bin\Google.Apis.Auth.Mvc.xml
 C:\Projects\WFMConsole\WFMConsole\bin\Google.Apis.Calendar.v3.xml
 C:\Projects\WFMConsole\WFMConsole\bin\Google.Apis.Core.xml
-C:\Projects\WFMConsole\WFMConsole\obj\Debug\WFMDashboard.csprojResolveAssemblyReference.cache
 C:\Projects\WFMConsole\WFMConsole\bin\client_secret.json
 C:\Projects\WFMConsole\WFMConsole\bin\System.Net.Http.dll
 C:\Projects\WFMConsole\WFMConsole\bin\System.Net.Http.WebRequest.dll
 C:\Projects\WFMConsole\WFMConsole\bin\System.Net.Http.xml
 C:\Projects\WFMConsole\WFMConsole\bin\System.Net.Http.WebRequest.xml
 C:\Projects\WFMConsole\WFMConsole\bin\Mvc.Mailer.dll
+C:\Projects\WFMConsole\WFMConsole\obj\Debug\WFMDashboard.csprojResolveAssemblyReference.cache

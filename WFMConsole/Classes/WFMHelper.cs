@@ -17,6 +17,7 @@ using WFMConsole.Models;
 using WFMConsole.Classes;
 using System.Configuration;
 using WFMConsole.ViewModels;
+using System.Globalization;
 
 namespace WFMDashboard.Classes
 {
@@ -26,23 +27,6 @@ namespace WFMDashboard.Classes
 
         static string[] Scopes = { CalendarService.Scope.CalendarReadonly };
         static string ApplicationName = "Google Calendar API .NET Quickstart";
-
-        public static List<ViewAgent> GetStaffList(out string msg)
-        {
-            var staffList = new List<ViewAgent>();
-            using (var db = new inContact_NGEntities())
-            {
-                var staffListDb = db.Agents.OrderBy(t => t.LastName);
-                foreach (var item in staffListDb)
-                {
-                    staffList.Add(new ViewAgent(item));
-                }
-                //staffList = staffListDb.Select(t => new WFMConsole.ViewModels.ViewAgent(t)).ToList();
-
-            }
-            msg = "Successfully retreived list of staff members";
-            return staffList;
-        }
 
         public static List<ViewEvent> GetEventList()
         {
@@ -68,6 +52,146 @@ namespace WFMDashboard.Classes
             }
         }
 
+        public static List<ViewAgent> GetStaffList(out string msg)
+        {
+            var staffList = new List<ViewAgent>();
+            using (var db = new inContact_NGEntities())
+            {
+                var staffListDb = db.Agents.Where(t => t.Status == "Active").OrderBy(t => t.LastName);
+                foreach (var item in staffListDb)
+                {
+                    staffList.Add(new ViewAgent(item));
+                }
+                //staffList = staffListDb.Select(t => new WFMConsole.ViewModels.ViewAgent(t)).ToList();
+
+            }
+            msg = "Successfully retreived list of staff members";
+            return staffList;
+        }
+
+        
+
+        public static List<ViewAgent> GetMowList(List<ViewAgent> agentList)
+        {
+            return agentList.Where(t => t.TeamName.Contains("CCA")).ToList();
+        }
+
+        public static List<ViewAgent> GetManagerList(List<ViewAgent> agentList)
+        {
+            return agentList.Where(t => t.TeamName.Contains("Management")).ToList();
+        }
+
+        public static List<ViewLateShiftSchedule> GetLateShift()
+        {
+            var weekStart = DateTimeExtensions.StartOfWeek(DateTime.Now, DayOfWeek.Monday);
+            var weekEnd = weekStart.AddDays(5);
+            using (var db = new OnyxEntities())
+            {
+                var weekLateShift = db.BUS_WFMDashboard_LateShiftManager.Where(t => t.Date >= weekStart && t.Date <= weekEnd).OrderBy(t => t.Date).Select(t => new ViewLateShiftSchedule() {AgentNo = t.AgentNo, Date = t.Date, Id = t.Id, ManagerName = t.FirstName + " " + t.LastName }).ToList();
+                return weekLateShift;
+            }
+        }
+
+        public static bool SubmitLateShiftForm(string date, int agentNo, out string msg)
+        {
+            try
+            {
+                msg = "Successfully saved";
+                Agent agent;
+                using (var dbS = new inContact_NGEntities())
+                {
+                    agent = dbS.Agents.Where(t => t.AgentNo == agentNo).FirstOrDefault();
+                }
+
+                using (var db = new OnyxEntities())
+                {
+                    var dateObj = DateTime.Parse(date).Date;
+                    var prevRow = db.BUS_WFMDashboard_LateShiftManager.Where(t => t.Date == dateObj).FirstOrDefault();
+                    if(prevRow == null)
+                    {
+                        var newRow = new BUS_WFMDashboard_LateShiftManager();
+                        newRow.LastName = agent.LastName;
+                        newRow.FirstName = agent.FirstName;
+                        newRow.AgentNo = agentNo;
+                        newRow.Date = dateObj;
+                        db.BUS_WFMDashboard_LateShiftManager.Add(newRow);
+                    }
+                    else
+                    {
+                        prevRow.LastName = agent.LastName;
+                        prevRow.FirstName = agent.FirstName;
+                        prevRow.AgentNo = agentNo;
+                    }
+                    db.SaveChanges();
+                }
+                return true;
+
+            }
+            catch(Exception ex)
+            {
+                log.Error("Error in SubmitLastShiftForm", ex);
+                msg = ex.ToString();
+                return false;
+            }
+        }
+
+        public static Dictionary<int, List<ViewIcmSchedule>> GetIcmSchedule()
+        {
+            using (var db = new OnyxEntities())
+            {
+                var monthNumber = DateTime.Now.Month;
+                var yearNumber = DateTime.Now.Year;
+                //var icmScheduleList = db.BUS_WFMDashboard_ICM.Where(t => t.Month >= monthNumber && t.Year >= yearNumber).ToList();
+                var icmScheduleList = db.BUS_WFMDashboard_ICM;
+
+                var results = icmScheduleList.Select(t => new ViewIcmSchedule()
+                {
+                    AgentNo = t.AgentNo,
+                    Month = t.Month,
+                    Year = t.Year,
+                    ManagerName = t.Manager
+                }).OrderBy(t => t.Month).GroupBy(x => x.Year).ToDictionary(gdc => gdc.Key, gdc => gdc.ToList());
+
+                return results;
+            }
+        }
+        public static Dictionary<DateTime, List<ViewMowSchedule>> GetMowSchedule(DateTime monday)
+        {
+            using (var db = new OnyxEntities())
+            {
+                var weekStart = monday;
+                var weekEnd = weekStart.AddDays(5);
+                var mowScheduleList = db.BUS_WFMDashboard_WFO_Schedule.Where(t => t.StartTime >= weekStart && t.StartTime <= weekEnd).ToList();
+
+                var results = mowScheduleList
+                    .OrderBy(t => t.StartTime)
+                    .Select(t => new ViewMowSchedule() {
+                        Id = t.Id,
+                        AgentNo = t.AgentNo,
+                        Task = t.Task,
+                        Date = t.StartTime.Date,
+                        StartTime = t.StartTime.ToShortTimeString(),
+                        EndTime = t.EndTime.ToShortTimeString(),
+                        FirstName = t.FirstName,
+                        LastName = t.LastName
+                    })
+                    .GroupBy(x => x.Date)
+                    .ToDictionary(gdc => gdc.Key, gdc => gdc.ToList());
+
+                return results;
+                //return mowScheduleList.Select(t => new ViewMowSchedule(t)).ToList();
+            }
+        }
+
+        public static ViewIcmLatest GetLatestIcmInfo(ViewIcmSchedule lastSchedule)
+        {
+            ViewIcmLatest latestIcm = new ViewIcmLatest(lastSchedule);
+            
+            return latestIcm;
+        }
+
+
+
         public static void GetReportDates(out string downBy, out string mow)
         {
             using (var db = new OnyxEntities())
@@ -83,12 +207,11 @@ namespace WFMDashboard.Classes
         }
 
         //Color IDs : 4 = Scheduled Event = Pink ----- 7 = Teal = Training ----- 9 = Blue = Unplanned PTO ----- 10 = Green = Planned PTO ----- 11 = Red = Scheduled Event
-
-        public static ViewEvent SubmitEventForm(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, int id, string title, string color, string startDateInput, string endDateInput, bool fullDay, string startTime, string endTime, string notes, string eventType, out string msg)
+        //TODO: add options for unpaid time off
+        public static ViewEvent SubmitEventForm(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, int eventId, int agentId, string title, string color, string startDateInput, string endDateInput, bool fullDay, string startTime, string endTime, string notes, string eventType, out string msg)
         {
             try
             {
-                msg = "Successfully created event";
                 var startDate = $"{startDateInput} {startTime}";
                 var endDate = $"{endDateInput} {endTime}";
 
@@ -97,31 +220,54 @@ namespace WFMDashboard.Classes
 
                 if (endDateTime < startDateTime)
                 {
-                    msg = "Start time must be before end time";
-                    return null;
+                    if(fullDay)
+                    {
+                        endDateTime = startDateTime.AddDays(1);
+                    }
+                    else
+                    {
+                        msg = "Start time must be before end time";
+                        return null;
+                    }
                 }
                 if(notes == null)
                 {
                     notes = title;
                 }
-                Agent staffMember;
-                using (var db = new inContact_NGEntities())
+
+                if (eventId == 0)
                 {
-                    staffMember = db.Agents.Where(t => t.AgentNo == id).FirstOrDefault();
+                    msg = "Successfully created event";
+                    Agent staffMember;
+                    using (var db = new inContact_NGEntities())
+                    {
+                        staffMember = db.Agents.Where(t => t.AgentNo == agentId).FirstOrDefault();
+                    }
+                    string lastName = staffMember.LastName;
+                    string firstName = staffMember.FirstName;
+
+                    var googleEventId = SubmitTimeOff_GoogleCalendar(googleAuth, title, lastName, color, startDateTime, endDateTime, fullDay, notes, eventType, staffMember);
+
+                    var eventItem = CreateEvent(title, googleEventId, lastName, firstName, color, startDateTime, endDateTime, fullDay, notes, eventType, staffMember);
+
+                    //SubmitTimeOff_Nice();
+
+                    return eventItem;
                 }
-                string lastName = staffMember.LastName;
-                string firstName = staffMember.FirstName;
+                else
+                {
+                    msg = "Successfully updated event";
+                    var eventItem = UpdateEvent(title, eventId, color, startDateTime, endDateTime, fullDay, notes, eventType);
 
-
-                var googleEventId = SubmitTimeOff_GoogleCalendar(googleAuth, title, lastName, color, startDateTime, endDateTime, fullDay, notes, eventType, staffMember);
-
-                var eventItem = CreateEvent(title, googleEventId, lastName, firstName, color, startDateTime, endDateTime, fullDay, notes, eventType, staffMember);
-
-
-                SubmitTimeOff_Nice();
-
-
-                return eventItem;
+                    var message = UpdateEvent_GoogleCalendar(googleAuth, eventItem);
+                    if(message.ToLower().Contains("success"))
+                        return eventItem;
+                    else
+                    {
+                        msg = message;
+                        return null;
+                    }
+                }
             }
             catch(Exception ex)
             {
@@ -129,10 +275,9 @@ namespace WFMDashboard.Classes
                 msg = ex.ToString();
                 return null;
             }
-            
         }
 
-        public static bool DeleteEvent(int id, out string msg)
+        public static bool DeleteEvent(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, int id, out string msg)
         {
             try
             {
@@ -140,11 +285,12 @@ namespace WFMDashboard.Classes
                 {
                     var eventItem = db.BUS_WFMDashboard_Event.Where(t => t.Id == id).FirstOrDefault();
                     var googleCalId = eventItem.CalendarEventId;
+
                     db.BUS_WFMDashboard_Event.Remove(eventItem);
+
+                    var gcalResult = DeleteEvent_GoogleCalendar(googleAuth, googleCalId);
+
                     db.SaveChanges();
-
-
-                    //TODO: Remove event from google calendar here too...
                 }
                 msg = "Successfully deleted event.";
                 return true;
@@ -157,140 +303,112 @@ namespace WFMDashboard.Classes
             }
         }
 
-        private static bool SubmitTimeOff_Nice()
-        {
-            bool success = false;
-            return success;
-        }
-
-        
-        private static ViewEvent CreateEvent(string title, string eventId, string lastName, string firstName, string color, DateTime startDateTime, DateTime endDateTime, bool fullDay, string notes, string eventType, Agent agent)
+        public static Dictionary<int, List<ViewIcmSchedule>> SubmitIcmForm(int month, int year, int agentNo, out string msg, out bool success)
         {
             try
             {
-                BUS_WFMDashboard_Event busEvent = new BUS_WFMDashboard_Event() {
-                    AgentNo = agent.AgentNo,
-                    TeamName = agent.TeamName,
-                    TeamId = agent.TeamNo,
-                    FullDay = fullDay,
-                    EventType = eventType,
-                    StartTime = startDateTime, 
-                    EndTime = endDateTime,
-                    Description = title,
-                    Notes = notes,
-                    LastName = lastName, 
-                    FirstName = firstName,
-                    CalendarEventId = eventId,
-                    Color = color
-                };
+                success = true;
+                msg = "Successfully added ICM row";
+                string managerName = "";
+                using (var db = new inContact_NGEntities())
+                {
+                    var manager = db.Agents.Where(t => t.AgentNo == agentNo).FirstOrDefault();
+                    managerName = manager.FirstName + " " + manager.LastName;
+                }
                 using (var db = new OnyxEntities())
                 {
-                    db.BUS_WFMDashboard_Event.Add(busEvent);
+                    var existingOne = db.BUS_WFMDashboard_ICM.Where(t => t.Month == month && t.Year == year).FirstOrDefault();
+                    if (existingOne == null)
+                    {
+                        var newOne = new BUS_WFMDashboard_ICM()
+                        {
+                            AgentNo = agentNo,
+                            Manager = managerName,
+                            Month = month,
+                            Year = year
+                        };
+                        db.BUS_WFMDashboard_ICM.Add(newOne);
+                    }
+                    else
+                    {
+                        existingOne.AgentNo = agentNo;
+                        existingOne.Manager = managerName;
+                    }
                     db.SaveChanges();
                 }
-                return new ViewEvent(busEvent, false);
+                return GetIcmSchedule();
+
             }
             catch(Exception ex)
             {
+                log.Error("Error creating ICM row", ex);
+                msg = "Error creating ICM row";
+                success = false;
                 return null;
             }
         }
-        private static string SubmitTimeOff_GoogleCalendar(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, string title, string name, string color, DateTime startDateTime, DateTime endDateTime, bool fullDay, string notes, string eventType, Agent agent)
+
+        public static Dictionary<DateTime, List<ViewMowSchedule>> SubmitMowForm(MowFormInput Item, string MondayString, out string msg, out bool success)
         {
             try
             {
-                String calendarId = ConfigurationManager.AppSettings["CalendarId"];
-                var team = agent.TeamName;
-                team = ProcessTeamName(team);
-
-                var lastName = agent.LastName;
-
-                string summary = title;
-                string colorId = color; //Color for unplanned PTO
-
-                //TODO: fix the color based on the event type
-                //if(ptoType == "Planned")
-                //{
-                //    colorId = "10"; //Color for planned PTO
-                //}
-
-                EventDateTime start = new EventDateTime();
-                EventDateTime end = new EventDateTime();
-
-                start = new EventDateTime()
+                success = true;
+                msg = "Successfully added MOW row(s)";
+                using (var dbN = new inContact_NGEntities())
+                using (var db = new OnyxEntities())
                 {
-                    TimeZone = "America/New_York"
+                    foreach (var inputItem in Item.InputItems)
+                    {
+                        string agentName = "";
 
-                };
-                end = new EventDateTime()
-                {
-                    TimeZone = "America/New_York"
-                };
-                if (fullDay)
-                {
-                    start.Date = startDateTime.ToString("yyyy-MM-dd");
-                    end.Date = endDateTime.ToString("yyyy-MM-dd");
+                        var agent = dbN.Agents.Where(t => t.AgentNo == inputItem.agentNo).FirstOrDefault();
+                        agentName = agent.FirstName + " " + agent.LastName;
+                        var startTime = DateTime.Parse(Item.Date + " " + inputItem.shiftStart);
+                        var endTime = DateTime.Parse(Item.Date + " " + inputItem.shiftEnd);
+                        var newRow = new BUS_WFMDashboard_WFO_Schedule()
+                        {
+                            AgentNo = agent.AgentNo,
+                            Task = inputItem.task,
+                            FirstName = agent.FirstName,
+                            LastName = agent.LastName,
+                            StartTime = startTime,
+                            EndTime = endTime
+                        };
+                        db.BUS_WFMDashboard_WFO_Schedule.Add(newRow);
+                    }
+                    db.SaveChanges();
                 }
-                else
-                {
-                    start.DateTime = startDateTime;
-                    end.DateTime = endDateTime;
-                }
-
-                var service = new CalendarService(new BaseClientService.Initializer()
-                {
-                    HttpClientInitializer = googleAuth.Credential,
-                    ApplicationName = ApplicationName,
-                });
-
-                Event newEvent = new Event()
-                {
-                    Summary = summary,
-                    Description = notes,
-                    Start = start,
-                    ColorId = colorId,
-                    End = end,
-                    Attendees = new EventAttendee[] {
-                        new EventAttendee() { Email = "rtyszka@kmbs.konicaminolta.us" },
-                    },
-                };
-                
-                EventsResource.InsertRequest request = service.Events.Insert(newEvent, calendarId);
-                Event createdEvent = request.Execute();
-                //bool success = false;
-                return createdEvent.Id;
+                return GetMowSchedule(DateTime.Parse(MondayString));
             }
             catch (Exception ex)
             {
-                log.Error("Error in SubmitTimeOff_GoogleCalendar", ex);
-                throw ex;
+                log.Error("Error creating MOW rows", ex);
+                msg = "Error creating MOW rows";
+                success = false;
+                return null;
             }
+            
         }
 
-        public static string ProcessTeamName(string team)
+        public static bool DeleteMowRow(int rowId, out string msg)
         {
-            if (team.ToLower().Contains("management"))
+            try
             {
-                team = "MGMT";
+                using (var db = new OnyxEntities())
+                {
+                    var deleteItem = db.BUS_WFMDashboard_WFO_Schedule.Where(t => t.Id == rowId).FirstOrDefault();
+                    db.BUS_WFMDashboard_WFO_Schedule.Remove(deleteItem);
+                    db.SaveChanges();
+                }
+                msg = "Successfully deleted schedule row";
+                return true;
             }
-            if (team.ToLower().Contains("irc"))
+            catch(Exception ex)
             {
-                team = "IRC";
+                log.Error("error deleting Mow row", ex);
+                msg = ex.ToString();
+                return false;
             }
-
-            if (team.ToLower().Contains("ad"))
-            {
-                team = "AD";
-            }
-            if (team.ToLower().Contains("printer"))
-            {
-                team = "Printer";
-            }
-            if (team.ToLower().Contains("ra"))
-            {
-                team = "RA";
-            }
-            return team;
         }
 
         public static DownByReport CreateDownByReport(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth)
@@ -339,12 +457,7 @@ namespace WFMDashboard.Classes
             //DownByReport report = new DownByReport();
             var calendarId = ConfigurationManager.AppSettings["CalendarId"];
 
-            var service = new CalendarService(new BaseClientService.Initializer()
-            {
-                HttpClientInitializer = googleAuth.Credential,
-                ApplicationName = ApplicationName,
-                //ApiKey = ConfigurationManager.AppSettings["ApiKey"],
-            });
+            var service = CreateCalendarService(googleAuth);
 
             // Define parameters of request.
             EventsResource.ListRequest request = service.Events.List(calendarId);
@@ -417,54 +530,61 @@ namespace WFMDashboard.Classes
                     }
 
                     var sections = item.Summary.Split('-');
-                    var teamName = sections[0];
-                    var staffName = sections[1];
-                    bool fullDay = true;
-
-                    var staffMember = dbS.Agents.Where(t => staffName.Contains(t.LastName.ToLower())).FirstOrDefault();
-                    if (staffMember != null)
+                    if(sections.Length > 1)
                     {
-                        DateTime startTime = DateTime.Now;
-                        DateTime endTime = DateTime.Now;
-                        if(item.End.Date != null)
+                        var teamName = sections[0];
+                        var staffName = sections[1];
+                        bool fullDay = true;
+
+                        var staffMember = dbS.Agents.Where(t => staffName.Contains(t.LastName.ToLower())).FirstOrDefault();
+                        if (staffMember != null)
                         {
-                            fullDay = true;
-                            startTime = DateTime.Parse(item.Start.Date);
-                            endTime = DateTime.Parse(item.End.Date);
-                        }
-                        else
-                        {
-                            fullDay = false;
-                            startTime = item.Start.DateTime.Value;
-                            endTime = item.End.DateTime.Value;
-                        }
-                        var prevEvent = db.BUS_WFMDashboard_Event.Where(t => t.CalendarEventId == item.Id).FirstOrDefault();
-                        if (prevEvent == null)
-                        {
-                            var newEvent = new BUS_WFMDashboard_Event()
+                            DateTime startTime = DateTime.Now;
+                            DateTime endTime = DateTime.Now;
+                            if (item.End.Date != null)
                             {
-                                FirstName = staffMember.FirstName,
-                                Notes = item.Description,
-                                CalendarEventId = item.Id,
-                                AgentNo = staffMember.AgentNo,
-                                StartTime = startTime,
-                                EndTime = endTime,
-                                EventType = eventType,
-                                FullDay = fullDay,
-                                TeamId = staffMember.TeamNo,
-                                TeamName = staffMember.TeamName,
-                                LastName = staffName,
-                                Description = item.Summary,
-                                Color = item.ColorId
-                            };
-                            db.BUS_WFMDashboard_Event.Add(newEvent);
-                            //db.SaveChanges();
-                        }
-                        else
-                        {
-                            //TODO: Update the event here if it needs to be updated
+                                fullDay = true;
+                                startTime = DateTime.Parse(item.Start.Date);
+                                endTime = DateTime.Parse(item.End.Date);
+                            }
+                            else
+                            {
+                                fullDay = false;
+                                startTime = item.Start.DateTime.Value;
+                                endTime = item.End.DateTime.Value;
+                            }
+                            var prevEvent = db.BUS_WFMDashboard_Event.Where(t => t.CalendarEventId == item.Id).FirstOrDefault();
+                            if (prevEvent == null)
+                            {
+                                var description = item.Description;
+                                if (description == null)
+                                    description = "";
+                                var newEvent = new BUS_WFMDashboard_Event()
+                                {
+                                    FirstName = staffMember.FirstName,
+                                    Notes = description,
+                                    CalendarEventId = item.Id,
+                                    AgentNo = staffMember.AgentNo,
+                                    StartTime = startTime,
+                                    EndTime = endTime,
+                                    EventType = eventType,
+                                    FullDay = fullDay,
+                                    TeamId = staffMember.TeamNo,
+                                    TeamName = staffMember.TeamName,
+                                    LastName = staffName,
+                                    Description = item.Summary,
+                                    Color = item.ColorId
+                                };
+                                db.BUS_WFMDashboard_Event.Add(newEvent);
+                                //db.SaveChanges();
+                            }
+                            else
+                            {
+                                //TODO: Update the event here if it needs to be updated
+                            }
                         }
                     }
+                    
                 }
                 db.SaveChanges();
             }
@@ -551,17 +671,38 @@ namespace WFMDashboard.Classes
             return report;
         }
 
-        public static bool CreateMOWReport()
+        public static MowReport CreateMOWReport()
         {
             try
             {
                 bool success = false;
-                return success;
+                var report =  new MowReport();
+                var now = DateTime.Now;
+                using (var db = new OnyxEntities())
+                {
+                    var startTime = now.Date;
+                    var endTime = now.Date.AddDays(1);
+                    var icm = db.BUS_WFMDashboard_ICM.Where(t => t.Month == now.Month && t.Year == now.Year).FirstOrDefault();
+                    report.ICM = $"({now.ToString("MMMM")}) {icm.Manager}";
+                    var lateShift = db.BUS_WFMDashboard_LateShiftManager.Where(t => t.Date >= startTime && t.Date <= endTime).FirstOrDefault();
+                    if (lateShift == null)
+                        report.LateShiftManager = " --- ";
+                    else
+                        report.LateShiftManager = lateShift.FirstName + " " + lateShift.LastName;
+                    
+                    var wfos = db.BUS_WFMDashboard_WFO_Schedule.Where(t => t.StartTime >= startTime && t.EndTime <= endTime && t.Task == "MOW").OrderBy(t => t.StartTime).ToList();
+                    foreach (var item in wfos)
+                    {
+                        report.WfoList.Add($"{item.LastName} - {item.StartTime.ToShortTimeString()} to {item.EndTime.ToShortTimeString()}");
+                    }
+                }
+
+                return report;
             }
             catch (Exception ex)
             {
                 log.Error("Error in CreateMOWReport", ex);
-                return false;
+                return null;
             }
         }
 
@@ -602,6 +743,266 @@ namespace WFMDashboard.Classes
                 log.Error("Error in GetTeamInfo", ex);
                 return null;
             }
+        }
+
+
+
+        //Private support methods
+
+
+        private static bool SubmitTimeOff_Nice()
+        {
+            bool success = false;
+            return success;
+        }
+
+
+        private static ViewEvent CreateEvent(string title, string eventId, string lastName, string firstName, string color, DateTime startDateTime, DateTime endDateTime, bool fullDay, string notes, string eventType, Agent agent)
+        {
+            try
+            {
+                BUS_WFMDashboard_Event busEvent = new BUS_WFMDashboard_Event()
+                {
+                    AgentNo = agent.AgentNo,
+                    TeamName = agent.TeamName,
+                    TeamId = agent.TeamNo,
+                    FullDay = fullDay,
+                    EventType = eventType,
+                    StartTime = startDateTime,
+                    EndTime = endDateTime,
+                    Description = title,
+                    Notes = notes,
+                    LastName = lastName,
+                    FirstName = firstName,
+                    CalendarEventId = eventId,
+                    Color = color
+                };
+                using (var db = new OnyxEntities())
+                {
+                    db.BUS_WFMDashboard_Event.Add(busEvent);
+                    db.SaveChanges();
+                }
+                return new ViewEvent(busEvent, false);
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
+        private static ViewEvent UpdateEvent(string title, int eventId, string color, DateTime startDateTime, DateTime endDateTime, bool fullDay, string notes, string eventType)
+        {
+            try
+            {
+                using (var db = new OnyxEntities())
+                {
+                    BUS_WFMDashboard_Event busEvent = db.BUS_WFMDashboard_Event.Where(t => t.Id == eventId).FirstOrDefault();
+
+                    busEvent.FullDay = fullDay;
+                    busEvent.EventType = eventType;
+                    busEvent.StartTime = startDateTime;
+                    busEvent.EndTime = endDateTime;
+                    busEvent.Description = title;
+                    busEvent.Notes = notes;
+                    busEvent.Color = color;
+                    db.SaveChanges();
+                    return new ViewEvent(busEvent, false);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
+        private static string SubmitTimeOff_GoogleCalendar(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, string title, string name, string color, DateTime startDateTime, DateTime endDateTime, bool fullDay, string notes, string eventType, Agent agent)
+        {
+            try
+            {
+                String calendarId = ConfigurationManager.AppSettings["CalendarId"];
+                var team = agent.TeamName;
+                team = ProcessTeamName(team);
+
+                var lastName = agent.LastName;
+
+                string summary = title;
+                string colorId = color; //Color for unplanned PTO
+
+                //TODO: fix the color based on the event type
+                //if(ptoType == "Planned")
+                //{
+                //    colorId = "10"; //Color for planned PTO
+                //}
+
+                EventDateTime start = new EventDateTime();
+                EventDateTime end = new EventDateTime();
+
+                start = new EventDateTime()
+                {
+                    TimeZone = "America/New_York"
+
+                };
+                end = new EventDateTime()
+                {
+                    TimeZone = "America/New_York"
+                };
+                if (fullDay)
+                {
+                    start.Date = startDateTime.ToString("yyyy-MM-dd");
+                    end.Date = endDateTime.ToString("yyyy-MM-dd");
+                }
+                else
+                {
+                    start.DateTime = startDateTime;
+                    end.DateTime = endDateTime;
+                }
+
+                var service = CreateCalendarService(googleAuth);
+
+                Event newEvent = new Event()
+                {
+                    Summary = summary,
+                    Description = notes,
+                    Start = start,
+                    ColorId = colorId,
+                    End = end,
+                    Attendees = new EventAttendee[] {
+                        new EventAttendee() { Email = "rtyszka@kmbs.konicaminolta.us" },
+                    },
+                };
+
+                EventsResource.InsertRequest request = service.Events.Insert(newEvent, calendarId);
+                Event createdEvent = request.Execute();
+                //bool success = false;
+                return createdEvent.Id;
+            }
+            catch (Exception ex)
+            {
+                log.Error("Error in SubmitTimeOff_GoogleCalendar", ex);
+                throw ex;
+            }
+        }
+
+
+        private static string UpdateEvent_GoogleCalendar(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, ViewEvent eventItem)
+        {
+            try
+            {
+                String calendarId = ConfigurationManager.AppSettings["CalendarId"];
+                //string colorId = color; //Color for unplanned PTO
+
+                EventDateTime start = new EventDateTime();
+                EventDateTime end = new EventDateTime();
+
+                start = new EventDateTime()
+                {
+                    TimeZone = "America/New_York"
+
+                };
+                end = new EventDateTime()
+                {
+                    TimeZone = "America/New_York"
+                };
+
+                if (eventItem.allDay)
+                {
+                    start.Date = DateTime.Parse(eventItem.StartDate).ToString("yyyy-MM-dd");
+                    end.Date = DateTime.Parse(eventItem.StartDate).ToString("yyyy-MM-dd");
+                }
+                else
+                {
+                    start.DateTime = DateTime.Parse(eventItem.start);
+                    end.DateTime = DateTime.Parse(eventItem.end);
+                }
+
+                var service = CreateCalendarService(googleAuth);
+
+                Event newEvent = new Event()
+                {
+                    Description = eventItem.Notes,
+                    Summary = eventItem.title,
+                    Start = start,
+                    ColorId = eventItem.ColorId,
+                    End = end
+                };
+
+                EventsResource.PatchRequest request = service.Events.Patch(newEvent, calendarId, eventItem.CalendarEventId);
+                Event updatedEvent = request.Execute();
+                if (updatedEvent != null)
+                {
+                    return "Successfully updated event";
+                }
+                else
+                {
+                    return "Error updating event on google calendar";
+                }
+                ////bool success = false;
+                //return createdEvent.Id;
+            }
+            catch (Exception ex)
+            {
+                log.Error("Error in SubmitTimeOff_GoogleCalendar", ex);
+                //throw ex;
+                return ex.ToString();
+            }
+        }
+
+
+        private static string DeleteEvent_GoogleCalendar(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, string eventId)
+        {
+            try
+            {
+                String calendarId = ConfigurationManager.AppSettings["CalendarId"];
+
+                var service = CreateCalendarService(googleAuth);
+
+                EventsResource.DeleteRequest request = service.Events.Delete(calendarId, eventId);
+                var result = request.Execute();
+                //bool success = false;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                log.Error("Error in SubmitTimeOff_GoogleCalendar", ex);
+                throw ex;
+            }
+        }
+
+        private static string ProcessTeamName(string team)
+        {
+            if (team.ToLower().Contains("management"))
+            {
+                team = "MGMT";
+            }
+            if (team.ToLower().Contains("irc"))
+            {
+                team = "IRC";
+            }
+
+            if (team.ToLower().Contains("ad"))
+            {
+                team = "AD";
+            }
+            if (team.ToLower().Contains("printer"))
+            {
+                team = "Printer";
+            }
+            if (team.ToLower().Contains("ra"))
+            {
+                team = "RA";
+            }
+            return team;
+        }
+
+        private static CalendarService CreateCalendarService(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth)
+        {
+            return new CalendarService(new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = googleAuth.Credential,
+                ApplicationName = ApplicationName,
+                ApiKey = ConfigurationManager.AppSettings["ApiKey"],
+            });
         }
     }
 }

@@ -25,8 +25,12 @@ namespace WFMConsole.Models
             throw new UnintentionalCodeFirstException();
         }
     
-        public virtual DbSet<BUS_WFMDashboard_Google_Credentials> BUS_WFMDashboard_Google_Credentials { get; set; }
-        public virtual DbSet<BUS_WFMDashboard_ReportLog> BUS_WFMDashboard_ReportLog { get; set; }
         public virtual DbSet<BUS_WFMDashboard_Event> BUS_WFMDashboard_Event { get; set; }
+        public virtual DbSet<BUS_WFMDashboard_Google_Credentials> BUS_WFMDashboard_Google_Credentials { get; set; }
+        public virtual DbSet<BUS_WFMDashboard_ICM> BUS_WFMDashboard_ICM { get; set; }
+        public virtual DbSet<BUS_WFMDashboard_ICM_Order> BUS_WFMDashboard_ICM_Order { get; set; }
+        public virtual DbSet<BUS_WFMDashboard_ReportLog> BUS_WFMDashboard_ReportLog { get; set; }
+        public virtual DbSet<BUS_WFMDashboard_WFO_Schedule> BUS_WFMDashboard_WFO_Schedule { get; set; }
+        public virtual DbSet<BUS_WFMDashboard_LateShiftManager> BUS_WFMDashboard_LateShiftManager { get; set; }
     }
 }

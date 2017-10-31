@@ -5,9 +5,12 @@
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
       <Diagram DiagramId="3cc5dbb85fe241fbbcd11a3a38073c45" Name="Diagram1">
-        <EntityTypeShape EntityType="OnyxModel.BUS_WFMDashboard_Google_Credentials" Width="1.5" PointX="0.75" PointY="0.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="OnyxModel.BUS_WFMDashboard_ReportLog" Width="1.5" PointX="3.375" PointY="0.75" />
-        <EntityTypeShape EntityType="OnyxModel.BUS_WFMDashboard_Event" Width="1.5" PointX="0.75" PointY="3.75" />
+        <EntityTypeShape EntityType="OnyxModel.BUS_WFMDashboard_Event" Width="1.5" PointX="0.75" PointY="0.75" />
+        <EntityTypeShape EntityType="OnyxModel.BUS_WFMDashboard_Google_Credentials" Width="1.5" PointX="2.75" PointY="0.75" />
+        <EntityTypeShape EntityType="OnyxModel.BUS_WFMDashboard_ICM" Width="1.5" PointX="2.75" PointY="3.75" />
+        <EntityTypeShape EntityType="OnyxModel.BUS_WFMDashboard_ICM_Order" Width="1.5" PointX="4.75" PointY="0.75" />
+        <EntityTypeShape EntityType="OnyxModel.BUS_WFMDashboard_ReportLog" Width="1.5" PointX="4.75" PointY="3.75" />
+        <EntityTypeShape EntityType="OnyxModel.BUS_WFMDashboard_WFO_Schedule" Width="1.5" PointX="6.75" PointY="0.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

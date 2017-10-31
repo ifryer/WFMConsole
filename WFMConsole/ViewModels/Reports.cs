@@ -5,6 +5,23 @@ using System.Web;
 
 namespace WFMConsole.ViewModels
 {
+
+    public class MowReport
+    {
+        public string ReportDate { get; set; }
+        public string ReportTime { get; set; }
+        public string ICM { get; set; }
+        public string LateShiftManager { get; set; }
+        public string WfoTimeRange { get; set; }
+        public List<string> WfoList { get; set; }
+        public MowReport()
+        {
+            ReportDate = DateTime.Now.ToString("dddd - MM/dd/yyyy");
+            ReportTime = DateTime.Now.ToShortTimeString();
+            WfoList = new List<string>();
+        }
+
+    }
     public class DownByReport
     {
         public string Title { get; set; }

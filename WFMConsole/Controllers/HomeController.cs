@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using WFMConsole.Classes;
+using WFMConsole.ViewModels;
 using WFMDashboard.Classes;
 
 namespace WFMDashboard.Controllers
@@ -48,11 +49,23 @@ namespace WFMDashboard.Controllers
         public string GetPageInfo()
         {
             var msg = "";
-            string downBy, mow;
-            WFMHelper.GetReportDates(out downBy, out mow);
-            var list =  WFMHelper.GetStaffList(out msg);
+            string downByDate, mowDate;
+            WFMHelper.GetReportDates(out downByDate, out mowDate);
+            var agentList =  WFMHelper.GetStaffList(out msg);
             var eventList = WFMHelper.GetEventList();
-            return JsonConvert.SerializeObject(new { success = msg.ToLower().Contains("success"), msg = msg, agentList = list, downBy = downBy, mow = mow, eventList = eventList });
+            var managerList = WFMHelper.GetManagerList(agentList); //TODO: Remove this?
+            var mowList = WFMHelper.GetMowList(agentList);
+
+            var lateShift = WFMHelper.GetLateShift();
+
+            var icmSchedule = WFMHelper.GetIcmSchedule();
+            var mowSchedule = WFMHelper.GetMowSchedule(DateTimeExtensions.StartOfWeek(DateTime.Now, DayOfWeek.Monday));
+
+            var latestIcmInfo = WFMHelper.GetLatestIcmInfo(icmSchedule.Last().Value.Last());
+
+            //var latestMowInfo = WFMHelper.GetLatestMowInfo();
+
+            return JsonConvert.SerializeObject(new { success = msg.ToLower().Contains("success"), msg = msg, downByDate = downByDate, mowDate = mowDate, eventList = eventList, agentList = agentList, mowList = mowList, managerList = managerList, lateShift = lateShift, icmSchedule = icmSchedule, mowSchedule = mowSchedule, latestIcmInfo = latestIcmInfo });
         }
 
         public string GetTeamInfo(int agentNo)
@@ -64,21 +77,24 @@ namespace WFMDashboard.Controllers
         }
 
 
-        public async Task<string> SubmitEventForm(CancellationToken cancellationToken, int id, string title, string color, string startDate, string endDate, bool fullDay, string startTime, string endTime, string notes, string eventType)
+        public async Task<string> SubmitEventForm(CancellationToken cancellationToken, int eventId, int agentId, string title, string color, string startDate, string endDate, bool fullDay, string startTime, string endTime, string notes, string eventType)
         {
             var user = HttpContext.KmIdentity();
-            log.Info($"User {user} called SubmitEventForm - Params: /r/n id: {id} \r\n title: {title} \r\n start date: {startDate} \r\n end date: {endDate} \r\n fullDay: {fullDay} \r\n startTime: {startTime} \r\n endTime: {endTime} \r\n notes: {notes}");
+            log.Info($"User {user} called SubmitEventForm - Params: /r/n agentId: {agentId} \r\n title: {title} \r\n start date: {startDate} \r\n end date: {endDate} \r\n fullDay: {fullDay} \r\n startTime: {startTime} \r\n endTime: {endTime} \r\n notes: {notes}");
             string msg = "";
             //bool success = false;
             var googleAuth = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata()).AuthorizeAsync(cancellationToken);
-            var newEvent = WFMHelper.SubmitEventForm(googleAuth, id, title, color, startDate, endDate, fullDay, startTime, endTime, notes, eventType, out msg);
-            return JsonConvert.SerializeObject(new { success = newEvent != null, msg = msg, newEvent = newEvent });
+            ViewEvent eventObject = WFMHelper.SubmitEventForm(googleAuth, eventId, agentId, title, color, startDate, endDate, fullDay, startTime, endTime, notes, eventType, out msg);
+            return JsonConvert.SerializeObject(new { success = eventObject != null, msg = msg, eventObject = eventObject });
         }
 
-        public string DeleteEvent(int id)
+        public async Task<string> DeleteEvent(CancellationToken cancellationToken, int id)
         {
+            var user = HttpContext.KmIdentity();
             string msg = "";
-            var success = WFMHelper.DeleteEvent(id, out msg);
+            log.Info($"User {user} called DeleteEvent /r/n id: {id}");
+            var googleAuth = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata()).AuthorizeAsync(cancellationToken);
+            var success = WFMHelper.DeleteEvent(googleAuth, id, out msg);
             return JsonConvert.SerializeObject(new { success = success, msg = msg });
         }
 
@@ -118,14 +134,80 @@ namespace WFMDashboard.Controllers
             }
         }
 
-        public string CreateMOWReport()
+        public async Task<ActionResult> CreateMOWReport()
         {
             var user = HttpContext.KmIdentity();
             log.Info($"User {user} created MOW Report");
             string msg = "";
             bool success = false;
-            success = WFMHelper.CreateMOWReport();
+            var report = WFMHelper.CreateMOWReport();
+
+            if (report != null)
+            {
+                ViewBag.report = report;
+
+                return View("~/Views/Mailer/MowReport.cshtml");
+            }
+            else
+            {
+                return View("Index");
+            }
+            //success = WFMHelper.CreateMOWReport();
+            //return JsonConvert.SerializeObject(new { success = success, msg = msg });
+        }
+
+        #endregion
+
+
+        #region MOW Tab
+
+        public string GetMowScheduleWeek(string mondayString)
+        {
+            var monday = DateTime.Parse(mondayString);
+            var mowSchedule = WFMHelper.GetMowSchedule(monday);
+            return JsonConvert.SerializeObject(new { mowSchedule = mowSchedule, success = mowSchedule != null});
+        }
+
+        public string SubmitIcmForm(int month, int year, int agentNo)
+        {
+            var user = HttpContext.KmIdentity();
+            log.Info($"User {user} called SubmitIcmForm - Params: /r/n month: {month} \r\n year: {year} \r\n agentNo: {agentNo}");
+            string msg;
+            bool success;
+            var icmSchedule = WFMHelper.SubmitIcmForm(month, year, agentNo, out msg, out success);
+            //var latestIcmInfo = WFMHelper.GetLatestIcmInfo(icmSchedule.Last().Value.Last());
+            //return JsonConvert.SerializeObject(new { success = success, msg = msg, icmSchedule = icmSchedule, latestIcmInfo = latestIcmInfo });
+            return JsonConvert.SerializeObject(new { success = success, msg = msg, icmSchedule = icmSchedule });
+        }
+
+        public string DeleteMowRow(int rowId)
+        {
+            var user = HttpContext.KmIdentity();
+            log.Info($"User {user} called DeleteMowRow - Params: /r/n id: {rowId}");
+            string msg;
+            var success = WFMHelper.DeleteMowRow(rowId, out msg);
             return JsonConvert.SerializeObject(new { success = success, msg = msg });
+        }
+
+        public string SubmitMowForm(MowFormInput Item, string MondayString)
+        {
+            var user = HttpContext.KmIdentity();
+            log.Info($"User {user} called SubmitMowForm");
+            string msg;
+            bool success;
+            var mowSchedule = WFMHelper.SubmitMowForm(Item, MondayString, out msg, out success);
+            //var icmSchedule = WFMHelper.SubmitIcmForm(month, year, agentNo, out msg, out success);
+            //var latestIcmInfo = WFMHelper.GetLatestIcmInfo(icmSchedule.Last().Value.Last());
+            //return JsonConvert.SerializeObject(new { success = success, msg = msg, icmSchedule = icmSchedule, latestIcmInfo = latestIcmInfo });
+            return JsonConvert.SerializeObject(new { mowSchedule = mowSchedule, success = success, msg = msg });
+        }
+
+        public string SubmitLateShiftForm(string date, int agentNo)
+        {
+            string msg;
+            var success = WFMHelper.SubmitLateShiftForm(date, agentNo, out msg);
+            var lateShift = WFMHelper.GetLateShift();
+            return JsonConvert.SerializeObject(new { lateShift = lateShift, success = success, msg = msg });
         }
 
         #endregion

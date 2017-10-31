@@ -190,6 +190,19 @@
     <Compile Include="Classes\AppFlowMetadata.cs" />
     <Compile Include="Classes\AuthorizationCodeMvcAppOverride.cs" />
     <Compile Include="Classes\EfDataStore.cs" />
+    <Compile Include="Classes\Extensions.cs" />
+    <Compile Include="Models\BUS_WFMDashboard_ICM.cs">
+      <DependentUpon>OnyxEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\BUS_WFMDashboard_ICM_Order.cs">
+      <DependentUpon>OnyxEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\BUS_WFMDashboard_LateShiftManager.cs">
+      <DependentUpon>OnyxEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\BUS_WFMDashboard_WFO_Schedule.cs">
+      <DependentUpon>OnyxEntities.tt</DependentUpon>
+    </Compile>
     <Compile Include="ViewModels\ViewEvent.cs" />
     <Compile Include="ViewModels\Reports.cs" />
     <Compile Include="ViewModels\TeamInfo.cs" />
@@ -245,6 +258,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="ViewModels\ViewAgent.cs" />
+    <Compile Include="ViewModels\ViewSchedule.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.css" />
@@ -460,6 +474,7 @@
     <Content Include="Scripts\modernizr-2.6.2.js" />
     <Content Include="Scripts\respond.js" />
     <Content Include="Scripts\respond.min.js" />
+    <None Include="Views\Mailer\MowReport.cshtml" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>

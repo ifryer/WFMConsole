@@ -32,6 +32,35 @@
           <Property Name="Key" Type="nvarchar" MaxLength="100" Nullable="false" />
           <Property Name="Value" Type="nvarchar" MaxLength="500" Nullable="false" />
         </EntityType>
+        <EntityType Name="BUS_WFMDashboard_ICM">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Year" Type="int" Nullable="false" />
+          <Property Name="Month" Type="int" Nullable="false" />
+          <Property Name="Manager" Type="nvarchar" MaxLength="150" Nullable="false" />
+          <Property Name="AgentNo" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="BUS_WFMDashboard_ICM_Order">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ManagerName" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="AgentNo" Type="int" Nullable="false" />
+          <Property Name="Order" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="BUS_WFMDashboard_LateShiftManager">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="AgentNo" Type="int" Nullable="false" />
+          <Property Name="FirstName" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="LastName" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Date" Type="date" Nullable="false" />
+        </EntityType>
         <EntityType Name="BUS_WFMDashboard_ReportLog">
           <Key>
             <PropertyRef Name="Id" />
@@ -41,37 +70,40 @@
           <Property Name="LastSent" Type="datetime" Nullable="false" />
           <Property Name="LastSentBy" Type="nvarchar" MaxLength="100" Nullable="false" />
         </EntityType>
+        <EntityType Name="BUS_WFMDashboard_WFO_Schedule">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Task" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="StartTime" Type="datetime" Nullable="false" />
+          <Property Name="EndTime" Type="datetime" Nullable="false" />
+          <Property Name="FirstName" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="LastName" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="AgentNo" Type="int" Nullable="false" />
+        </EntityType>
         <EntityContainer Name="OnyxModelStoreContainer">
           <EntitySet Name="BUS_WFMDashboard_Event" EntityType="Self.BUS_WFMDashboard_Event" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="BUS_WFMDashboard_Google_Credentials" EntityType="Self.BUS_WFMDashboard_Google_Credentials" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="BUS_WFMDashboard_ICM" EntityType="Self.BUS_WFMDashboard_ICM" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="BUS_WFMDashboard_ICM_Order" EntityType="Self.BUS_WFMDashboard_ICM_Order" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="BUS_WFMDashboard_LateShiftManager" EntityType="Self.BUS_WFMDashboard_LateShiftManager" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="BUS_WFMDashboard_ReportLog" EntityType="Self.BUS_WFMDashboard_ReportLog" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="BUS_WFMDashboard_WFO_Schedule" EntityType="Self.BUS_WFMDashboard_WFO_Schedule" Schema="dbo" store:Type="Tables" />
         </EntityContainer>
       </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="OnyxModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
-        <EntityType Name="BUS_WFMDashboard_Google_Credentials">
-          <Key>
-            <PropertyRef Name="Id" />
-          </Key>
-          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="Key" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="Value" Type="String" MaxLength="500" FixedLength="false" Unicode="true" Nullable="false" />
-        </EntityType>
         <EntityContainer Name="OnyxEntities" annotation:LazyLoadingEnabled="true">
-          <EntitySet Name="BUS_WFMDashboard_Google_Credentials" EntityType="Self.BUS_WFMDashboard_Google_Credentials" />
-          <EntitySet Name="BUS_WFMDashboard_ReportLog" EntityType="OnyxModel.BUS_WFMDashboard_ReportLog" />
           <EntitySet Name="BUS_WFMDashboard_Event" EntityType="OnyxModel.BUS_WFMDashboard_Event" />
+          <EntitySet Name="BUS_WFMDashboard_Google_Credentials" EntityType="OnyxModel.BUS_WFMDashboard_Google_Credentials" />
+          <EntitySet Name="BUS_WFMDashboard_ICM" EntityType="OnyxModel.BUS_WFMDashboard_ICM" />
+          <EntitySet Name="BUS_WFMDashboard_ICM_Order" EntityType="OnyxModel.BUS_WFMDashboard_ICM_Order" />
+          <EntitySet Name="BUS_WFMDashboard_ReportLog" EntityType="OnyxModel.BUS_WFMDashboard_ReportLog" />
+          <EntitySet Name="BUS_WFMDashboard_WFO_Schedule" EntityType="OnyxModel.BUS_WFMDashboard_WFO_Schedule" />
+          <EntitySet Name="BUS_WFMDashboard_LateShiftManager" EntityType="OnyxModel.BUS_WFMDashboard_LateShiftManager" />
         </EntityContainer>
-        <EntityType Name="BUS_WFMDashboard_ReportLog">
-          <Key>
-            <PropertyRef Name="Id" />
-          </Key>
-          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="ReportType" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
-          <Property Name="LastSent" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="LastSentBy" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
-        </EntityType>
         <EntityType Name="BUS_WFMDashboard_Event">
           <Key>
             <PropertyRef Name="Id" />
@@ -91,31 +123,70 @@
           <Property Name="Notes" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
           <Property Name="Color" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
         </EntityType>
+        <EntityType Name="BUS_WFMDashboard_Google_Credentials">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Key" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Value" Type="String" Nullable="false" MaxLength="500" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="BUS_WFMDashboard_ICM">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Year" Type="Int32" Nullable="false" />
+          <Property Name="Month" Type="Int32" Nullable="false" />
+          <Property Name="Manager" Type="String" Nullable="false" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="AgentNo" Type="Int32" Nullable="false" />
+        </EntityType>
+        <EntityType Name="BUS_WFMDashboard_ICM_Order">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ManagerName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="AgentNo" Type="Int32" Nullable="false" />
+          <Property Name="Order" Type="Int32" Nullable="false" />
+        </EntityType>
+        <EntityType Name="BUS_WFMDashboard_ReportLog">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ReportType" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="LastSent" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="LastSentBy" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="BUS_WFMDashboard_WFO_Schedule">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Task" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="StartTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="EndTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="FirstName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="LastName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="AgentNo" Type="Int32" Nullable="false" />
+        </EntityType>
+        <EntityType Name="BUS_WFMDashboard_LateShiftManager">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="AgentNo" Type="Int32" Nullable="false" />
+          <Property Name="FirstName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="LastName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Date" Type="DateTime" Nullable="false" Precision="0" />
+        </EntityType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="OnyxModelStoreContainer" CdmEntityContainer="OnyxEntities">
-          <EntitySetMapping Name="BUS_WFMDashboard_Google_Credentials">
-            <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_Google_Credentials">
-              <MappingFragment StoreEntitySet="BUS_WFMDashboard_Google_Credentials">
-                <ScalarProperty Name="Id" ColumnName="Id" />
-                <ScalarProperty Name="Key" ColumnName="Key" />
-                <ScalarProperty Name="Value" ColumnName="Value" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="BUS_WFMDashboard_ReportLog">
-            <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_ReportLog">
-              <MappingFragment StoreEntitySet="BUS_WFMDashboard_ReportLog">
-                <ScalarProperty Name="LastSentBy" ColumnName="LastSentBy" />
-                <ScalarProperty Name="LastSent" ColumnName="LastSent" />
-                <ScalarProperty Name="ReportType" ColumnName="ReportType" />
-                <ScalarProperty Name="Id" ColumnName="Id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="BUS_WFMDashboard_Event">
             <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_Event">
               <MappingFragment StoreEntitySet="BUS_WFMDashboard_Event">
@@ -132,6 +203,70 @@
                 <ScalarProperty Name="AgentNo" ColumnName="AgentNo" />
                 <ScalarProperty Name="CalendarEventId" ColumnName="CalendarEventId" />
                 <ScalarProperty Name="EventType" ColumnName="EventType" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="BUS_WFMDashboard_Google_Credentials">
+            <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_Google_Credentials">
+              <MappingFragment StoreEntitySet="BUS_WFMDashboard_Google_Credentials">
+                <ScalarProperty Name="Value" ColumnName="Value" />
+                <ScalarProperty Name="Key" ColumnName="Key" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="BUS_WFMDashboard_ICM">
+            <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_ICM">
+              <MappingFragment StoreEntitySet="BUS_WFMDashboard_ICM">
+                <ScalarProperty Name="AgentNo" ColumnName="AgentNo" />
+                <ScalarProperty Name="Manager" ColumnName="Manager" />
+                <ScalarProperty Name="Month" ColumnName="Month" />
+                <ScalarProperty Name="Year" ColumnName="Year" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="BUS_WFMDashboard_ICM_Order">
+            <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_ICM_Order">
+              <MappingFragment StoreEntitySet="BUS_WFMDashboard_ICM_Order">
+                <ScalarProperty Name="Order" ColumnName="Order" />
+                <ScalarProperty Name="AgentNo" ColumnName="AgentNo" />
+                <ScalarProperty Name="ManagerName" ColumnName="ManagerName" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="BUS_WFMDashboard_ReportLog">
+            <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_ReportLog">
+              <MappingFragment StoreEntitySet="BUS_WFMDashboard_ReportLog">
+                <ScalarProperty Name="LastSentBy" ColumnName="LastSentBy" />
+                <ScalarProperty Name="LastSent" ColumnName="LastSent" />
+                <ScalarProperty Name="ReportType" ColumnName="ReportType" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="BUS_WFMDashboard_WFO_Schedule">
+            <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_WFO_Schedule">
+              <MappingFragment StoreEntitySet="BUS_WFMDashboard_WFO_Schedule">
+                <ScalarProperty Name="AgentNo" ColumnName="AgentNo" />
+                <ScalarProperty Name="LastName" ColumnName="LastName" />
+                <ScalarProperty Name="FirstName" ColumnName="FirstName" />
+                <ScalarProperty Name="EndTime" ColumnName="EndTime" />
+                <ScalarProperty Name="StartTime" ColumnName="StartTime" />
+                <ScalarProperty Name="Task" ColumnName="Task" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="BUS_WFMDashboard_LateShiftManager">
+            <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_LateShiftManager">
+              <MappingFragment StoreEntitySet="BUS_WFMDashboard_LateShiftManager">
+                <ScalarProperty Name="Date" ColumnName="Date" />
+                <ScalarProperty Name="LastName" ColumnName="LastName" />
+                <ScalarProperty Name="FirstName" ColumnName="FirstName" />
+                <ScalarProperty Name="AgentNo" ColumnName="AgentNo" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
               </MappingFragment>
             </EntityTypeMapping>
