@@ -53,24 +53,25 @@ indexScript = (function () {
 
                     //Maybe delete this part? Not really needed with the calendar on the front page anymore...
                     //Set up event list
-                    $.each(data.eventList, function (index, item) {
-                        $("#schedule-table-body").append(`
-                            <tr style='background-color:` + item.backgroundColor + `'> 
-                                <td> ` + item.LastName + ` </td>
-                                <td> ` + item.TeamName + ` </td>
-                                <td> ` + item.start + ` </td>
-                                <td> ` + item.end  + ` </td>
-                                <td> ` + item.title + ` </td>
-                                <td> ` + item.EventType + ` </td>
-                            </tr>
-                        `)
-                    })
+                    //$.each(data.eventList, function (index, item) {
+                    //    $("#schedule-table-body").append(`
+                    //        <tr style='background-color:` + item.backgroundColor + `'> 
+                    //            <td> ` + item.LastName + ` </td>
+                    //            <td> ` + item.TeamName + ` </td>
+                    //            <td> ` + item.start + ` </td>
+                    //            <td> ` + item.end  + ` </td>
+                    //            <td> ` + item.title + ` </td>
+                    //            <td> ` + item.EventType + ` </td>
+                    //        </tr>
+                    //    `)
+                    //})
 
                     //Set up calendar
                     SetUpCalendar(data.eventList);
 
                     //Set up MOW stuff
                     SetUpMowTable(data.mowSchedule, data.mowList, new moment().format("MM/DD/YYYY"))
+                    $(".mow-schedule-event-date").val(new moment().format("MM/DD/YYYY"))
 
                     SetUpLateShiftTable(data.managerList, data.lateShift)
 
@@ -94,6 +95,7 @@ indexScript = (function () {
         $('.mow-schedule-event-date').val($.datepicker.formatDate('mm/dd/yy', new Date()));
         $(".mow-schedule-event-date").datepicker();
     }
+
     $(document).on("click", "#mow-tab.unclicked", function () {
         $(this).removeClass("unclicked")
         $(".mow-schedule-list").scrollTop(
@@ -101,7 +103,7 @@ indexScript = (function () {
         );
     })
 
-    $(".log-off-google").on("click", function () {
+    $(document).on("click", ".log-off-google", function () {
         $.ajax({
             dataType: "json",
             type: "post",
@@ -111,7 +113,6 @@ indexScript = (function () {
             }
         });
     })
-
 
     $("#pto-section").on("change", "#select-name-staff", function () {
         let selectedStaff = $(this).val();
@@ -283,7 +284,7 @@ indexScript = (function () {
 
     });
 
-    $("#fullDayCheckbox").on("change", function () {
+    $("#pto-section").on("change", "#fullDayCheckbox", function () {
         if (this.checked) {
             $("#event-start-time, #event-end-time").attr("disabled", "disabled")
             //$("#start-end-event-section").hide();
@@ -294,7 +295,7 @@ indexScript = (function () {
         }
     });
 
-    $("#event-title").on("keyup", function () {
+    $("#pto-section").on("keyup", "#event-title", function () {
         editedEventTitle = true;
     })
 
@@ -383,7 +384,7 @@ indexScript = (function () {
         }
     }
 
-    //MOW Section
+    //MOW & WFO Section
     var newMowRowOptionString = ``;
     var newMowRowString = ``;
 
@@ -416,18 +417,6 @@ indexScript = (function () {
         
     });
 
-    $(document).on("click", "#add-new-icm-row", function () {
-        $(".new-icm-form").slideDown("fast");
-    });
-
-    $(document).on("click", "#cancel-new-icm-row", function () {
-        $(".new-icm-form").slideUp("fast");
-    });
-
-    $(document).on("click", "#save-new-icm-row", function () {
-        SubmitIcmForm();
-    })
-
     $(document).on("click", "#add-new-mow-schedule", function () {
         if ($("#new-mow-event-form").css("display") == "none") {
             let tbody = $(".mow-schedule-edit-table").find("tbody");
@@ -443,8 +432,7 @@ indexScript = (function () {
                 $("#new-mow-event-form").slideUp("fast");
             }
         }
-        else
-        {
+        else {
             $(".mow-schedule-edit-table").find("tbody tr").remove();
             $("#new-mow-event-form").slideUp("fast");
         }
@@ -454,29 +442,67 @@ indexScript = (function () {
         SubmitMowForm();
     });
 
-    $(document).on("click", ".save-late-shift-row", function () {
-        SubmitLateShiftForm();
-    });
-
-    $(document).on("click", ".edit-late-shift-row-btn", function () {
-        let tr = $(this).parents("tr")
-        let date = tr.find(".date-td").html();
-        let name = tr.find(".name-td").html();
-        $(".late-shift-date").val(date);
-        $(".late-shift-manager-select").val(name);
-        $(".new-late-shift-form").slideDown("fast");
-    })
-
-    $(document).on("click", "#edit-late-shift-btn", function () {
-        $(".new-late-shift-form").slideDown("fast");
-    })
-
-    $(document).on("click", "#cancel-late-shift-row", function () {
-        $(".new-late-shift-form").slideUp("fast");
-    })
-
     $(document).on("click", ".mow-event-remove-row", function () {
         $(this).parents("tr").remove();
+    });
+
+    $(document).on("click", ".mow-event-save-edit-row", function () {
+        let tr = $(this).parents("tr");
+        tr.find(".mow-event-save-edit-row").attr("disabled", "disabled")
+        tr.find(".mow-event-cancel-edit-row").attr("disabled", "disabled")
+        let row_id = tr.attr("row_id");
+        let task = tr.find(".mow-event-task").val();
+        let agent_no = tr.find(".mow-event-manager").val();
+        let start = tr.find(".mow-event-shift-start").val();
+        let end = tr.find(".mow-event-shift-end").val();
+
+        let currentMonday = $("#mow-wfo-schedule-date-span").attr("current-monday")
+        $.ajax({
+            dataType: "json",
+            type: "post",
+            data: {
+                    Item: {
+                        InputItems: [{
+                            "shiftStart": start,
+                            "shiftEnd": end,
+                            "task": task,
+                            "agentNo": agent_no,
+                            "rowId": row_id
+                        }], Date: $(".mow-schedule-event-date").val() }, MondayString: currentMonday },
+            url: toUrl("Home/SubmitMowForm"),
+            success: function (data) {
+
+                //$("#save-new-mow-schedule-form").removeAttr("disabled")
+                if (!data.success) {
+                    console.log("error -- " + data.msg);
+                    showSmallError(data.msg);
+                }
+                else {
+                    $(".mow-schedule-edit-table").find("tbody tr").remove();
+                    $("#new-mow-event-form").slideUp("fast");
+                    SetUpMowTable(data.mowSchedule, null, null);
+                    showSmallAlert(data.msg);
+                }
+            }
+
+        });
+
+    })
+
+    $(document).on("click", ".mow-event-cancel-edit-row", function () {
+        let tr = $(this).parents("tr");
+        let task = tr.attr("task");
+        let row_id = tr.attr("row_id");
+        let first_name = tr.attr("first_name");
+        let agent_no = tr.attr("agent_no");
+        let last_name = tr.attr("last_name");
+        let shift_start = tr.attr("shift_start");
+        let shift_end = tr.attr("shift_end");
+
+        let original_tr = MowTableRow(task, last_name, first_name, shift_start, shift_end, row_id, agent_no);
+
+        tr.replaceWith(original_tr);
+
     });
 
     $(document).on("change", ".new-mow-row.clean input", function () {
@@ -491,15 +517,18 @@ indexScript = (function () {
         let tr = $(this).parents("tr");
         let action_td = $(this).parents("tr");
 
-        let original_task = tr.find(".mow-display-task").val();
-        let last_name = tr.find(".mow-display-name").attr("lastname");
-        let shift_start = tr.find(".mow-display-time").attr("starttime");
-        let shift_end = tr.find(".mow-display-time").attr("endtime");
+        let task = tr.find(".mow-display-task").html();
+        let last_name = tr.find(".mow-display-name").attr("last_name");
+        let first_name = tr.find(".mow-display-name").attr("first_name");
+        let shift_start = tr.find(".mow-display-time").attr("start_time");
+        let shift_end = tr.find(".mow-display-time").attr("end_time");
+
+        let agent_no = tr.find(".mow-display-name").attr("agent_no")
 
         //make sure the right option is selected
         let replacement_tr =
             `
-            <tr class="clean new-mow-row">
+            <tr class="edit-mow-row" id="edit-mow-row-` + rowId + `" row_id="` + rowId + `" task="` + task + `" first_name="` + first_name + `" last_name="` + last_name + `" shift_start="` + shift_start + `" shift_end="` + shift_end + `" agent_no="` + agent_no + `" >
                 <td>
                     <select class="form-control input-xs mow-event-task" placeholder=""> 
                         <option> AD Escalations </option>
@@ -514,18 +543,33 @@ indexScript = (function () {
                     </select>
                 </td>
                 <td>
-                    <div class="form-inline">
-                        <input class="form-control input-xs mow-event-shift-start" style="width: calc(50% - 10px);" placeholder="" value="` + item.start + `">
+                    <div style="max-width: 130px" class="form-inline">
+                        <input class="form-control input-xs mow-event-shift-start" style="width: calc(50% - 10px);" placeholder="" value="` + shift_start + `">
                         <span style="width: 9px">to</span>
-                        <input class="form-control input-xs mow-event-shift-end" style="width: calc(50% - 10px);" placeholder="" value="` + item.end + `">
+                        <input class="form-control input-xs mow-event-shift-end" style="width: calc(50% - 10px);" placeholder="" value="` + shift_end + `">
                     </div>
                 </td>
                 <td>
-                    <button tabindex="-1" class="btn btn-xs btn-danger mow-event-remove-row"> <span class="glyphicon glyphicon-remove"></span> </button>
+                    <button tabindex="-1" class="btn btn-xs btn-success mow-event-save-edit-row"> <span class="glyphicon glyphicon-ok"></span> </button>
+                    <button tabindex="-1" class="btn btn-xs btn-danger mow-event-cancel-edit-row"> <span class="glyphicon glyphicon-remove"></span> </button>
                 </td>
             </tr>
         `;
+        tr.replaceWith(replacement_tr)
+        $(".mow-event-shift-start").timepicker({
+            'scrollDefault': '7:00am',
+            'minTime': '7:00am',
+            'maxTime': '8:30pm',
+        });
 
+        $(".mow-event-shift-end").timepicker({
+            'minTime': '7:00am',
+            'maxTime': '8:30pm',
+            'showDuration': true,
+        });
+        let new_tr = $("#edit-mow-row-" + rowId);
+        new_tr.find(".mow-event-task").val(task)
+        new_tr.find(".mow-event-manager").val(agent_no)
         //TODO: --
         //Replace each of the 3 TDs with inputs
         //set the initial values and save the old values
@@ -581,7 +625,7 @@ indexScript = (function () {
             }
         });
 
-        
+
     });
 
     $(document).on("click", ".mow-week-right", function () {
@@ -611,9 +655,9 @@ indexScript = (function () {
     function ResetMowFormToTemplate() {
         $(".mow-schedule-edit-table tbody tr").remove();
         var itemList = [{ task: "Early Shift", start: "7:00am", end: "8:00am" }, { task: "MOW", start: "8:00am", end: "12:00pm" }, { task: "WFO", start: "8:00am", end: "12:00pm" }, { task: "AD Escalations", start: "8:00am", end: "12:00pm" }, { task: "MOW", start: "12:00pm", end: "3:30pm" }, { task: "MOW", start: "3:30pm", end: "4:30pm" }, { task: "WFO", start: "12:00pm", end: "4:30pm" }, { task: "AD Escalations", start: "12:00pm", end: "4:30pm" }]
-        $.each(itemList, function (index, item) { 
+        $.each(itemList, function (index, item) {
             $(".mow-schedule-edit-table tbody").append(
-            `
+                `
                 <tr class="clean new-mow-row">
                     <td>
                         <select class="form-control input-xs mow-event-task" placeholder=""> 
@@ -641,7 +685,7 @@ indexScript = (function () {
                 </tr>
             `);
             $(".mow-event-task:last").val(item.task)
-            
+
         })
         $(".mow-event-shift-start").timepicker({
             'scrollDefault': '7:00am',
@@ -655,11 +699,10 @@ indexScript = (function () {
             'showDuration': true,
         });
         $(".mow-event-manager").val("")
-            
+
     }
 
-    function AppendNewMowRow(tbody)
-    {
+    function AppendNewMowRow(tbody) {
         tbody.append(newMowRowString);
         $(".mow-event-shift-start").timepicker({
             'scrollDefault': '7:00am',
@@ -673,6 +716,76 @@ indexScript = (function () {
             'showDuration': true,
         });
     }
+
+    function SubmitMowForm() {
+        let dataList = [];
+        $.each($(".mow-schedule-edit-table tbody tr"), function (index, item) {
+            let shiftStart = $(item).find(".mow-event-shift-start").val();
+            let shiftEnd = $(item).find(".mow-event-shift-end").val();
+            if (shiftStart != "" && shiftEnd != "") {
+                let task = $(item).find(".mow-event-task").val();
+                let agentNo = $(item).find(".mow-event-manager").val();
+                dataList.push({
+                    "shiftStart": shiftStart,
+                    "shiftEnd": shiftEnd,
+                    "task": task,
+                    "agentNo": agentNo,
+                    "rowId": 0
+                });
+            }
+        });
+        if (dataList.length > 0) {
+            let currentMonday = $("#mow-wfo-schedule-date-span").attr("current-monday")
+            $("#save-new-mow-schedule-form").attr("disabled", "disabled")
+            var stringDataList = JSON.stringify(dataList)
+            $.ajax({
+                type: "post",
+                data: { Item: { InputItems: dataList, Date: $(".mow-schedule-event-date").val() }, MondayString: currentMonday },
+                dataType: "json",
+                url: toUrl("Home/SubmitMowForm"),
+                success: function (data) {
+                    $("#save-new-mow-schedule-form").removeAttr("disabled")
+                    if (!data.success) {
+                        console.log("error -- " + data.msg);
+                        showSmallError(data.msg);
+                    }
+                    else {
+                        $(".mow-schedule-edit-table").find("tbody tr").remove();
+                        $("#new-mow-event-form").slideUp("fast");
+                        SetUpMowTable(data.mowSchedule, null, null);
+                        showSmallAlert(data.msg);
+                    }
+                }
+            });
+        }
+    }
+
+
+    //ICM Form
+
+    $(document).on("click", "#add-new-icm-row", function () {
+        $(".new-icm-form").slideDown("fast");
+    });
+
+    $(document).on("click", "#cancel-new-icm-row", function () {
+        $(".new-icm-form").slideUp("fast");
+    });
+
+    $(document).on("click", "#save-new-icm-row", function () {
+        SubmitIcmForm();
+    })
+
+    $(document).on("click", ".edit-icm-row-btn", function () {
+        let tr = $(this).parents("tr");
+        let month = $(this).attr("month");
+        let year = $(this).attr("year");
+        let manager = $(this).attr("manager");
+
+        $(".new-icm-form").slideDown("fast");
+        $("#icm-month").val(month);
+        $("#icm-year").val(year);
+        $("#icm-manager").val(manager);
+    });
 
     function SubmitIcmForm() {
         let month = $("#icm-month").val();
@@ -716,6 +829,30 @@ indexScript = (function () {
         });
     }
 
+
+    //Late Shift Manager Form
+
+    $(document).on("click", ".save-late-shift-row", function () {
+        SubmitLateShiftForm();
+    });
+
+    $(document).on("click", ".edit-late-shift-row-btn", function () {
+        let tr = $(this).parents("tr")
+        let date = tr.find(".date-td").html();
+        let name = tr.find(".name-td").attr("agentNo");
+        $(".late-shift-date").val(date);
+        $(".late-shift-manager-select").val(name);
+        $(".new-late-shift-form").slideDown("fast");
+    })
+
+    $(document).on("click", "#edit-late-shift-btn", function () {
+        $(".new-late-shift-form").slideDown("fast");
+    })
+
+    $(document).on("click", "#cancel-late-shift-row", function () {
+        $(".new-late-shift-form").slideUp("fast");
+    })
+
     function SubmitLateShiftForm() {
         let date = $(".late-shift-date").val();
         let agentNo = $(".late-shift-manager-select").val();
@@ -743,50 +880,7 @@ indexScript = (function () {
         }
     }
 
-    function SubmitMowForm() {
-        let dataList = [];
-        $.each($(".mow-schedule-edit-table tbody tr"), function (index, item) {
-            let shiftStart = $(item).find(".mow-event-shift-start").val();
-            let shiftEnd = $(item).find(".mow-event-shift-end").val();
-            if (shiftStart != "" && shiftEnd != "")
-            {
-                let task = $(item).find(".mow-event-task").val();
-                let agentNo = $(item).find(".mow-event-manager").val();
-                dataList.push({
-                    "shiftStart": shiftStart,
-                    "shiftEnd": shiftEnd,
-                    "task": task,
-                    "agentNo": agentNo
-                });
-            }
-        });
-        if (dataList.length > 0)
-        {
-            let currentMonday = $("#mow-wfo-schedule-date-span").attr("current-monday")
-            $("#save-new-mow-schedule-form").attr("disabled", "disabled")
-            var stringDataList = JSON.stringify(dataList)
-            $.ajax({
-                type: "post",
-                data: { Item: { InputItems: dataList, Date: $(".mow-schedule-event-date").val() }, MondayString: currentMonday },
-                dataType: "json",
-                url: toUrl("Home/SubmitMowForm"),
-                success: function (data) {
-                    $("#save-new-mow-schedule-form").removeAttr("disabled")
-                    if (!data.success) {
-                        console.log("error -- " + data.msg);
-                        showSmallError(data.msg);
-                    }
-                    else {
-                        $(".mow-schedule-edit-table").find("tbody tr").remove();
-                        $("#new-mow-event-form").slideUp("fast");
-                        SetUpMowTable(data.mowSchedule, null, null);
-                        showSmallAlert(data.msg);
-                    }
-                }
-            });
-        }
-    }
-
+    
     //Report section
 
     $("#report-area").on("click", "#create-down-by-report-btn", function () {
@@ -832,7 +926,7 @@ indexScript = (function () {
                                     <tbody>
                                 `;
             $.each(item, function (i, icmRow) {
-                icmTableHtml += `<tr><td>` + MonthList[icmRow.Month] + `</td><td>` + icmRow.ManagerName + `</td></tr>`;
+                icmTableHtml += `<tr><td class="icm-month-td">` + MonthList[icmRow.Month] + `</td><td class="icm-manager-td">` + icmRow.ManagerName + ` <button manager="` + icmRow.AgentNo + `" month="` + icmRow.Month + `" year="` + index + `" class="btn btn-xs btn-info edit-icm-row-btn pull-right"><span class="glyphicon glyphicon-edit"></span></button></td></tr>`;
             });
             icmTableHtml += `</tbody></table>`
         });
@@ -862,7 +956,7 @@ indexScript = (function () {
         }
         $(".late-shift-manager-tbody tr").remove();
         $.each(lateShift, function (i, item) {
-            $(".late-shift-manager-tbody").append(`<tr> <td class="date-td"> ` + moment(item.Date).format("MM/DD/YYYY") + ` </td> <td class="name-td"> ` + item.ManagerName + ` </td> <td> <button rowId="` + item.Id + `" class="btn btn-xs btn-info edit-late-shift-row-btn pull-right"><span class="glyphicon glyphicon-edit"></span></button> </td> </tr>`)
+            $(".late-shift-manager-tbody").append(`<tr> <td class="date-td"> ` + moment(item.Date).format("MM/DD/YYYY") + ` </td> <td agentNo="` + item.AgentNo + `" class="name-td"> ` + item.ManagerName + ` </td> <td> <button rowId="` + item.Id + `" class="btn btn-xs btn-info edit-late-shift-row-btn pull-right"><span class="glyphicon glyphicon-edit"></span></button> </td> </tr>`)
         });
     }
 
@@ -896,13 +990,7 @@ indexScript = (function () {
                                     <tbody>
                                 `;
             $.each(item, function (i, mowRow) {
-                let extraClass = ""
-                console.log(mowRow.Task)
-                if (mowRow.Task == "AD Escalations")
-                {
-                    extraClass = "escalation-row"
-                }
-                mowTableHtml += `<tr class="mow-display-row ` + extraClass + `"><td class="mow-display-task">` + mowRow.Task + `</td><td class="mow-display-name" lastName="` + mowRow.LastName + `">` + mowRow.FirstName + " " + mowRow.LastName + `</td><td startTime="` + mowRow.StartTime + `" endTime="` + mowRow.EndTime + `" class="mow-display-time">` + mowRow.StartTime + " - " + mowRow.EndTime + `</td><td style="width: 65px;"> <button rowId="` + mowRow.Id + `" class="btn btn-xs btn-info edit-mow-row-btn"><span class="glyphicon glyphicon-edit"></span></button> <button rowId="`+ mowRow.Id + `" class="btn btn-xs btn-danger delete-mow-row-btn"><span class="glyphicon glyphicon-trash"></span></button> </td></tr>`;
+                mowTableHtml += MowTableRow(mowRow.Task, mowRow.LastName, mowRow.FirstName, mowRow.StartTime, mowRow.EndTime, mowRow.Id, mowRow.AgentNo);
             });
             mowTableHtml += `</tbody></table>`
         });
@@ -943,6 +1031,7 @@ indexScript = (function () {
             `;
         }
     }
+
 
     function SetUpCalendar(eventList) {
         $('#event-calendar').fullCalendar({
@@ -1006,6 +1095,18 @@ indexScript = (function () {
 
             }
         })
+    }
+
+
+    //HTML Generator functions
+
+    function MowTableRow(Task, LastName, FirstName, StartTime, EndTime, RowId, AgentNo)
+    {
+        let extraClass = ""
+        if (Task == "AD Escalations") {
+            extraClass = "escalation-row"
+        }
+        return `<tr class="mow-display-row ` + extraClass + `"><td class="mow-display-task">` + Task + `</td><td class="mow-display-name" agent_no="` + AgentNo +`" first_name="` + FirstName + `" last_name="` + LastName + `">` + FirstName + " " + LastName + `</td><td start_time="` + StartTime + `" end_time="` + EndTime + `" class="mow-display-time">` + StartTime + " - " + EndTime + `</td><td style="width: 65px;"> <button rowId="` + RowId + `" class="btn btn-xs btn-info edit-mow-row-btn"><span class="glyphicon glyphicon-edit"></span></button> <button rowId="` + RowId + `" class="btn btn-xs btn-danger delete-mow-row-btn"><span class="glyphicon glyphicon-trash"></span></button> </td></tr>`
     }
 
 })();

@@ -237,9 +237,8 @@ textarea {
 /*MOW TAB*/
 
 .icm-schedule-list {
-    max-height: 60vh;
+    max-height: 35vh;
     overflow-y: scroll;
-    margin-bottom: 20px;
 }
 
 .new-icm-form {
@@ -294,10 +293,24 @@ h4.box-header{
 
 .mow-schedule-list {
     max-height: calc(60vh - 23px);
-    margin-bottom: 10px;
     overflow-y: auto;
+    border-top: 1px solid #dddddd
 }
 
 .escalation-row{
     color: crimson
+}
+
+.new-late-shift-form {
+    margin-top: 10px;
+    border: 1px solid #0076bc;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+.mow-table-title {
+    margin: 0;
+    padding-bottom: 10px;
+    padding-top: 10px;
+    background: rgba(255, 202, 122, 0.72);
 }

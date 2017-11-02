@@ -11,6 +11,7 @@
         <EntityTypeShape EntityType="OnyxModel.BUS_WFMDashboard_ICM_Order" Width="1.5" PointX="4.75" PointY="0.75" />
         <EntityTypeShape EntityType="OnyxModel.BUS_WFMDashboard_ReportLog" Width="1.5" PointX="4.75" PointY="3.75" />
         <EntityTypeShape EntityType="OnyxModel.BUS_WFMDashboard_WFO_Schedule" Width="1.5" PointX="6.75" PointY="0.75" />
+        <EntityTypeShape EntityType="OnyxModel.BUS_WFMDashboard_LateShiftManager" Width="1.5" PointX="0.75" PointY="6.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

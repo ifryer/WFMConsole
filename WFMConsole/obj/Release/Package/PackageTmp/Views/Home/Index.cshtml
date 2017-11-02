@@ -89,15 +89,15 @@
             </a>
         </li>
         <li>
-            <a href="#mowTab" data-toggle="tab" class="tabMenuItem" id="mow-tab">
+            <a href="#mowTab" data-toggle="tab" class="tabMenuItem unclicked" id="mow-tab">
                 MOW
             </a>
         </li>
-        <li>
+        @*<li>
             <a href="#eventsTab" data-toggle="tab" class="tabMenuItem" id="events-tab">
                 Events
             </a>
-        </li>
+        </li>*@
     </ul>
     <div class="tab-content">
         <div id="homeTab" class="tab-pane in active">
@@ -275,6 +275,8 @@
         <div id="reportsTab" class="tab-pane">
             <div class="row margin-top" id="report-area">
                 <a class="btn btn-sm btn-primary" target="_blank" href="~/Home/CreateDownByReport">View Down By Report</a>
+                <a class="btn btn-sm btn-primary" target="_blank" href="~/Home/CreateMowReport">View MOW Report</a>
+
                 <div class="col-md-4">
                     <button class="btn btn-default" id="create-down-by-report-btn" disabled="disabled"> Create Down By Report</button>
                     <p class="help-block sent-label"> Last sent <span id="down-by-last-sent-date"> - </span> </p>
@@ -288,11 +290,52 @@
         <div id="mowTab" class="tab-pane">
             <div class="row">
                 <div class="col-md-6">
-                    <h4 class="center-text"> Inventory Control Manager Schedule</h4>
-                    <div class="icm-schedule-list">
+                    <div style="border:1px solid #dddddd">
+                        <h4 class="center-text mow-table-title"> Late Shift Manager </h4>
+                        <div class="late-shift-manager-div">
+                            <table style="margin-bottom: 0" class="table table-condensed">
+                                <thead><tr><th style="width: 170px;">Date</th><th>Late Shift Manager</th><th></th></tr></thead>
+                                <tbody class="late-shift-manager-tbody">
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
+                    <button id="edit-late-shift-btn" class="btn btn-primary btn-sm" style="width: 100%">
+                        <span class="glyphicon glyphicon-plus"></span> Add / Edit Late Shift Manager Row(s)
+                    </button>
+                    <div class="row no-margin">
+                        <div class="new-late-shift-form" style="display: none;">
+                            <div class="row no-margin">
+                                <div class="col-md-4">
+                                    <label for="icm-month">Date</label>
+                                    <div class="form-inline">
+                                        <input class="input-group form-control late-shift-date input-xs" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="icm-year">Manager</label>
+                                    <div class="form-inline">
+                                        <select class="late-shift-manager-select input-group form-control input-xs">
+                                            <option></option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row no-margin" style="margin-top: 10px;">
+                                <button class="btn btn-sm btn-default pull-right" id="cancel-late-shift-row"> Close </button>
+                                <button class="btn btn-sm btn-primary pull-right save-late-shift-row" style="margin-right:5px;"> Save </button>
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <div style="border:1px solid #dddddd">
+                        <h4 class="center-text mow-table-title"> Inventory Control Manager Schedule</h4>
+                        <div class="icm-schedule-list">
+                        </div>
+                    </div>
+                    
                     <button id="add-new-icm-row" class="btn btn-primary btn-sm" style="width: 100%">
-                        <span class="glyphicon glyphicon-plus"></span> Add / Edit Schedule Row(s)
+                        <span class="glyphicon glyphicon-plus"></span> Add / Edit ICM Schedule Row(s)
                     </button>
                     <div class="row no-margin">
                         <div class="new-icm-form" style="display: none;">
@@ -340,9 +383,11 @@
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <h4 class="center-text"> MOW & WFO Schedule </h4>
-                    <h5 class="center-text"><button class="btn btn-xs btn-default mow-week-left"> <span class="glyphicon glyphicon-chevron-left"></span> </button> <span id="mow-wfo-schedule-date-span"></span> <button class="btn btn-xs btn-default mow-week-right"> <span class="glyphicon glyphicon-chevron-right"></span> </button></h5>
-                    <div class="mow-schedule-list">
+                    <div style="border: 1px solid #dddddd">
+                        <h4 class="center-text mow-table-title"> MOW & WFO Schedule </h4>
+                        <h5 class="center-text"><button class="btn btn-xs btn-default mow-week-left"> <span class="glyphicon glyphicon-chevron-left"></span> </button> <span id="mow-wfo-schedule-date-span"></span> <button class="btn btn-xs btn-default mow-week-right"> <span class="glyphicon glyphicon-chevron-right"></span> </button></h5>
+                        <div class="mow-schedule-list">
+                        </div>
                     </div>
                     <button id="add-new-mow-schedule" class="btn btn-primary btn-sm" style="width: 100%">
                         <span class="glyphicon glyphicon-plus"></span> Add Schedule Row(s)
@@ -354,10 +399,11 @@
                                     <div style="padding-top: 5px; padding-left: 5px;">
                                         <label style="margin-right: 10px;" for="event-date">Date:</label>
                                         <input class="form-control input-sm mow-schedule-event-date" type="text" style="width: 35%; display:inline-block" placeholder="">
+                                        <button class="btn btn-xs pull-right btn-primary" id="mow-reset-form-btn"> Reset To Template </button>
                                     </div>
                                     <table style="margin-bottom: 5px;" class="mow-schedule-edit-table table table-bordered table-condensed">
                                         <thead>
-                                            <tr><th style="width:35%">Task</th><th style="width:25%"> Manager</th><th>Shift</th><th></th></tr>
+                                            <tr><th style="width:35%">Task</th><th style="width:25%"> Staff Member</th><th>Shift</th><th></th></tr>
                                         </thead>
                                         <tbody></tbody>
                                     </table>
@@ -377,7 +423,7 @@
                 </div>
             </div>
         </div>
-        <div id="eventsTab" class="tab-pane">
+        @*<div id="eventsTab" class="tab-pane">
             
             <div class="col-md-12 schedule-area">
                 <table class="schedule-table table table-condensed" id="schedule-table">
@@ -395,7 +441,7 @@
                     <tbody id="schedule-table-body"></tbody>
                 </table>
             </div>
-        </div>
+        </div>*@
     </div>
 </div>
 

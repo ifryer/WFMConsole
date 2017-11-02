@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using WFMConsole.Classes;
+using WFMConsole.Configuration;
 using WFMConsole.ViewModels;
 using WFMDashboard.Classes;
 
@@ -25,33 +26,44 @@ namespace WFMDashboard.Controllers
 
         public async Task<ActionResult> Index(CancellationToken cancellationToken)
         {
-            log.Info("Accessing WFM Dashboard");
+
             var user = HttpContext.KmIdentity();
-            var result = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata()).AuthorizeAsync(cancellationToken);
-            if (result.Credential != null)
-            {
-                var service = new CalendarService(new BaseClientService.Initializer
-                {
-                    HttpClientInitializer = result.Credential,
-                    ApplicationName = "ASP.NET MVC Sample"
-                });
-                ViewBag.Title = "WFM Dashboard";
-                return View();
-            }
-            else
-            {
-                log.Info($"User {user} is logging into google calendar");
-                ViewBag.Title = "WFM Dashboard";
-                return new RedirectResult(result.RedirectUri);
-            }
+            var WFMUser = getWFMUser(user.LdapUserId);
+            if (WFMUser == null) return RedirectToAction("Error", new { msg = "You are not authorized to use WFM Dashboard" });
+            ViewBag.Title = "WFM Dashboard";
+
+            return View();
+
+            //GCal login stuff no longer needed (probably)
+            //var result = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata()).AuthorizeAsync(cancellationToken);
+            //if (result.Credential != null)
+            //{
+            //    var service = new CalendarService(new BaseClientService.Initializer
+            //    {
+            //        HttpClientInitializer = result.Credential,
+            //        ApplicationName = "ASP.NET MVC Sample"
+            //    });
+            //    ViewBag.Title = "WFM Dashboard";
+            //    return View();
+            //}
+            //else
+            //{
+            //    log.Info($"User {user.LdapUserId} is logging into google calendar");
+            //    ViewBag.Title = "WFM Dashboard";
+            //    return new RedirectResult(result.RedirectUri);
+            //}
         }
 
         public string GetPageInfo()
         {
+            var user = HttpContext.KmIdentity();
+            var WFMUser = getWFMUser(user.LdapUserId);
+            if (WFMUser == null) return JsonConvert.SerializeObject(new { success = false, msg = "You are not authorized to access WFM Dashboard" });
+
             var msg = "";
             string downByDate, mowDate;
             WFMHelper.GetReportDates(out downByDate, out mowDate);
-            var agentList =  WFMHelper.GetStaffList(out msg);
+            var agentList = WFMHelper.GetStaffList(out msg);
             var eventList = WFMHelper.GetEventList();
             var managerList = WFMHelper.GetManagerList(agentList); //TODO: Remove this?
             var mowList = WFMHelper.GetMowList(agentList);
@@ -80,7 +92,10 @@ namespace WFMDashboard.Controllers
         public async Task<string> SubmitEventForm(CancellationToken cancellationToken, int eventId, int agentId, string title, string color, string startDate, string endDate, bool fullDay, string startTime, string endTime, string notes, string eventType)
         {
             var user = HttpContext.KmIdentity();
-            log.Info($"User {user} called SubmitEventForm - Params: /r/n agentId: {agentId} \r\n title: {title} \r\n start date: {startDate} \r\n end date: {endDate} \r\n fullDay: {fullDay} \r\n startTime: {startTime} \r\n endTime: {endTime} \r\n notes: {notes}");
+            var WFMUser = getWFMUser(user.LdapUserId);
+            if (WFMUser == null) return JsonConvert.SerializeObject(new { success = false, msg = "You are not authorized to access WFM Dashboard" });
+
+            log.Info($"User {user.LdapUserId} called SubmitEventForm - Params: /r/n agentId: {agentId} \r\n title: {title} \r\n start date: {startDate} \r\n end date: {endDate} \r\n fullDay: {fullDay} \r\n startTime: {startTime} \r\n endTime: {endTime} \r\n notes: {notes}");
             string msg = "";
             //bool success = false;
             var googleAuth = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata()).AuthorizeAsync(cancellationToken);
@@ -91,8 +106,11 @@ namespace WFMDashboard.Controllers
         public async Task<string> DeleteEvent(CancellationToken cancellationToken, int id)
         {
             var user = HttpContext.KmIdentity();
+            var WFMUser = getWFMUser(user.LdapUserId);
+            if (WFMUser == null) return JsonConvert.SerializeObject(new { success = false, msg = "You are not authorized to access WFM Dashboard" });
+
             string msg = "";
-            log.Info($"User {user} called DeleteEvent /r/n id: {id}");
+            log.Info($"User {user.LdapUserId} called DeleteEvent /r/n id: {id}");
             var googleAuth = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata()).AuthorizeAsync(cancellationToken);
             var success = WFMHelper.DeleteEvent(googleAuth, id, out msg);
             return JsonConvert.SerializeObject(new { success = success, msg = msg });
@@ -105,7 +123,7 @@ namespace WFMDashboard.Controllers
         //public async Task<string> CreateDownByReport(CancellationToken cancellationToken)
         //{
         //    var user = HttpContext.KmIdentity();
-        //    log.Info($"User {user} created Down By Report");
+        //    log.Info($"User {user.LdapUserId} created Down By Report");
         //    string msg = "";
         //    bool success = false;
         //    var googleAuth = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata()).AuthorizeAsync(cancellationToken);
@@ -116,11 +134,13 @@ namespace WFMDashboard.Controllers
         public async Task<ActionResult> CreateDownByReport(CancellationToken cancellationToken)
         {
             var user = HttpContext.KmIdentity();
-            log.Info($"User {user} created Down By Report");
+            var WFMUser = getWFMUser(user.LdapUserId);
+            if (WFMUser == null) return RedirectToAction("Error", new { msg = "You are not authorized to use WFM Dashboard" });
+            log.Info($"User {user.LdapUserId} created Down By Report");
             string msg = "";
             bool success = false;
             var googleAuth = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata()).AuthorizeAsync(cancellationToken);
-            var report = WFMHelper.CreateDownByReport(googleAuth);
+            var report = WFMHelper.CreateDownByReport(googleAuth, out msg);
 
             if (report != null)
             {
@@ -130,17 +150,19 @@ namespace WFMDashboard.Controllers
             }
             else
             {
-                return View("Index");
+                log.Warn("Something went wrong creating Down By report");
+                return RedirectToAction("Error", new { msg = msg});
             }
         }
 
-        public async Task<ActionResult> CreateMOWReport()
+        public ActionResult CreateMOWReport()
         {
             var user = HttpContext.KmIdentity();
-            log.Info($"User {user} created MOW Report");
+            var WFMUser = getWFMUser(user.LdapUserId);
+            if (WFMUser == null) return RedirectToAction("Error", new { msg = "You are not authorized to use WFM Dashboard" });
+            log.Info($"User {user.LdapUserId} created MOW Report");
             string msg = "";
-            bool success = false;
-            var report = WFMHelper.CreateMOWReport();
+            var report = WFMHelper.CreateMOWReport(out msg);
 
             if (report != null)
             {
@@ -150,7 +172,8 @@ namespace WFMDashboard.Controllers
             }
             else
             {
-                return View("Index");
+                log.Warn("Something went wrong creating MOW report");
+                return RedirectToAction("Error", new { msg = msg });
             }
             //success = WFMHelper.CreateMOWReport();
             //return JsonConvert.SerializeObject(new { success = success, msg = msg });
@@ -165,13 +188,15 @@ namespace WFMDashboard.Controllers
         {
             var monday = DateTime.Parse(mondayString);
             var mowSchedule = WFMHelper.GetMowSchedule(monday);
-            return JsonConvert.SerializeObject(new { mowSchedule = mowSchedule, success = mowSchedule != null});
+            return JsonConvert.SerializeObject(new { mowSchedule = mowSchedule, success = mowSchedule != null });
         }
 
         public string SubmitIcmForm(int month, int year, int agentNo)
         {
             var user = HttpContext.KmIdentity();
-            log.Info($"User {user} called SubmitIcmForm - Params: /r/n month: {month} \r\n year: {year} \r\n agentNo: {agentNo}");
+            var WFMUser = getWFMUser(user.LdapUserId);
+            if (WFMUser == null) return JsonConvert.SerializeObject(new { success = false, msg = "You are not authorized to access WFM Dashboard" });
+            log.Info($"User {user.LdapUserId} called SubmitIcmForm - Params: /r/n month: {month} \r\n year: {year} \r\n agentNo: {agentNo}");
             string msg;
             bool success;
             var icmSchedule = WFMHelper.SubmitIcmForm(month, year, agentNo, out msg, out success);
@@ -180,10 +205,14 @@ namespace WFMDashboard.Controllers
             return JsonConvert.SerializeObject(new { success = success, msg = msg, icmSchedule = icmSchedule });
         }
 
+
         public string DeleteMowRow(int rowId)
         {
             var user = HttpContext.KmIdentity();
-            log.Info($"User {user} called DeleteMowRow - Params: /r/n id: {rowId}");
+            var WFMUser = getWFMUser(user.LdapUserId);
+            if (WFMUser == null) return JsonConvert.SerializeObject(new { success = false, msg = "You are not authorized to access WFM Dashboard" });
+
+            log.Info($"User {user.LdapUserId} called DeleteMowRow - Params: /r/n id: {rowId}");
             string msg;
             var success = WFMHelper.DeleteMowRow(rowId, out msg);
             return JsonConvert.SerializeObject(new { success = success, msg = msg });
@@ -192,7 +221,9 @@ namespace WFMDashboard.Controllers
         public string SubmitMowForm(MowFormInput Item, string MondayString)
         {
             var user = HttpContext.KmIdentity();
-            log.Info($"User {user} called SubmitMowForm");
+            var WFMUser = getWFMUser(user.LdapUserId);
+            if (WFMUser == null) return JsonConvert.SerializeObject(new { success = false, msg = "You are not authorized to access WFM Dashboard" });
+            log.Info($"User {user.LdapUserId} called SubmitMowForm /r/n/ MondayString: {MondayString} \r\n InputItem: {Item.ToString()}");
             string msg;
             bool success;
             var mowSchedule = WFMHelper.SubmitMowForm(Item, MondayString, out msg, out success);
@@ -204,6 +235,10 @@ namespace WFMDashboard.Controllers
 
         public string SubmitLateShiftForm(string date, int agentNo)
         {
+            var user = HttpContext.KmIdentity();
+            var WFMUser = getWFMUser(user.LdapUserId);
+            if (WFMUser == null) return JsonConvert.SerializeObject(new { success = false, msg = "You are not authorized to access WFM Dashboard" });
+            log.Info($"User {user.LdapUserId} called SubmitLateShiftForm /r/n/ date: {date} \r\n agentNo: {agentNo}");
             string msg;
             var success = WFMHelper.SubmitLateShiftForm(date, agentNo, out msg);
             var lateShift = WFMHelper.GetLateShift();
@@ -216,11 +251,27 @@ namespace WFMDashboard.Controllers
         public async Task<ActionResult> LogOutGoogle(CancellationToken cancellationToken)
         {
             var user = HttpContext.KmIdentity();
-            log.Info($"User {user} logged out of google calendar");
+            log.Info($"User {user.LdapUserId} logged out of google calendar");
             await EFDataStore.ClearAsyncStatic();
 
             return Redirect(ConfigurationManager.AppSettings["LogOutRedirect"]);
         }
 
+
+        //Misc
+
+        public ActionResult Error(string msg)
+        {
+            if (!string.IsNullOrWhiteSpace(msg))
+                ViewBag.Msg = msg;
+            return View();
+        }
+        private WFMConfig.WFMUser getWFMUser(string ldapUserId)
+        {
+            var wfmUser = WFM.Config.GetUser(ldapUserId);
+            if (wfmUser != null) return wfmUser;
+            log.Warn($"User {ldapUserId} attempted to use WFM Dashboard");
+            return null;
+        }
     }
 }

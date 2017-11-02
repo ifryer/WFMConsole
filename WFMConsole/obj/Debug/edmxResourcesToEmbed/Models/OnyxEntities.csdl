@@ -8,6 +8,7 @@
     <EntitySet Name="BUS_WFMDashboard_ReportLog" EntityType="OnyxModel.BUS_WFMDashboard_ReportLog" />
     <EntitySet Name="BUS_WFMDashboard_WFO_Schedule" EntityType="OnyxModel.BUS_WFMDashboard_WFO_Schedule" />
     <EntitySet Name="BUS_WFMDashboard_LateShiftManager" EntityType="OnyxModel.BUS_WFMDashboard_LateShiftManager" />
+    <EntitySet Name="BUS_WFMDashboard_Action_History" EntityType="OnyxModel.BUS_WFMDashboard_Action_History" />
   </EntityContainer>
   <EntityType Name="BUS_WFMDashboard_Event">
     <Key>
@@ -85,5 +86,20 @@
     <Property Name="FirstName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
     <Property Name="LastName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
     <Property Name="Date" Type="DateTime" Nullable="false" Precision="0" />
+  </EntityType>
+  <EntityType Name="BUS_WFMDashboard_Action_History">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="EventId" Type="Int32" />
+    <Property Name="ScheduleId" Type="Int32" />
+    <Property Name="ScheduleType" Type="String" MaxLength="25" FixedLength="false" Unicode="true" />
+    <Property Name="Action" Type="String" Nullable="false" MaxLength="128" FixedLength="false" Unicode="true" />
+    <Property Name="Description" Type="String" Nullable="false" MaxLength="128" FixedLength="false" Unicode="true" />
+    <Property Name="Before" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+    <Property Name="After" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+    <Property Name="PerformedBy" Type="String" Nullable="false" MaxLength="24" FixedLength="false" Unicode="true" />
+    <Property Name="PerformedAt" Type="DateTime" Nullable="false" Precision="3" />
   </EntityType>
 </Schema>

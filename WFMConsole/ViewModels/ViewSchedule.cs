@@ -84,6 +84,16 @@ namespace WFMConsole.ViewModels
     {
         public List<MowFormInputItem> InputItems { get; set; }
         public string Date { get; set; }
+
+        override public string ToString()
+        {
+            var to_s = $"Date: {Date} \r\n InputItems: \r\n";
+            foreach (var item in InputItems)
+            {
+                to_s += $"{item.ToString()} \r\n";
+            }
+            return to_s;
+        }
     }
     public class MowFormInputItem
     {
@@ -91,5 +101,12 @@ namespace WFMConsole.ViewModels
         public string shiftEnd { get; set; }
         public string task { get; set; }
         public int agentNo { get; set; }
+        public int rowId { get; set; }
+        override public string ToString()
+        {
+            var to_s = $" shiftStart: {shiftStart}  -  shiftEnd: {shiftEnd}  -  task: {task}  -  agentNo: {agentNo}  -  rowId: {rowId}";
+
+            return to_s;
+        }
     }
 }

@@ -178,7 +178,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Configuration\" />
     <Folder Include="Views\AuthCallback\" />
   </ItemGroup>
   <ItemGroup>
@@ -189,8 +188,12 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Classes\AppFlowMetadata.cs" />
     <Compile Include="Classes\AuthorizationCodeMvcAppOverride.cs" />
+    <Compile Include="Configuration\Configuration.cs" />
     <Compile Include="Classes\EfDataStore.cs" />
     <Compile Include="Classes\Extensions.cs" />
+    <Compile Include="Models\BUS_WFMDashboard_Action_History.cs">
+      <DependentUpon>OnyxEntities.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\BUS_WFMDashboard_ICM.cs">
       <DependentUpon>OnyxEntities.tt</DependentUpon>
     </Compile>

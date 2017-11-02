@@ -32,5 +32,6 @@ namespace WFMConsole.Models
         public virtual DbSet<BUS_WFMDashboard_ReportLog> BUS_WFMDashboard_ReportLog { get; set; }
         public virtual DbSet<BUS_WFMDashboard_WFO_Schedule> BUS_WFMDashboard_WFO_Schedule { get; set; }
         public virtual DbSet<BUS_WFMDashboard_LateShiftManager> BUS_WFMDashboard_LateShiftManager { get; set; }
+        public virtual DbSet<BUS_WFMDashboard_Action_History> BUS_WFMDashboard_Action_History { get; set; }
     }
 }

@@ -74,5 +74,16 @@
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
+    <EntitySetMapping Name="BUS_WFMDashboard_LateShiftManager">
+      <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_LateShiftManager">
+        <MappingFragment StoreEntitySet="BUS_WFMDashboard_LateShiftManager">
+          <ScalarProperty Name="Date" ColumnName="Date" />
+          <ScalarProperty Name="LastName" ColumnName="LastName" />
+          <ScalarProperty Name="FirstName" ColumnName="FirstName" />
+          <ScalarProperty Name="AgentNo" ColumnName="AgentNo" />
+          <ScalarProperty Name="Id" ColumnName="Id" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
   </EntityContainerMapping>
 </Mapping>

@@ -47,6 +47,8 @@
                                     <select class="form-control" id="event-type-modal" placeholder="">
                                         <option value="PTO (Unplanned)"> Unplanned PTO </option>
                                         <option value="PTO (Planned)"> Planned PTO </option>
+                                        <option value="Unpaid Time Off (Unplanned)"> Unpaid Time Off (Unplanned) </option>
+                                        <option value="Unpaid Time Off (Planned)"> Unpaid Time Off (Planned)</option>
                                         <option value="Training"> Training </option>
                                         <option value="LOA"> LOA </option>
                                         <option value="Other"> Other </option>
@@ -93,11 +95,11 @@
                 MOW
             </a>
         </li>
-        <li>
+        @*<li>
             <a href="#eventsTab" data-toggle="tab" class="tabMenuItem" id="events-tab">
                 Events
             </a>
-        </li>
+        </li>*@
     </ul>
     <div class="tab-content">
         <div id="homeTab" class="tab-pane in active">
@@ -274,15 +276,13 @@
         </div>
         <div id="reportsTab" class="tab-pane">
             <div class="row margin-top" id="report-area">
-                <a class="btn btn-sm btn-primary" target="_blank" href="~/Home/CreateDownByReport">View Down By Report</a>
-                <a class="btn btn-sm btn-primary" target="_blank" href="~/Home/CreateMowReport">View MOW Report</a>
-
                 <div class="col-md-4">
-                    <button class="btn btn-default" id="create-down-by-report-btn" disabled="disabled"> Create Down By Report</button>
+                    <button style="display:none" class="btn btn-default" id="create-down-by-report-btn" disabled="disabled"> Create Down By Report</button>
+                    <a class="btn btn-sm btn-primary" target="_blank" href="~/Home/CreateDownByReport">View Down By Report</a>
                     <p class="help-block sent-label"> Last sent <span id="down-by-last-sent-date"> - </span> </p>
-                </div>
-                <div class="col-md-4">
-                    <button class="btn btn-default" id="create-mow-report-btn" disabled="disabled"> Create MOW Report</button>
+                    <br />
+                    <button style="display:none" class="btn btn-default" id="create-mow-report-btn" disabled="disabled"> Create MOW Report</button>
+                    <a class="btn btn-sm btn-primary" target="_blank" href="~/Home/CreateMowReport">View MOW Report</a>
                     <p class="help-block sent-label"> Last sent <span id="mow-last-sent-date"> - </span> </p>
                 </div>
             </div>
@@ -291,7 +291,7 @@
             <div class="row">
                 <div class="col-md-6">
                     <div style="border:1px solid #dddddd">
-                        <h4 class="center-text"> Late Shift Manager </h4>
+                        <h4 class="center-text mow-table-title"> Late Shift Manager </h4>
                         <div class="late-shift-manager-div">
                             <table style="margin-bottom: 0" class="table table-condensed">
                                 <thead><tr><th style="width: 170px;">Date</th><th>Late Shift Manager</th><th></th></tr></thead>
@@ -329,7 +329,7 @@
                     </div>
                     <br />
                     <div style="border:1px solid #dddddd">
-                        <h4 class="center-text"> Inventory Control Manager Schedule</h4>
+                        <h4 class="center-text mow-table-title"> Inventory Control Manager Schedule</h4>
                         <div class="icm-schedule-list">
                         </div>
                     </div>
@@ -384,7 +384,7 @@
                 </div>
                 <div class="col-md-6">
                     <div style="border: 1px solid #dddddd">
-                        <h4 class="center-text"> MOW & WFO Schedule </h4>
+                        <h4 class="center-text mow-table-title"> MOW & WFO Schedule </h4>
                         <h5 class="center-text"><button class="btn btn-xs btn-default mow-week-left"> <span class="glyphicon glyphicon-chevron-left"></span> </button> <span id="mow-wfo-schedule-date-span"></span> <button class="btn btn-xs btn-default mow-week-right"> <span class="glyphicon glyphicon-chevron-right"></span> </button></h5>
                         <div class="mow-schedule-list">
                         </div>
@@ -423,7 +423,7 @@
                 </div>
             </div>
         </div>
-        <div id="eventsTab" class="tab-pane">
+        @*<div id="eventsTab" class="tab-pane">
             
             <div class="col-md-12 schedule-area">
                 <table class="schedule-table table table-condensed" id="schedule-table">
@@ -441,7 +441,7 @@
                     <tbody id="schedule-table-body"></tbody>
                 </table>
             </div>
-        </div>
+        </div>*@
     </div>
 </div>
 

@@ -34,7 +34,7 @@
     <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="Year" Type="int" Nullable="false" />
     <Property Name="Month" Type="int" Nullable="false" />
-    <Property Name="Manager" Type="nvarchar" MaxLength="50" Nullable="false" />
+    <Property Name="Manager" Type="nvarchar" MaxLength="150" Nullable="false" />
     <Property Name="AgentNo" Type="int" Nullable="false" />
   </EntityType>
   <EntityType Name="BUS_WFMDashboard_ICM_Order">
@@ -45,6 +45,16 @@
     <Property Name="ManagerName" Type="nvarchar" MaxLength="50" Nullable="false" />
     <Property Name="AgentNo" Type="int" Nullable="false" />
     <Property Name="Order" Type="int" Nullable="false" />
+  </EntityType>
+  <EntityType Name="BUS_WFMDashboard_LateShiftManager">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="AgentNo" Type="int" Nullable="false" />
+    <Property Name="FirstName" Type="nvarchar" MaxLength="50" Nullable="false" />
+    <Property Name="LastName" Type="nvarchar" MaxLength="50" Nullable="false" />
+    <Property Name="Date" Type="date" Nullable="false" />
   </EntityType>
   <EntityType Name="BUS_WFMDashboard_ReportLog">
     <Key>
@@ -72,6 +82,7 @@
     <EntitySet Name="BUS_WFMDashboard_Google_Credentials" EntityType="Self.BUS_WFMDashboard_Google_Credentials" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="BUS_WFMDashboard_ICM" EntityType="Self.BUS_WFMDashboard_ICM" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="BUS_WFMDashboard_ICM_Order" EntityType="Self.BUS_WFMDashboard_ICM_Order" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="BUS_WFMDashboard_LateShiftManager" EntityType="Self.BUS_WFMDashboard_LateShiftManager" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="BUS_WFMDashboard_ReportLog" EntityType="Self.BUS_WFMDashboard_ReportLog" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="BUS_WFMDashboard_WFO_Schedule" EntityType="Self.BUS_WFMDashboard_WFO_Schedule" Schema="dbo" store:Type="Tables" />
   </EntityContainer>
