@@ -84,6 +84,7 @@ indexScript = (function () {
                 }
             }
         });
+        $("#repeat-end-date-input").datepicker();
         $(".late-shift-date").datepicker();
         $('#start-end-event-section').datepair();
         $('#start-end-event-section-modal').datepair();
@@ -98,9 +99,13 @@ indexScript = (function () {
 
     $(document).on("click", "#mow-tab.unclicked", function () {
         $(this).removeClass("unclicked")
-        $(".mow-schedule-list").scrollTop(
-            $("#mow-date-" + new moment().format("MMDDYYYY")).offset().top - $(".mow-schedule-list").offset().top + $(".mow-schedule-list").scrollTop()
-        );
+        if ($("#mow-date-" + new moment().format("MMDDYYYY")).length > 0)
+        {
+            $(".mow-schedule-list").scrollTop(
+                $("#mow-date-" + new moment().format("MMDDYYYY")).offset().top - $(".mow-schedule-list").offset().top + $(".mow-schedule-list").scrollTop()
+            );
+        }
+        
     })
 
     $(document).on("click", ".log-off-google", function () {
@@ -154,7 +159,147 @@ indexScript = (function () {
 
     });
 
+
+    //Repeating event modal
+    
+
+    //TODO: Change event for selectbox
+    $(document).on("change", "#repeat-type", function () {
+        let repeat_type = $(this).val();
+        $("#repeat-every-weekday-checkboxes-tr").hide();
+        $("#repeat-every-number-tr").hide()
+        switch (repeat_type) {
+            case "0": //Daily
+                $("#repeat-every-number-tr").show();
+                $("#repeat-every-unit").html("days");
+                break;
+            case "1": //Weekday
+                //Hide all
+                break;
+            case "2": // M W F
+                //Hide all
+                break;
+            case "3": // TU TH
+                //Hide all
+                break;
+            case "4": //Weekly
+                $("#repeat-every-number-tr").show();
+                $("#repeat-every-unit").html("weeks");
+                $("#repeat-every-weekday-checkboxes-tr").show();
+                break;
+            case "5": //Monthly
+                $("#repeat-every-number-tr").show();
+                $("#repeat-every-unit").html("months");
+                //TODO: Add new thing to choose - repeat by day on month or day number (i.e first thursday of each month, OR every month on the 6th)
+                break;
+            case "6": //Yearly
+                $("#repeat-every-number-tr").show();
+                $("#repeat-every-unit").html("years")
+                break;
+            default:
+        }
+    });
+
+
+    //TODO: submit btn
+    $(document).on("click", "#save-repeat-modal-btn", function () {
+        //Here are all the values we need to submit for this...
+        let validationErrors = false;
+        let validationText = "";
+        let repeat_type = $("#repeat-type").val(); //repeat type, 0-6 same as google calendar
+        let repeat_every_number = $("#repeat-every-number").val(); // repeat every X ___s
+        let repeat_on_days = ""; //MO TU WE , etc.
+         //Get the days of the week to mrepeat on
+        $.each($(".repeat-day-checkboxes input:checked"), function (index, item) {
+            repeat_on_days += $(item).val() + " ";
+        })
+        let repeat_start_date = $("#repeat-start-date").val();
+        let end_type = $(".repeat-end:checked").val(); // Get the repeat end type (Never, Number, Date)
+        let end_date = $("#repeat-end-date-input").val();
+        let end_after_number = $("#repeat-end-count-input").val();
+        let origin_form = $(this).attr("origin");
+
+        if (repeat_type == "0" || repeat_type == "4" || repeat_type == "5" || repeat_type == "6")
+        {
+            if (Number.parseInt(repeat_every_number) <= 0)
+            {
+                validationErrors = true;
+                validationText += " Please enter a valid repeat frequency.  " + repeat_every_number + " is not a valid input. \r\n "
+            }
+            if (repeat_type == "4")
+            {
+                if (repeat_on_days == "")
+                {
+                    validationErrors = true;
+                    validationText += " Please choose at least one day of the week to repeat the event on. "
+                }
+            }
+        }
+        
+        if (!validationErrors)
+        {
+            $("#repeating-event-modal").modal("hide")
+            if (origin_form == "create")
+                var checkbox = $("#repeatingCheckbox");
+            else
+                var checkbox = $("#repeatingCheckbox-modal");
+            checkbox.attr("repeat-type", repeat_type);
+            checkbox.attr("repeat-every-number", repeat_every_number);
+            checkbox.attr("repeat-on-days", repeat_on_days);
+            checkbox.attr("end-type", end_type);
+            checkbox.attr("end-date", end_date);
+            checkbox.attr("end-after-number", end_after_number);
+        }
+        else
+        {
+            showSmallAlert(validationText)
+        }
+
+        //TODO: Add some validation to make sure everything was filled out correctly
+
+    });
+
+    $(document).on("change", ".repeat-end", function () {
+        let end_type = $(".repeat-end:checked").val() // Get the repeat end type (Never, Number, Date)
+        if (end_type == "number") {
+            $("#repeat-end-date-input").attr("disabled", "disabled")
+            $("#repeat-end-count-input").removeAttr("disabled")
+        }
+        if (end_type == "date") {
+            $("#repeat-end-count-input").attr("disabled", "disabled")
+            $("#repeat-end-date-input").removeAttr("disabled")
+        }
+        if (end_type == "never") {
+            $("#repeat-end-count-input").attr("disabled", "disabled")
+            $("#repeat-end-date-input").attr("disabled", "disabled")
+        }
+    });
+
+
+    $(document).on("click", "#close-repeat-modal", function () {
+        let origin = $("#save-repeat-modal-btn").attr("origin")
+        $("#repeating-event-modal").modal("hide")
+        if(origin == "create")
+            $("#repeatingCheckbox").removeAttr("checked");
+        else
+            $("#repeatingCheckbox-modal").removeAttr("checked");
+    });
+
+
+
     //Edit Event Form
+
+    //TODO: Click event for repeating checkbox
+    $(document).on("click", "#repeatingCheckbox-modal", function () {
+        $("#save-repeat-modal-btn").attr("origin", "modal")
+        $("#repeating-event-modal").modal("toggle")
+        let start_date = $("#event-start-date").val();
+        $("#repeat-start-date").val(start_date);
+        $("#repeat-type").val("0");
+        $("#repeat-every-weekday-checkboxes-tr").hide();
+        $("#repeat-every-number-tr").show();
+        $("#repeat-every-unit").html("days");
+    });
 
     $("#fullDayCheckbox-modal").on("change", function () {
         if (this.checked) {
@@ -207,6 +352,17 @@ indexScript = (function () {
         let eventType = $("#event-type-modal").val();
         let eventTitle = $("#event-title-modal").val();
         let eventId = $("#editing-event-id").val();
+        let checkbox = $("#repeatingCheckbox-modal")
+        let repeatingEvent = checkbox.is(":checked")
+        //if (checkbox.attr("checked")) {
+            let repeatType = checkbox.attr("repeat-type");
+            let repeatEveryNumber = checkbox.attr("repeat-every-number");
+            let repeatOnDays = checkbox.attr("repeat-on-days");
+            let repeatEndType = checkbox.attr("end-type");
+            let repeatEndDate = checkbox.attr("end-date");
+            let repeatEndAfterNumber = checkbox.attr("end-after-number");
+        //}
+
 
         let originalEvent = $('#event-calendar').fullCalendar('clientEvents', calendarId)[0];
 
@@ -230,17 +386,26 @@ indexScript = (function () {
             dataType: "json",
             type: "post",
             data: {
-                agentId: 0,
-                eventId: eventId,
-                title: eventTitle,
-                color: color,
-                startDate: startDate,
-                endDate: endDate,
-                fullDay: fullDay,
-                startTime: startTime,
-                endTime: endTime,
-                notes: notes,
-                eventType: eventType
+                inputForm: {
+                    eventId: eventId,
+                    agentId: agentId,
+                    title: eventTitle,
+                    color: color,
+                    startDate: startDate,
+                    endDate: endDate,
+                    fullDay: fullDay,
+                    startTime: startTime,
+                    endTime: endTime,
+                    notes: notes,
+                    eventType: eventType,
+                    repeatType: repeatType,
+                    repeatEveryNumber: repeatEveryNumber,
+                    repeatOnDays: repeatOnDays,
+                    repeatEndType: repeatEndType,
+                    repeatEndDate: repeatEndDate,
+                    repeatEndAfterNumber: repeatEndAfterNumber,
+                    repeatingEvent: repeatingEvent
+                }
             },
             url: toUrl("Home/SubmitEventForm"),
             success: function (data) {
@@ -270,10 +435,25 @@ indexScript = (function () {
                 }
             }
         });
-
     }
 
     //Create Event Form
+
+    //TODO: Click event for repeating checkbox
+    $(document).on("click", "#repeatingCheckbox", function () {
+        if ($(this).is(":checked"))
+        {
+            $("#save-repeat-modal-btn").attr("origin", "create")
+            $("#repeating-event-modal").modal("toggle")
+            let start_date = $("#event-start-date").val();
+            $("#repeat-start-date").val(start_date);
+            $("#repeat-type").val("0");
+            $("#repeat-every-weekday-checkboxes-tr").hide();
+            $("#repeat-every-number-tr").show();
+            $("#repeat-every-unit").html("days");
+        }
+        
+    });
 
     $("#pto-section").on("click", "#new-event-btn", function () {
         $(".event-form").slideToggle("fast");
@@ -323,11 +503,23 @@ indexScript = (function () {
 
         let startTime = $("#event-start-time").val();
         let endTime = $("#event-end-time").val();
-        let fullDay = $("#fullDayCheckbox:checked").length > 0
+        let fullDay = $("#fullDayCheckbox:checked").length > 0;
         let notes = $("#event-notes").val();
         let eventType = $("#event-type").val();
         let eventTitle = $("#event-title").val();
         let agentId = $("#select-name-staff").val();
+        let checkbox = $("#repeatingCheckbox")
+        let repeatingEvent = checkbox.is(":checked")
+        //if (checkbox.attr("checked"))
+        //{
+            let repeatType = checkbox.attr("repeat-type");
+            let repeatEveryNumber = checkbox.attr("repeat-every-number");
+            let repeatOnDays = checkbox.attr("repeat-on-days");
+            let repeatEndType = checkbox.attr("end-type");
+            let repeatEndDate = checkbox.attr("end-date");
+            let repeatEndAfterNumber = checkbox.attr("end-after-number");
+        //}
+        
 
         if (!fullDay && (startTime == null || startTime == "" || endTime == null || endTime == ""))
         {
@@ -355,17 +547,27 @@ indexScript = (function () {
                 dataType: "json",
                 type: "post",
                 data: {
-                    eventId: 0,
-                    agentId: agentId,
-                    title: eventTitle,
-                    color: color,
-                    startDate: startDate,
-                    endDate: endDate,
-                    fullDay: fullDay,
-                    startTime: startTime,
-                    endTime: endTime,
-                    notes: notes,
-                    eventType: eventType
+                    inputForm: {
+                        eventId: 0,
+                        agentId: agentId,
+                        title: eventTitle,
+                        color: color,
+                        startDate: startDate,
+                        endDate: endDate,
+                        fullDay: fullDay,
+                        startTime: startTime,
+                        endTime: endTime,
+                        notes: notes,
+                        eventType: eventType,
+                        repeatType: repeatType,
+                        repeatEveryNumber: repeatEveryNumber,
+                        repeatOnDays: repeatOnDays,
+                        repeatEndType: repeatEndType,
+                        repeatEndDate: repeatEndDate,
+                        repeatEndAfterNumber: repeatEndAfterNumber,
+                        repeatingEvent: repeatingEvent
+                    }
+                    
                 },
                 url: toUrl("Home/SubmitEventForm"),
                 success: function (data) {
@@ -405,7 +607,7 @@ indexScript = (function () {
         var keycode = (event.keyCode ? event.keyCode : event.which);
         if (keycode == '13') {
             let tbody = $(this).parents("tbody");
-            AppendNewMowRow(tbody)
+            AppendNewMowRow(tbody);
             $(this).blur();
 
         }

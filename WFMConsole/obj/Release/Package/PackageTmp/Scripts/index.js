@@ -84,6 +84,7 @@ indexScript = (function () {
                 }
             }
         });
+        $("#repeat-end-date").datepicker();
         $(".late-shift-date").datepicker();
         $('#start-end-event-section').datepair();
         $('#start-end-event-section-modal').datepair();
@@ -154,7 +155,139 @@ indexScript = (function () {
 
     });
 
+
+    //Repeating event modal
+    
+
+    //TODO: Change event for selectbox
+    $(document).on("change", "#repeat-type", function () {
+        let repeat_type = $(this).val();
+        $("#repeat-every-weekday-checkboxes-tr").hide();
+        $("#repeat-every-number-tr").hide()
+        switch (repeat_type) {
+            case "0": //Daily
+                $("#repeat-every-number-tr").show();
+                $("#repeat-every-unit").html("days");
+                break;
+            case "1": //Weekday
+                //Hide all
+                break;
+            case "2": // M W F
+                //Hide all
+                break;
+            case "3": // TU TH
+                //Hide all
+                break;
+            case "4": //Weekly
+                $("#repeat-every-number-tr").show();
+                $("#repeat-every-unit").html("weeks");
+                $("#repeat-every-weekday-checkboxes-tr").show();
+                break;
+            case "5": //Monthly
+                $("#repeat-every-number-tr").show();
+                $("#repeat-every-unit").html("months");
+                //TODO: Add new thing to choose - repeat by day on month or day number (i.e first thursday of each month, OR every month on the 6th)
+                break;
+            case "6": //Yearly
+                $("#repeat-every-number-tr").show();
+                $("#repeat-every-unit").html("years")
+                break;
+            default:
+        }
+    });
+
+
+    //TODO: submit btn
+    $(document).on("click", "#save-repeat-modal-btn", function () {
+        //Here are all the values we need to submit for this...
+        let validationErrors = false;
+        let validationText = "";
+        let repeat_type = $("#repeat-type") //repeat type, 0-6 same as google calendar
+        let repeat_number = $("#repeat-number") // repeat every X ___s
+        let repeat_days = "";
+         //Get the days of the week to mrepeat on
+        $.each($(".repeat-day-checkboxes input:checked"), function (index, item) {
+            repeat_days += $(item).val() + " ";
+        })
+        console.log(repeat_days)
+        let repeat_start_date = $("#repeat-start-date")
+        let end_type = $(".repeat-end:checked") // Get the repeat end type (Never, Number, Date)
+        let end_date = $("#repeat-end-date-input").val();
+        let end_number = $("#repeat-end-count-input").val();
+        let origin_form = $(this).attr("origin");
+
+        if (repeat_type == "0" || repeat_type == "4" || repeat_type == "5" || repeat_type == "6")
+        {
+            if (Number.parseInt(repeat_number) <= 0)
+            {
+                validationErrors = true;
+                validationText += " Please enter a valid repeat frequency.  " + repeat_number + " is not a valid input. \r\n "
+            }
+            if (repeat_type == "4")
+            {
+                if (repeat_days == "")
+                {
+                    validationErrors = true;
+                    validationText += " Please choose at least one day of the week to repeat the event on. "
+                }
+            }
+        }
+        
+
+        if (!validationErrors)
+        {
+            $("#repeating-event-modal").modal("hide")
+        }
+        else
+        {
+            showSmallAlert(validationText)
+        }
+
+        //TODO: Add some validation to make sure everything was filled out correctly
+
+    });
+
+    $(document).on("change", ".repeat-end", function () {
+        let end_type = $(".repeat-end:checked").val() // Get the repeat end type (Never, Number, Date)
+        if (end_type == "number") {
+            $("#repeat-end-date-input").attr("disabled", "disabled")
+            $("#repeat-end-count-input").removeAttr("disabled")
+        }
+        if (end_type == "date") {
+            $("#repeat-end-count-input").attr("disabled", "disabled")
+            $("#repeat-end-date-input").removeAttr("disabled")
+        }
+        if (end_type == "never") {
+            $("#repeat-end-count-input").attr("disabled", "disabled")
+            $("#repeat-end-date-input").attr("disabled", "disabled")
+        }
+    });
+
+
+    $("document").on("click", '#close-repeat-modal', function () {
+        let origin = $("#save-repeat-modal-btn").attr("origin")
+        $("#repeating-event-modal").modal("hide")
+        if(origin == "create")
+            $("#repeatingCheckbox").removeAttr("checked");
+        else
+            $("#repeatingCheckbox-modal").removeAttr("checked");
+    });
+
+
+
     //Edit Event Form
+
+    //TODO: Click event for repeating checkbox
+    $(document).on("click", "#repeatingCheckbox-modal", function () {
+        $("#save-repeat-modal-btn").attr("origin", "modal")
+        $("#repeating-event-modal").modal("toggle")
+        let start_date = $("#event-start-date").val();
+        $("#repeat-start-date").val(start_date);
+        $("#repeat-type").val("0");
+        $("#repeat-every-weekday-checkboxes-tr").hide();
+        $("#repeat-every-number-tr").show();
+        $("#repeat-every-unit").html("days");
+    });
 
     $("#fullDayCheckbox-modal").on("change", function () {
         if (this.checked) {
@@ -275,6 +408,18 @@ indexScript = (function () {
 
     //Create Event Form
 
+    //TODO: Click event for repeating checkbox
+    $(document).on("click", "#repeatingCheckbox", function () {
+        $("#save-repeat-modal-btn").attr("origin", "create")
+        $("#repeating-event-modal").modal("toggle")
+        let start_date = $("#event-start-date").val();
+        $("#repeat-start-date").val(start_date);
+        $("#repeat-type").val("0");
+        $("#repeat-every-weekday-checkboxes-tr").hide();
+        $("#repeat-every-number-tr").show();
+        $("#repeat-every-unit").html("days");
+    });
+
     $("#pto-section").on("click", "#new-event-btn", function () {
         $(".event-form").slideToggle("fast");
         editedEventTitle = false;
@@ -324,7 +469,7 @@ indexScript = (function () {
         let startTime = $("#event-start-time").val();
         let endTime = $("#event-end-time").val();
         let fullDay = $("#fullDayCheckbox:checked").length > 0
-        let notes = $("#event-notes").val();
+        let notes = $("#event-notes").val();to
         let eventType = $("#event-type").val();
         let eventTitle = $("#event-title").val();
         let agentId = $("#select-name-staff").val();
@@ -405,7 +550,7 @@ indexScript = (function () {
         var keycode = (event.keyCode ? event.keyCode : event.which);
         if (keycode == '13') {
             let tbody = $(this).parents("tbody");
-            AppendNewMowRow(tbody)
+            AppendNewMowRow(tbody);
             $(this).blur();
 
         }
@@ -775,6 +920,18 @@ indexScript = (function () {
         SubmitIcmForm();
     })
 
+    $(document).on("click", ".edit-icm-row-btn", function () {
+        let tr = $(this).parents("tr");
+        let month = $(this).attr("month");
+        let year = $(this).attr("year");
+        let manager = $(this).attr("manager");
+
+        $(".new-icm-form").slideDown("fast");
+        $("#icm-month").val(month);
+        $("#icm-year").val(year);
+        $("#icm-manager").val(manager);
+    });
+
     function SubmitIcmForm() {
         let month = $("#icm-month").val();
         let year = $("#icm-year").val();
@@ -914,7 +1071,7 @@ indexScript = (function () {
                                     <tbody>
                                 `;
             $.each(item, function (i, icmRow) {
-                icmTableHtml += `<tr><td>` + MonthList[icmRow.Month] + `</td><td>` + icmRow.ManagerName + `</td></tr>`;
+                icmTableHtml += `<tr><td class="icm-month-td">` + MonthList[icmRow.Month] + `</td><td class="icm-manager-td">` + icmRow.ManagerName + ` <button manager="` + icmRow.AgentNo + `" month="` + icmRow.Month + `" year="` + index + `" class="btn btn-xs btn-info edit-icm-row-btn pull-right"><span class="glyphicon glyphicon-edit"></span></button></td></tr>`;
             });
             icmTableHtml += `</tbody></table>`
         });

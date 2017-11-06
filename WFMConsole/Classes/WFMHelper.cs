@@ -207,19 +207,19 @@ namespace WFMDashboard.Classes
         }
 
         //Color IDs : 4 = Scheduled Event = Pink ----- 7 = Teal = Training ----- 9 = Blue = Unplanned PTO ----- 10 = Green = Planned PTO ----- 11 = Red = Scheduled Event
-        public static ViewEvent SubmitEventForm(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, int eventId, int agentId, string title, string color, string startDateInput, string endDateInput, bool fullDay, string startTime, string endTime, string notes, string eventType, out string msg)
+        public static ViewEvent SubmitEventForm(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, EventForm inputForm, string user, out string msg)
         {
             try
             {
-                var startDate = $"{startDateInput} {startTime}";
-                var endDate = $"{endDateInput} {endTime}";
+                var startDate = $"{inputForm.startDate} {inputForm.startTime}";
+                var endDate = $"{inputForm.endDate} {inputForm.endTime}";
 
                 var startDateTime = DateTime.Parse(startDate);
                 var endDateTime = DateTime.Parse(endDate);
 
                 if (endDateTime < startDateTime)
                 {
-                    if(fullDay)
+                    if(inputForm.fullDay)
                     {
                         endDateTime = startDateTime.AddDays(1);
                     }
@@ -229,25 +229,25 @@ namespace WFMDashboard.Classes
                         return null;
                     }
                 }
-                if(notes == null)
+                if(inputForm.notes == null)
                 {
-                    notes = title;
+                    inputForm.notes = inputForm.title;
                 }
 
-                if (eventId == 0)
+                if (inputForm.eventId == 0)
                 {
                     msg = "Successfully created event";
                     Agent staffMember;
                     using (var db = new inContact_NGEntities())
                     {
-                        staffMember = db.Agents.Where(t => t.AgentNo == agentId).FirstOrDefault();
+                        staffMember = db.Agents.Where(t => t.AgentNo == inputForm.agentId).FirstOrDefault();
                     }
                     string lastName = staffMember.LastName;
                     string firstName = staffMember.FirstName;
 
-                    var googleEventId = SubmitTimeOff_GoogleCalendar(googleAuth, title, lastName, color, startDateTime, endDateTime, fullDay, notes, eventType, staffMember);
+                    var googleEventId = SubmitTimeOff_GoogleCalendar(googleAuth, inputForm, startDateTime, endDateTime, staffMember);
 
-                    var eventItem = CreateEvent(title, googleEventId, lastName, firstName, color, startDateTime, endDateTime, fullDay, notes, eventType, staffMember);
+                    var eventItem = CreateEvent(googleEventId, inputForm, startDateTime, endDateTime, staffMember, user);
 
                     //SubmitTimeOff_Nice();
 
@@ -256,7 +256,7 @@ namespace WFMDashboard.Classes
                 else
                 {
                     msg = "Successfully updated event";
-                    var eventItem = UpdateEvent(title, eventId, color, startDateTime, endDateTime, fullDay, notes, eventType);
+                    var eventItem = UpdateEvent(inputForm, startDateTime, endDateTime, user);
 
                     var message = UpdateEvent_GoogleCalendar(googleAuth, eventItem);
                     if(message.ToLower().Contains("success"))
@@ -435,13 +435,15 @@ namespace WFMDashboard.Classes
         {
             try
             {
+                //var report = GenerateDownByReport_Old(googleAuth);
                 var report = GenerateDownByReport(googleAuth);
+
                 msg = "Success";
 
                 return report;
 
 
-                //var result = TrapModel.UpdateTrap(user.LdapUserId, updateModel.trapId, updateModel.requestId, updateModel.incidentId, updateModel.model, updateModel.description, updateModel.placement, updateModel.recommendation, updateModel.reason, out msg);
+     
 
                 //string owner = TrapModel.GetTrapOwnerEmail(updateModel.trapId);
 
@@ -482,9 +484,11 @@ namespace WFMDashboard.Classes
 
             // Define parameters of request.
             EventsResource.ListRequest request = service.Events.List(calendarId);
-            
-            request.TimeMin = DateTime.Today.Date; //Start of day
-            request.TimeMax = DateTime.Today.Date.AddHours(23).AddMinutes(59); //End of day
+
+            request.TimeMin = DateTime.Today.AddDays(15); ; //Start of day
+            //request.TimeMax = DateTime.Today.Date.AddHours(23).AddMinutes(59); //End of day
+            request.TimeMax = DateTime.Today.AddDays(30);
+
             request.ShowDeleted = false;
             request.SingleEvents = true;
             //request.MaxResults = 20;
@@ -493,14 +497,14 @@ namespace WFMDashboard.Classes
             // List events.
             Events events = request.Execute();
 
-            //DownByReport report = FillDownByReport(events);
+            DownByReport report = FillDownByReport(events);
 
             //return report;
 
             return null;
         }
 
-        public static DownByReport FillDownByReport_Old(Events events)
+        public static DownByReport FillDownByReport(Events events)
         {
             var report = new DownByReport();
             //var ptoDateEnd = DateTime.Now.AddDays(1).Date.ToString("yyyy-MM-dd"); 
@@ -551,17 +555,13 @@ namespace WFMDashboard.Classes
         public static DownByReport FillDownByReport(List<BUS_WFMDashboard_Event> events)
         {
             var report = new DownByReport();
-            //var ptoDateEnd = DateTime.Now.AddDays(1).Date.ToString("yyyy-MM-dd"); 
+
             var ptoDateEnd = DateTime.Now.AddDays(1).Date;
-            var paidPto = events.Where(t => (t.Color == "10" || t.Color == "9") && t.FullDay && t.EndTime >= ptoDateEnd).ToList();
-            var fullDayTraining = events.Where(t => t.Color == "7" && t.FullDay && t.EndTime >= ptoDateEnd).ToList();
-            fullDayTraining = fullDayTraining.Where(t => !t.Description.ToLower().Contains("cancelled")).ToList();
-            var fullDayOther = events.Where(t => t.Color == "11" && t.FullDay && t.EndTime >= ptoDateEnd).ToList();
-
-            //var partialTraining = events.Items.Where(t => t.ColorId == "7" && t.End.DateTime != null).ToList();
-
-            //CreateDatabaseEvents(events);
-
+            var partialTypeList =  new string [] { "PTO (Unplanned)", "PTO (Planned)", "Unpaid Time Off" };
+            var partialEvents = events.Where(t => !t.FullDay && t.StartTime >= DateTime.Now.Date && t.EndTime <= ptoDateEnd && partialTypeList.Contains(t.EventType)).ToList();
+            var fullDayEvents = events.Where(t => t.FullDay && t.EndTime >= ptoDateEnd).ToList();
+            report = FillDownByReportSectionFullDay(report, fullDayEvents);
+            report = FillDownByReportSectionPartialDay(report, partialEvents);
             var rangeEvents = events.Where(t => !t.FullDay).OrderBy(t => t.StartTime.TimeOfDay).ToList();
             foreach (var item in rangeEvents)
             {
@@ -573,17 +573,10 @@ namespace WFMDashboard.Classes
                 downByEvent.Title = item.Description;
                 report.Events.Add(downByEvent);
             }
-            var darkRedEvents = events.Where(t => t.Color == "11").ToList();
-            var lightRedEvents = events.Where(t => t.Color == "4").ToList();
-
-            report = FillDownByReportSectionFullDay(report, fullDayTraining, "Training");
-            report = FillDownByReportSectionFullDay(report, fullDayOther, "Other");
-            report = FillDownByReportSectionFullDay(report, paidPto, "PTO");
 
             return report;
         }
-
-        public static DownByReport FillDownByReportSectionFullDay(DownByReport report, List<BUS_WFMDashboard_Event> events, string eventType)
+        public static DownByReport FillDownByReportSectionFullDay(DownByReport report, List<BUS_WFMDashboard_Event> events)
         {
             List<BUS_WFMDashboard_Event> eventList = new List<BUS_WFMDashboard_Event>();
             using (var db = new OnyxEntities())
@@ -593,9 +586,99 @@ namespace WFMDashboard.Classes
                 {
                     var teamName = item.TeamName;
                     var staffName = item.LastName;
-
+                    var eventType = "";
+                    switch (item.EventType)
+                    {
+                        case "PTO (Unplanned)":
+                        case "PTO (Planned)":
+                            eventType = "PTO";
+                            break;
+                        case "Training":
+                            eventType = "Training";
+                            break;
+                        case "LOA":
+                            eventType = "LOA";
+                            break;
+                        default:
+                            eventType = "Other";
+                            break;
+                    }
                     report.TotalDown++;
                     report.Sections[eventType].TotalDown++;
+                    if (teamName.Contains("RA"))
+                    {
+                        report.Sections[eventType].RA = report.Sections[eventType].RA.TrimStart('0');
+                        report.Sections[eventType].RA += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
+                        report.Sections[eventType].RA = report.Sections[eventType].RA.TrimStart(',').TrimStart(' ');
+                    }
+                    if (teamName.Contains("AD"))
+                    {
+                        report.Sections[eventType].AD = report.Sections[eventType].AD.TrimStart('0');
+                        report.Sections[eventType].AD += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
+                        report.Sections[eventType].AD = report.Sections[eventType].AD.TrimStart(',').TrimStart(' ');
+                    }
+                    if (teamName.Contains("IRC"))
+                    {
+                        report.Sections[eventType].IRC = report.Sections[eventType].IRC.TrimStart('0');
+                        report.Sections[eventType].IRC += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
+                        report.Sections[eventType].IRC = report.Sections[eventType].IRC.TrimStart(',').TrimStart(' ');
+                    }
+                    if (teamName.ToLower().Contains("printer"))
+                    {
+                        report.Sections[eventType].PrinterOps = report.Sections[eventType].PrinterOps.TrimStart('0');
+                        report.Sections[eventType].PrinterOps += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
+                        report.Sections[eventType].PrinterOps = report.Sections[eventType].PrinterOps.TrimStart(',').TrimStart(' ');
+                    }
+                    if (teamName.Contains("MGR") || teamName.ToLower().Contains("manage"))
+                    {
+                        report.Sections[eventType].MGR = report.Sections[eventType].MGR.TrimStart('0');
+                        report.Sections[eventType].MGR += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
+                        report.Sections[eventType].MGR = report.Sections[eventType].MGR.TrimStart(',').TrimStart(' ');
+                    }
+                    if (teamName.Contains("POA"))
+                    {
+                        report.Sections[eventType].POA = report.Sections[eventType].POA.TrimStart('0');
+                        report.Sections[eventType].POA += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
+                        report.Sections[eventType].POA = report.Sections[eventType].POA.TrimStart(',').TrimStart(' ');
+                    }
+                }
+            }
+            return report;
+        }
+
+        public static DownByReport FillDownByReportSectionPartialDay(DownByReport report, List<BUS_WFMDashboard_Event> events)
+        {
+            List<BUS_WFMDashboard_Event> eventList = new List<BUS_WFMDashboard_Event>();
+            using (var db = new OnyxEntities())
+            using (var dbS = new inContact_NGEntities())
+            {
+                foreach (var item in events)
+                {
+                    var eventType = "";
+                    var teamName = item.TeamName;
+                    var staffName = item.LastName;
+                    switch (item.EventType)
+                    {
+                        case "PTO (Unplanned)":
+                        case "PTO (Planned)":
+                            eventType = "PTO";
+                            break;
+                        case "Training":
+                            eventType = "Training";
+                            break;
+                        case "LOA":
+                            eventType = "LOA";
+                            break;
+                        default:
+                            eventType = "Other";
+                            break;
+                    }
+
+                    TimeSpan diff = item.EndTime - item.StartTime;
+                    double hours = diff.TotalHours;
+                    var fraction = Math.Round((hours / 8.0), 1);
+                    report.TotalDown += fraction;
+                    report.Sections[eventType].TotalDown += fraction;
                     if (teamName.Contains("RA"))
                     {
                         report.Sections[eventType].RA = report.Sections[eventType].RA.TrimStart('0');
@@ -638,93 +721,103 @@ namespace WFMDashboard.Classes
         }
 
 
+        //public static DownByReport FillDownByReport(List<BUS_WFMDashboard_Event> events)
+        //{
+        //    var report = new DownByReport();
+        //    //var ptoDateEnd = DateTime.Now.AddDays(1).Date.ToString("yyyy-MM-dd"); 
+        //    var ptoDateEnd = DateTime.Now.AddDays(1).Date;
 
+        //    var paidPto = events.Where(t => (t.Color == "10" || t.Color == "9") && t.FullDay && t.EndTime >= ptoDateEnd).ToList();
 
+        //    var fullDayTraining = events.Where(t => t.Color == "7" && t.FullDay && t.EndTime >= ptoDateEnd).ToList();
+        //    fullDayTraining = fullDayTraining.Where(t => !t.Description.ToLower().Contains("cancelled")).ToList();
+        //    var fullDayOther = events.Where(t => t.Color == "11" && t.FullDay && t.EndTime >= ptoDateEnd).ToList();
 
-        public static bool CreateDatabaseEvents(Events events)
-        {
-            using (var db = new OnyxEntities())
-            using (var dbS = new inContact_NGEntities())
-            {
-                foreach (var item in events.Items)
-                {
-                    string eventType = "Other";
-                    if(item.ColorId == "10" || item.ColorId == "9" )
-                    {
-                        eventType = "PTO";
-                    }
-                    if (item.ColorId == "7")
-                    {
-                        eventType = "Training";
-                    }
+        //    //var partialTraining = events.Items.Where(t => t.ColorId == "7" && t.End.DateTime != null).ToList();
 
-                    var sections = item.Summary.Split('-');
-                    if(sections.Length > 1)
-                    {
-                        var teamName = sections[0];
-                        var staffName = sections[1];
-                        bool fullDay = true;
+        //    //CreateDatabaseEvents(events);
 
-                        var staffMember = dbS.Agents.Where(t => staffName.Contains(t.LastName.ToLower())).FirstOrDefault();
-                        if (staffMember != null)
-                        {
-                            DateTime startTime = DateTime.Now;
-                            DateTime endTime = DateTime.Now;
-                            if (item.End.Date != null)
-                            {
-                                fullDay = true;
-                                startTime = DateTime.Parse(item.Start.Date);
-                                endTime = DateTime.Parse(item.End.Date);
-                            }
-                            else
-                            {
-                                fullDay = false;
-                                startTime = item.Start.DateTime.Value;
-                                endTime = item.End.DateTime.Value;
-                            }
-                            var prevEvent = db.BUS_WFMDashboard_Event.Where(t => t.CalendarEventId == item.Id).FirstOrDefault();
-                            if (prevEvent == null)
-                            {
-                                var description = item.Description;
-                                if (description == null)
-                                    description = "";
-                                var newEvent = new BUS_WFMDashboard_Event()
-                                {
-                                    FirstName = staffMember.FirstName,
-                                    Notes = description,
-                                    CalendarEventId = item.Id,
-                                    AgentNo = staffMember.AgentNo,
-                                    StartTime = startTime,
-                                    EndTime = endTime,
-                                    EventType = eventType,
-                                    FullDay = fullDay,
-                                    TeamId = staffMember.TeamNo,
-                                    TeamName = staffMember.TeamName,
-                                    LastName = staffName,
-                                    Description = item.Summary,
-                                    Color = item.ColorId
-                                };
-                                db.BUS_WFMDashboard_Event.Add(newEvent);
-                                //db.SaveChanges();
-                            }
-                            else
-                            {
-                                //TODO: Update the event here if it needs to be updated
-                            }
-                        }
-                    }
-                    
-                }
-                db.SaveChanges();
-            }
-            return true;
-        }
+        //    var rangeEvents = events.Where(t => !t.FullDay).OrderBy(t => t.StartTime.TimeOfDay).ToList();
+        //    foreach (var item in rangeEvents)
+        //    {
+        //        var downByEvent = new DownByEvent(item.Color);
+        //        var startString = item.StartTime.ToShortTimeString();
+        //        var endString = item.EndTime.ToShortTimeString();
+        //        downByEvent.DateRange = $"{startString} - {endString}";
+        //        downByEvent.StartTime = item.StartTime;
+        //        downByEvent.Title = item.Description;
+        //        report.Events.Add(downByEvent);
+        //    }
+        //    var darkRedEvents = events.Where(t => t.Color == "11").ToList();
+        //    var lightRedEvents = events.Where(t => t.Color == "4").ToList();
+
+        //    report = FillDownByReportSectionFullDay(report, fullDayTraining, "Training");
+        //    report = FillDownByReportSectionFullDay(report, fullDayOther, "Other");
+        //    report = FillDownByReportSectionFullDay(report, paidPto, "PTO");
+
+        //    return report;
+        //}
+
+        //public static DownByReport FillDownByReportSectionFullDay(DownByReport report, List<BUS_WFMDashboard_Event> events, string eventType)
+        //{
+        //    List<BUS_WFMDashboard_Event> eventList = new List<BUS_WFMDashboard_Event>();
+        //    using (var db = new OnyxEntities())
+        //    using (var dbS = new inContact_NGEntities())
+        //    {
+        //        foreach (var item in events)
+        //        {
+        //            var teamName = item.TeamName;
+        //            var staffName = item.LastName;
+
+        //            report.TotalDown++;
+        //            report.Sections[eventType].TotalDown++;
+        //            if (teamName.Contains("RA"))
+        //            {
+        //                report.Sections[eventType].RA = report.Sections[eventType].RA.TrimStart('0');
+        //                report.Sections[eventType].RA += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
+        //                report.Sections[eventType].RA = report.Sections[eventType].RA.TrimStart(',').TrimStart(' ');
+        //            }
+        //            if (teamName.Contains("AD"))
+        //            {
+        //                report.Sections[eventType].AD = report.Sections[eventType].AD.TrimStart('0');
+        //                report.Sections[eventType].AD += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
+        //                report.Sections[eventType].AD = report.Sections[eventType].AD.TrimStart(',').TrimStart(' ');
+        //            }
+        //            if (teamName.Contains("IRC"))
+        //            {
+        //                report.Sections[eventType].IRC = report.Sections[eventType].IRC.TrimStart('0');
+        //                report.Sections[eventType].IRC += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
+        //                report.Sections[eventType].IRC = report.Sections[eventType].IRC.TrimStart(',').TrimStart(' ');
+        //            }
+        //            if (teamName.ToLower().Contains("printer"))
+        //            {
+        //                report.Sections[eventType].PrinterOps = report.Sections[eventType].PrinterOps.TrimStart('0');
+        //                report.Sections[eventType].PrinterOps += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
+        //                report.Sections[eventType].PrinterOps = report.Sections[eventType].PrinterOps.TrimStart(',').TrimStart(' ');
+        //            }
+        //            if (teamName.Contains("MGR"))
+        //            {
+        //                report.Sections[eventType].MGR = report.Sections[eventType].MGR.TrimStart('0');
+        //                report.Sections[eventType].MGR += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
+        //                report.Sections[eventType].MGR = report.Sections[eventType].MGR.TrimStart(',').TrimStart(' ');
+        //            }
+        //            if (teamName.Contains("POA"))
+        //            {
+        //                report.Sections[eventType].POA = report.Sections[eventType].POA.TrimStart('0');
+        //                report.Sections[eventType].POA += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
+        //                report.Sections[eventType].POA = report.Sections[eventType].POA.TrimStart(',').TrimStart(' ');
+        //            }
+        //        }
+        //    }
+        //    return report;
+        //}
+
 
         public static DownByReport FillDownByReportSectionFullDayOld(DownByReport report, List<Event> events, string eventType)
         {
             List<BUS_WFMDashboard_Event> eventList = new List<BUS_WFMDashboard_Event>();
             using (var db = new OnyxEntities())
-            using(var dbS = new inContact_NGEntities())
+            using (var dbS = new inContact_NGEntities())
             {
                 foreach (var item in events)
                 {
@@ -800,6 +893,106 @@ namespace WFMDashboard.Classes
             return report;
         }
 
+
+
+        public static bool CreateDatabaseEvents(Events events)
+        {
+            using (var db = new OnyxEntities())
+            using (var dbS = new inContact_NGEntities())
+            {
+                foreach (var item in events.Items)
+                {
+                    string eventType = "Other";
+
+                    var lowerEventTitle = item.Summary.ToLower();
+
+                    if(lowerEventTitle.Contains("pto"))
+                    {
+                        if (lowerEventTitle.Contains("unplanned"))
+                            eventType = "PTO (Unplanned)";
+                        else
+                            eventType = "PTO (Planned)";
+                    }
+                    if (lowerEventTitle.Contains("unpaid"))
+                    {
+                        eventType = "Unpaid Time Off";
+                    }
+                    if (lowerEventTitle.Contains("training"))
+                    {
+                        eventType = "Training";
+                    }
+                    if (lowerEventTitle.Contains("loa"))
+                    {
+                        eventType = "LOA";
+                    }
+
+                    var sections = item.Summary.Split('-');
+                    if(sections.Length > 1)
+                    {
+                        var teamName = sections[0];
+                        var staffName = sections[1];
+                        bool fullDay = true;
+
+                        var staffMember = dbS.Agents.Where(t => staffName.Contains(t.LastName.ToLower()) && t.Status == "Active").FirstOrDefault();
+                        if (staffMember != null)
+                        {
+                            DateTime startTime = DateTime.Now;
+                            DateTime endTime = DateTime.Now;
+                            if (item.End.Date != null)
+                            {
+                                fullDay = true;
+                                startTime = DateTime.Parse(item.Start.Date);
+                                endTime = DateTime.Parse(item.End.Date);
+                            }
+                            else
+                            {
+                                fullDay = false;
+                                startTime = item.Start.DateTime.Value;
+                                endTime = item.End.DateTime.Value;
+                            }
+                            var prevEvent = db.BUS_WFMDashboard_Event.Where(t => t.CalendarEventId == item.Id).FirstOrDefault();
+                            if (prevEvent == null)
+                            {
+                                var description = item.Description;
+                                if (description == null)
+                                    description = "";
+                                var newEvent = new BUS_WFMDashboard_Event()
+                                {
+                                    FirstName = staffMember.FirstName,
+                                    Notes = description,
+                                    CalendarEventId = item.Id,
+                                    AgentNo = staffMember.AgentNo,
+                                    StartTime = startTime,
+                                    EndTime = endTime,
+                                    EventType = eventType,
+                                    FullDay = fullDay,
+                                    TeamId = staffMember.TeamNo,
+                                    TeamName = staffMember.TeamName,
+                                    LastName = staffName,
+                                    Description = item.Summary,
+                                    Color = item.ColorId,
+                                    CreatedAt = DateTime.Now,
+                                    CreatedBy = "Google Calendar",
+                                    UpdatedAt = DateTime.Now,
+                                    UpdatedBy = "Google Calendar"
+                                };
+                                db.BUS_WFMDashboard_Event.Add(newEvent);
+                                //db.SaveChanges();
+                            }
+                            else
+                            {
+                                //TODO: Update the event here if it needs to be updated
+                            }
+                        }
+                    }
+                    
+                }
+                db.SaveChanges();
+            }
+            return true;
+        }
+
+        
         public static MowReport CreateMOWReport(out string msg)
         {
             try
@@ -887,7 +1080,7 @@ namespace WFMDashboard.Classes
         }
 
 
-        private static ViewEvent CreateEvent(string title, string eventId, string lastName, string firstName, string color, DateTime startDateTime, DateTime endDateTime, bool fullDay, string notes, string eventType, Agent agent)
+        private static ViewEvent CreateEvent(string googleEventId, EventForm inputForm, DateTime startDateTime, DateTime endDateTime, Agent agent, string user)
         {
             try
             {
@@ -896,21 +1089,31 @@ namespace WFMDashboard.Classes
                     AgentNo = agent.AgentNo,
                     TeamName = agent.TeamName,
                     TeamId = agent.TeamNo,
-                    FullDay = fullDay,
-                    EventType = eventType,
+                    FullDay = inputForm.fullDay,
+                    EventType = inputForm.eventType,
                     StartTime = startDateTime,
                     EndTime = endDateTime,
-                    Description = title,
-                    Notes = notes,
-                    LastName = lastName,
-                    FirstName = firstName,
-                    CalendarEventId = eventId,
-                    Color = color
+                    Description = inputForm.title,
+                    Notes = inputForm.notes,
+                    LastName = agent.LastName,
+                    FirstName = agent.FirstName,
+                    CalendarEventId = googleEventId,
+                    Color = inputForm.color,
+                    CreatedAt = DateTime.Now,
+                    CreatedBy = user,
+                    UpdatedAt = DateTime.Now,
+                    UpdatedBy = user
                 };
                 using (var db = new OnyxEntities())
                 {
                     db.BUS_WFMDashboard_Event.Add(busEvent);
                     db.SaveChanges();
+                    if(inputForm.repeatingEvent)
+                    {
+                        inputForm.eventId = busEvent.Id; //TODO: make sure we actually have the Id here.
+                        CalculateRepeatingEvents(inputForm, db);
+                        //TODO: add repeating event logic
+                    }
                 }
                 return new ViewEvent(busEvent, false);
             }
@@ -920,22 +1123,68 @@ namespace WFMDashboard.Classes
             }
         }
 
-        private static ViewEvent UpdateEvent(string title, int eventId, string color, DateTime startDateTime, DateTime endDateTime, bool fullDay, string notes, string eventType)
+        private static bool CalculateRepeatingEvents(EventForm inputForm, OnyxEntities db)
+        {
+            try
+            {
+                var existingRepeatItem = db.BUS_WFMDashboard_Repeating_Event.Where(t => t.EventId == inputForm.eventId).FirstOrDefault();
+                if(existingRepeatItem == null)
+                {
+                    var newRepeatingItem = new BUS_WFMDashboard_Repeating_Event();
+                    newRepeatingItem.EndDate = DateTime.Parse(inputForm.repeatEndDate);
+                    newRepeatingItem.EndAfterOccurences = inputForm.repeatEndAfterNumber;
+                    newRepeatingItem.RepeatType = inputForm.repeatType;
+                    newRepeatingItem.RepeatEveryNumber = inputForm.repeatEveryNumber;
+                    newRepeatingItem.RepeatOnDays = inputForm.repeatOnDays;
+                    newRepeatingItem.RepeatSummary = inputForm.repeatSummary;
+                    newRepeatingItem.StartDate = DateTime.Parse(inputForm.startDate);
+                    newRepeatingItem.EndType = inputForm.repeatEndType;
+                    db.BUS_WFMDashboard_Repeating_Event.Add(newRepeatingItem);
+                }
+                else
+                {
+                    existingRepeatItem.EndDate = DateTime.Parse(inputForm.repeatEndDate);
+                    existingRepeatItem.EndAfterOccurences = inputForm.repeatEndAfterNumber;
+                    existingRepeatItem.RepeatType = inputForm.repeatType;
+                    existingRepeatItem.RepeatEveryNumber = inputForm.repeatEveryNumber;
+                    existingRepeatItem.RepeatOnDays = inputForm.repeatOnDays;
+                    existingRepeatItem.RepeatSummary = inputForm.repeatSummary;
+                    existingRepeatItem.StartDate = DateTime.Parse(inputForm.startDate);
+                    existingRepeatItem.EndType = inputForm.repeatEndType;
+                }
+
+                //TODO: Create the "repeating event date" object here - make a small event with a date for each day the event should repeat- it only needs a start (datetime) and a repeatingEventId (int)
+                db.SaveChanges();
+                return true;
+            }
+            catch(Exception ex)
+            {
+                return false;
+            }
+        }
+
+        private static ViewEvent UpdateEvent(EventForm inputForm, DateTime startDateTime, DateTime endDateTime, string user)
         {
             try
             {
                 using (var db = new OnyxEntities())
                 {
-                    BUS_WFMDashboard_Event busEvent = db.BUS_WFMDashboard_Event.Where(t => t.Id == eventId).FirstOrDefault();
+                    BUS_WFMDashboard_Event busEvent = db.BUS_WFMDashboard_Event.Where(t => t.Id == inputForm.eventId).FirstOrDefault();
 
-                    busEvent.FullDay = fullDay;
-                    busEvent.EventType = eventType;
+                    busEvent.FullDay = inputForm.fullDay;
+                    busEvent.EventType = inputForm.eventType;
                     busEvent.StartTime = startDateTime;
                     busEvent.EndTime = endDateTime;
-                    busEvent.Description = title;
-                    busEvent.Notes = notes;
-                    busEvent.Color = color;
+                    busEvent.Description = inputForm.title;
+                    busEvent.Notes = inputForm.notes;
+                    busEvent.Color = inputForm.color;
+                    busEvent.UpdatedAt = DateTime.Now;
+                    busEvent.UpdatedBy = user;
                     db.SaveChanges();
+                    if(inputForm.repeatingEvent)
+                    {
+                        //TODO: add repeating event object logic
+                    }
                     return new ViewEvent(busEvent, false);
 
                 }
@@ -946,7 +1195,7 @@ namespace WFMDashboard.Classes
             }
         }
 
-        private static string SubmitTimeOff_GoogleCalendar(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, string title, string name, string color, DateTime startDateTime, DateTime endDateTime, bool fullDay, string notes, string eventType, Agent agent)
+        private static string SubmitTimeOff_GoogleCalendar(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, EventForm inputForm, DateTime startDateTime, DateTime endDateTime, Agent agent)
         {
             try
             {
@@ -956,8 +1205,8 @@ namespace WFMDashboard.Classes
 
                 var lastName = agent.LastName;
 
-                string summary = title;
-                string colorId = color; //Color for unplanned PTO
+                string summary = inputForm.title;
+                string colorId = inputForm.color; //Color for unplanned PTO
 
                 //TODO: fix the color based on the event type
                 //if(ptoType == "Planned")
@@ -977,7 +1226,7 @@ namespace WFMDashboard.Classes
                 {
                     TimeZone = "America/New_York"
                 };
-                if (fullDay)
+                if (inputForm.fullDay)
                 {
                     start.Date = startDateTime.ToString("yyyy-MM-dd");
                     end.Date = endDateTime.ToString("yyyy-MM-dd");
@@ -993,7 +1242,7 @@ namespace WFMDashboard.Classes
                 Event newEvent = new Event()
                 {
                     Summary = summary,
-                    Description = notes,
+                    Description = inputForm.notes,
                     Start = start,
                     ColorId = colorId,
                     End = end,
@@ -1001,6 +1250,11 @@ namespace WFMDashboard.Classes
                         new EventAttendee() { Email = "rtyszka@kmbs.konicaminolta.us" },
                     },
                 };
+
+                if(inputForm.repeatingEvent)
+                {
+                    //TODO: add logic to create repeating event on google calendar
+                }
 
                 EventsResource.InsertRequest request = service.Events.Insert(newEvent, calendarId);
                 Event createdEvent = request.Execute();

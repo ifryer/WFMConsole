@@ -27,7 +27,7 @@ namespace WFMConsole.ViewModels
         public string Title { get; set; }
         public Dictionary<string, DownBySection> Sections { get; set; }
         public List<DownByEvent> Events { get; set; }
-        public int TotalDown { get; set; }
+        public double TotalDown { get; set; }
         public string ReportDate { get; set; }
         public string ReportTime { get; set; }
         public DownByReport()
@@ -62,7 +62,7 @@ namespace WFMConsole.ViewModels
     public class DownBySection
     {
         public string Name { get; set; }
-        public int TotalDown { get; set; }
+        public double TotalDown { get; set; }
         public string AD { get; set; }
         public string RA { get; set; }
         public string POA { get; set; }

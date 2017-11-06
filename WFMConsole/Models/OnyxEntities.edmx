@@ -38,6 +38,10 @@
           <Property Name="FullDay" Type="bit" Nullable="false" />
           <Property Name="Notes" Type="nvarchar(max)" Nullable="false" />
           <Property Name="Color" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="CreatedAt" Type="datetime" Nullable="false" />
+          <Property Name="UpdatedAt" Type="datetime" />
+          <Property Name="CreatedBy" Type="nvarchar" MaxLength="45" Nullable="false" />
+          <Property Name="UpdatedBy" Type="nvarchar" MaxLength="45" Nullable="false" />
         </EntityType>
         <EntityType Name="BUS_WFMDashboard_Google_Credentials">
           <Key>
@@ -76,6 +80,21 @@
           <Property Name="LastName" Type="nvarchar" MaxLength="50" Nullable="false" />
           <Property Name="Date" Type="date" Nullable="false" />
         </EntityType>
+        <EntityType Name="BUS_WFMDashboard_Repeating_Event">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="EventId" Type="int" Nullable="false" />
+          <Property Name="RepeatType" Type="nvarchar" MaxLength="5" Nullable="false" />
+          <Property Name="RepeatEveryNumber" Type="int" />
+          <Property Name="RepeatOnDays" Type="nvarchar" MaxLength="30" />
+          <Property Name="StartDate" Type="date" Nullable="false" />
+          <Property Name="EndAfterOccurences" Type="int" />
+          <Property Name="EndDate" Type="date" />
+          <Property Name="RepeatSummary" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="EndType" Type="nvarchar" MaxLength="25" Nullable="false" />
+        </EntityType>
         <EntityType Name="BUS_WFMDashboard_ReportLog">
           <Key>
             <PropertyRef Name="Id" />
@@ -104,6 +123,7 @@
           <EntitySet Name="BUS_WFMDashboard_ICM" EntityType="Self.BUS_WFMDashboard_ICM" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="BUS_WFMDashboard_ICM_Order" EntityType="Self.BUS_WFMDashboard_ICM_Order" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="BUS_WFMDashboard_LateShiftManager" EntityType="Self.BUS_WFMDashboard_LateShiftManager" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="BUS_WFMDashboard_Repeating_Event" EntityType="Self.BUS_WFMDashboard_Repeating_Event" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="BUS_WFMDashboard_ReportLog" EntityType="Self.BUS_WFMDashboard_ReportLog" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="BUS_WFMDashboard_WFO_Schedule" EntityType="Self.BUS_WFMDashboard_WFO_Schedule" Schema="dbo" store:Type="Tables" />
         </EntityContainer>
@@ -112,7 +132,6 @@
     <edmx:ConceptualModels>
       <Schema Namespace="OnyxModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
         <EntityContainer Name="OnyxEntities" annotation:LazyLoadingEnabled="true">
-          <EntitySet Name="BUS_WFMDashboard_Event" EntityType="OnyxModel.BUS_WFMDashboard_Event" />
           <EntitySet Name="BUS_WFMDashboard_Google_Credentials" EntityType="OnyxModel.BUS_WFMDashboard_Google_Credentials" />
           <EntitySet Name="BUS_WFMDashboard_ICM" EntityType="OnyxModel.BUS_WFMDashboard_ICM" />
           <EntitySet Name="BUS_WFMDashboard_ICM_Order" EntityType="OnyxModel.BUS_WFMDashboard_ICM_Order" />
@@ -120,26 +139,9 @@
           <EntitySet Name="BUS_WFMDashboard_WFO_Schedule" EntityType="OnyxModel.BUS_WFMDashboard_WFO_Schedule" />
           <EntitySet Name="BUS_WFMDashboard_LateShiftManager" EntityType="OnyxModel.BUS_WFMDashboard_LateShiftManager" />
           <EntitySet Name="BUS_WFMDashboard_Action_History" EntityType="OnyxModel.BUS_WFMDashboard_Action_History" />
+          <EntitySet Name="BUS_WFMDashboard_Event" EntityType="OnyxModel.BUS_WFMDashboard_Event" />
+          <EntitySet Name="BUS_WFMDashboard_Repeating_Event" EntityType="OnyxModel.BUS_WFMDashboard_Repeating_Event" />
         </EntityContainer>
-        <EntityType Name="BUS_WFMDashboard_Event">
-          <Key>
-            <PropertyRef Name="Id" />
-          </Key>
-          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="EventType" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
-          <Property Name="CalendarEventId" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="AgentNo" Type="Int32" Nullable="false" />
-          <Property Name="TeamId" Type="Int32" Nullable="false" />
-          <Property Name="Description" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="true" />
-          <Property Name="TeamName" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
-          <Property Name="FirstName" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
-          <Property Name="LastName" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
-          <Property Name="StartTime" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="EndTime" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="FullDay" Type="Boolean" Nullable="false" />
-          <Property Name="Notes" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="Color" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
-        </EntityType>
         <EntityType Name="BUS_WFMDashboard_Google_Credentials">
           <Key>
             <PropertyRef Name="Id" />
@@ -213,32 +215,50 @@
           <Property Name="PerformedBy" Type="String" Nullable="false" MaxLength="24" FixedLength="false" Unicode="true" />
           <Property Name="PerformedAt" Type="DateTime" Nullable="false" Precision="3" />
         </EntityType>
+        <EntityType Name="BUS_WFMDashboard_Event">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="EventType" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="CalendarEventId" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="AgentNo" Type="Int32" Nullable="false" />
+          <Property Name="TeamId" Type="Int32" Nullable="false" />
+          <Property Name="Description" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="TeamName" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="FirstName" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="LastName" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="StartTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="EndTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="FullDay" Type="Boolean" Nullable="false" />
+          <Property Name="Notes" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Color" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="UpdatedAt" Type="DateTime" Precision="3" />
+          <Property Name="CreatedBy" Type="String" Nullable="false" MaxLength="45" FixedLength="false" Unicode="true" />
+          <Property Name="UpdatedBy" Type="String" Nullable="false" MaxLength="45" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="BUS_WFMDashboard_Repeating_Event">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="EventId" Type="Int32" Nullable="false" />
+          <Property Name="RepeatType" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="true" />
+          <Property Name="RepeatEveryNumber" Type="Int32" />
+          <Property Name="RepeatOnDays" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
+          <Property Name="StartDate" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="EndAfterOccurences" Type="Int32" />
+          <Property Name="EndDate" Type="DateTime" Precision="0" />
+          <Property Name="RepeatSummary" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="EndType" Type="String" Nullable="false" MaxLength="25" FixedLength="false" Unicode="true" />
+        </EntityType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="OnyxModelStoreContainer" CdmEntityContainer="OnyxEntities">
-          <EntitySetMapping Name="BUS_WFMDashboard_Event">
-            <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_Event">
-              <MappingFragment StoreEntitySet="BUS_WFMDashboard_Event">
-                <ScalarProperty Name="Color" ColumnName="Color" />
-                <ScalarProperty Name="Notes" ColumnName="Notes" />
-                <ScalarProperty Name="FullDay" ColumnName="FullDay" />
-                <ScalarProperty Name="EndTime" ColumnName="EndTime" />
-                <ScalarProperty Name="StartTime" ColumnName="StartTime" />
-                <ScalarProperty Name="LastName" ColumnName="LastName" />
-                <ScalarProperty Name="FirstName" ColumnName="FirstName" />
-                <ScalarProperty Name="TeamName" ColumnName="TeamName" />
-                <ScalarProperty Name="Description" ColumnName="Description" />
-                <ScalarProperty Name="TeamId" ColumnName="TeamId" />
-                <ScalarProperty Name="AgentNo" ColumnName="AgentNo" />
-                <ScalarProperty Name="CalendarEventId" ColumnName="CalendarEventId" />
-                <ScalarProperty Name="EventType" ColumnName="EventType" />
-                <ScalarProperty Name="Id" ColumnName="Id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="BUS_WFMDashboard_Google_Credentials">
             <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_Google_Credentials">
               <MappingFragment StoreEntitySet="BUS_WFMDashboard_Google_Credentials">
@@ -314,6 +334,46 @@
                 <ScalarProperty Name="Action" ColumnName="Action" />
                 <ScalarProperty Name="ScheduleType" ColumnName="ScheduleType" />
                 <ScalarProperty Name="ScheduleId" ColumnName="ScheduleId" />
+                <ScalarProperty Name="EventId" ColumnName="EventId" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="BUS_WFMDashboard_Event">
+            <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_Event">
+              <MappingFragment StoreEntitySet="BUS_WFMDashboard_Event">
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+                <ScalarProperty Name="Color" ColumnName="Color" />
+                <ScalarProperty Name="Notes" ColumnName="Notes" />
+                <ScalarProperty Name="FullDay" ColumnName="FullDay" />
+                <ScalarProperty Name="EndTime" ColumnName="EndTime" />
+                <ScalarProperty Name="StartTime" ColumnName="StartTime" />
+                <ScalarProperty Name="LastName" ColumnName="LastName" />
+                <ScalarProperty Name="FirstName" ColumnName="FirstName" />
+                <ScalarProperty Name="TeamName" ColumnName="TeamName" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="TeamId" ColumnName="TeamId" />
+                <ScalarProperty Name="AgentNo" ColumnName="AgentNo" />
+                <ScalarProperty Name="CalendarEventId" ColumnName="CalendarEventId" />
+                <ScalarProperty Name="EventType" ColumnName="EventType" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="BUS_WFMDashboard_Repeating_Event">
+            <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_Repeating_Event">
+              <MappingFragment StoreEntitySet="BUS_WFMDashboard_Repeating_Event">
+                <ScalarProperty Name="EndType" ColumnName="EndType" />
+                <ScalarProperty Name="RepeatSummary" ColumnName="RepeatSummary" />
+                <ScalarProperty Name="EndDate" ColumnName="EndDate" />
+                <ScalarProperty Name="EndAfterOccurences" ColumnName="EndAfterOccurences" />
+                <ScalarProperty Name="StartDate" ColumnName="StartDate" />
+                <ScalarProperty Name="RepeatOnDays" ColumnName="RepeatOnDays" />
+                <ScalarProperty Name="RepeatEveryNumber" ColumnName="RepeatEveryNumber" />
+                <ScalarProperty Name="RepeatType" ColumnName="RepeatType" />
                 <ScalarProperty Name="EventId" ColumnName="EventId" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
               </MappingFragment>

@@ -1,5 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Schema Namespace="OnyxModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+  <EntityType Name="BUS_WFMDashboard_Action_History">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="EventId" Type="int" />
+    <Property Name="ScheduleId" Type="int" />
+    <Property Name="ScheduleType" Type="nvarchar" MaxLength="25" />
+    <Property Name="Action" Type="nvarchar" MaxLength="128" Nullable="false" />
+    <Property Name="Description" Type="nvarchar" MaxLength="128" Nullable="false" />
+    <Property Name="Before" Type="nvarchar(max)" />
+    <Property Name="After" Type="nvarchar(max)" />
+    <Property Name="PerformedBy" Type="nvarchar" MaxLength="24" Nullable="false" />
+    <Property Name="PerformedAt" Type="datetime" Nullable="false" />
+  </EntityType>
   <EntityType Name="BUS_WFMDashboard_Event">
     <Key>
       <PropertyRef Name="Id" />
@@ -18,6 +33,10 @@
     <Property Name="FullDay" Type="bit" Nullable="false" />
     <Property Name="Notes" Type="nvarchar(max)" Nullable="false" />
     <Property Name="Color" Type="nvarchar" MaxLength="20" Nullable="false" />
+    <Property Name="CreatedAt" Type="datetime" Nullable="false" />
+    <Property Name="UpdatedAt" Type="datetime" />
+    <Property Name="CreatedBy" Type="nvarchar" MaxLength="45" Nullable="false" />
+    <Property Name="UpdatedBy" Type="nvarchar" MaxLength="45" Nullable="false" />
   </EntityType>
   <EntityType Name="BUS_WFMDashboard_Google_Credentials">
     <Key>
@@ -78,6 +97,7 @@
     <Property Name="AgentNo" Type="int" Nullable="false" />
   </EntityType>
   <EntityContainer Name="OnyxModelStoreContainer">
+    <EntitySet Name="BUS_WFMDashboard_Action_History" EntityType="Self.BUS_WFMDashboard_Action_History" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="BUS_WFMDashboard_Event" EntityType="Self.BUS_WFMDashboard_Event" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="BUS_WFMDashboard_Google_Credentials" EntityType="Self.BUS_WFMDashboard_Google_Credentials" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="BUS_WFMDashboard_ICM" EntityType="Self.BUS_WFMDashboard_ICM" Schema="dbo" store:Type="Tables" />

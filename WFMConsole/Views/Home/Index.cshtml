@@ -37,6 +37,8 @@
                                 <div style="margin-top: 5px;">
                                     <input type="checkbox" id="fullDayCheckbox-modal" checked="checked" />
                                     <label for="fullDayCheckbox-modal"> Full Day </label>
+                                    <input style="margin-left:10px;" type="checkbox" id="repeatingCheckbox" />
+                                    <label for="repeatingCheckbox"> Repeat </label>
                                 </div>
                             </div>
                         </div>
@@ -73,6 +75,119 @@
                 <button type="button" class="btn btn-danger pull-left" id="delete-event-modal-btn"> Delete Event </button>
                 <button type="button" class="btn btn-primary" id="save-event-modal-btn"> Save</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="repeating-event-modal" data-keyboard="false" data-backdrop="static" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog slim" role="document">
+        <div class="modal-content">
+            <div style="padding-left: 20px;" class="modal-header no-padding">
+                <h4 style="margin:0;" class="no-padding"> Repeat </h4>
+            </div>
+            <div class="modal-body" style="max-height: calc(80vh - 30px); overflow: auto;">
+                <div>
+                    <table class="repeat-event-table" role="presentation">
+                        <tbody>
+                            <tr>
+                                <th>Repeats:</th>
+                                <td>
+                                    <select id="repeat-type">
+                                        <option value="0">Daily</option>
+                                        <option value="1">Every weekday (Monday to Friday)</option>
+                                        <option value="2">Every Monday, Wednesday, and Friday</option>
+                                        <option value="3">Every Tuesday and Thursday</option>
+                                        <option value="4">Weekly</option>
+                                        <option value="5">Monthly</option>
+                                        <option value="6">Yearly</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tbody>
+                            <tr id="repeat-every-number-tr">
+                                <th>Repeat every:</th>
+                                <td>
+                                    <input type="number" id="repeat-every-number" />
+                                    <label id="repeat-every-unit">days</label>
+                                </td>
+                            </tr>
+                            <tr id="repeat-every-weekday-checkboxes-tr">
+                                <th>Repeat on:</th>
+                                <td>
+                                    <div class="repeat-day-checkboxes">
+                                        <span class="repeat-day-checkboxes">
+                                            <input id="repeat-sunday" value="SU" name="SU" type="checkbox" aria-label="Repeat on Sunday" title="Sunday">
+                                            <label for="repeat-sunday" title="Sunday">S</label>
+                                        </span>
+                                        <span class="ep-rec-dow">
+                                            <input id="repeat-monday" value="MO" name="MO" type="checkbox" aria-label="Repeat on Monday" title="Monday">
+                                            <label for="repeat-monday" title="Monday">M</label>
+                                        </span>
+                                        <span class="ep-rec-dow">
+                                            <input id="repeat-tuesday" value="TU" name="TU" type="checkbox" aria-label="Repeat on Tuesday" title="Tuesday">
+                                            <label for="repeat-tuesday" title="Tuesday">T</label>
+                                        </span>
+                                        <span class="ep-rec-dow">
+                                            <input id="repeat-wednesday" value="WE" name="WE" type="checkbox" aria-label="Repeat on Wednesday" title="Wednesday">
+                                            <label for="repeat-wednesday" title="Wednesday">W</label>
+                                        </span>
+                                        <span class="ep-rec-dow">
+                                            <input id="repeat-thursday" value="TH" name="TH" type="checkbox" aria-label="Repeat on Thursday" title="Thursday">
+                                            <label for="repeat-thursday" title="Thursday">T</label>
+                                        </span>
+                                        <span class="ep-rec-dow">
+                                            <input id="repeat-friday" value="FR" name="FR" type="checkbox" aria-label="Repeat on Friday" title="Friday">
+                                            <label for="repeat-friday" title="Friday">F</label>
+                                        </span>
+                                        <span class="ep-rec-dow">
+                                            <input id="repeat-saturday" value="SA" name="SA" type="checkbox" aria-label="Repeat on Saturday" title="Saturday">
+                                            <label for="repeat-saturday" title="Saturday">S</label>
+                                        </span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Starts on:</th>
+                                <td><input id="repeat-start-date" size="10"  disabled="disabled"></td>
+                            </tr>
+                            <tr>
+                                <th class="ep-rec-ends-th">Ends:</th>
+                                <td>
+                                    <div>
+                                        <span style="display:block" class="ep-rec-ends-opt">
+                                            <input id="repeat-end-never" value="never" class="repeat-end" name="endson" type="radio" checked="checked" aria-label="Ends never" title="Ends never">
+                                            <label for="repeat-end-never" title="Ends never">Never</label>
+                                        </span>
+                                        <span style="display:block" class="ep-rec-ends-opt">
+                                            <input id="repeat-end-count" value="number" class="repeat-end" name="endson" type="radio" aria-label="Ends after a number of occurrences" title="Ends after a number of occurrences">
+                                            <label for="repeat-end-count" title="Ends after a number of occurrences">
+                                                After
+                                                <input id="repeat-end-count-input" style="width: 60px;" type="number" value="" disabled="disabled" title="Occurrences">
+                                                occurrences
+                                            </label>
+                                        </span>
+                                        <span style="display:block" class="ep-rec-ends-opt">
+                                            <input id="repeat-end-date" value="date" class="repeat-end" name="endson" type="radio" aria-label="Ends on a specified date" title="Ends on a specified date">
+                                            <label for="repeat-end-date" title="Ends on a specified date">
+                                                On
+                                                <input id="repeat-end-date-input" size="10" disabled="disabled" autocomplete="off">
+                                            </label>
+                                        </span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Summary:</th>
+                                <td class="repeat-form-summary">Daily</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary btn-sm" id="save-repeat-modal-btn"> Confirm</button>
+                <button type="button" class="btn btn-default btn-sm" id="close-repeat-modal">Cancel</button>
             </div>
         </div>
     </div>
@@ -230,6 +345,8 @@
                                 <div style="margin-top: 5px;">
                                     <input type="checkbox" id="fullDayCheckbox" checked="checked" />
                                     <label for="fullDayCheckbox"> Full Day </label>
+                                    <input style="margin-left:10px;" type="checkbox" id="repeatingCheckbox" />
+                                    <label for="repeatingCheckbox"> Repeat </label>
                                 </div>
                                 @*<label for="selectNameForm">Submitting For</label>
                                 <div class="selected-staff-name"> No Staff Member Selected </div>*@
@@ -240,6 +357,7 @@
                                         <select class="form-control input-sm" id="event-type" placeholder="">
                                             <option value="PTO (Unplanned)"> Unplanned PTO </option>
                                             <option value="PTO (Planned)"> Planned PTO </option>
+                                            <option value="Unpaid Time Off"> Unpaid Time Off </option>
                                             <option value="Training"> Training </option>
                                             <option value="LOA"> LOA </option>
                                             <option value="Other"> Other </option>

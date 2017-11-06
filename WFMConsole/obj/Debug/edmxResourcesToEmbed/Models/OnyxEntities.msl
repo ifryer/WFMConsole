@@ -1,26 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
   <EntityContainerMapping StorageEntityContainer="OnyxModelStoreContainer" CdmEntityContainer="OnyxEntities">
-    <EntitySetMapping Name="BUS_WFMDashboard_Event">
-      <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_Event">
-        <MappingFragment StoreEntitySet="BUS_WFMDashboard_Event">
-          <ScalarProperty Name="Color" ColumnName="Color" />
-          <ScalarProperty Name="Notes" ColumnName="Notes" />
-          <ScalarProperty Name="FullDay" ColumnName="FullDay" />
-          <ScalarProperty Name="EndTime" ColumnName="EndTime" />
-          <ScalarProperty Name="StartTime" ColumnName="StartTime" />
-          <ScalarProperty Name="LastName" ColumnName="LastName" />
-          <ScalarProperty Name="FirstName" ColumnName="FirstName" />
-          <ScalarProperty Name="TeamName" ColumnName="TeamName" />
-          <ScalarProperty Name="Description" ColumnName="Description" />
-          <ScalarProperty Name="TeamId" ColumnName="TeamId" />
-          <ScalarProperty Name="AgentNo" ColumnName="AgentNo" />
-          <ScalarProperty Name="CalendarEventId" ColumnName="CalendarEventId" />
-          <ScalarProperty Name="EventType" ColumnName="EventType" />
-          <ScalarProperty Name="Id" ColumnName="Id" />
-        </MappingFragment>
-      </EntityTypeMapping>
-    </EntitySetMapping>
     <EntitySetMapping Name="BUS_WFMDashboard_Google_Credentials">
       <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_Google_Credentials">
         <MappingFragment StoreEntitySet="BUS_WFMDashboard_Google_Credentials">
@@ -96,6 +76,46 @@
           <ScalarProperty Name="Action" ColumnName="Action" />
           <ScalarProperty Name="ScheduleType" ColumnName="ScheduleType" />
           <ScalarProperty Name="ScheduleId" ColumnName="ScheduleId" />
+          <ScalarProperty Name="EventId" ColumnName="EventId" />
+          <ScalarProperty Name="Id" ColumnName="Id" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="BUS_WFMDashboard_Event">
+      <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_Event">
+        <MappingFragment StoreEntitySet="BUS_WFMDashboard_Event">
+          <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+          <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+          <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />
+          <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+          <ScalarProperty Name="Color" ColumnName="Color" />
+          <ScalarProperty Name="Notes" ColumnName="Notes" />
+          <ScalarProperty Name="FullDay" ColumnName="FullDay" />
+          <ScalarProperty Name="EndTime" ColumnName="EndTime" />
+          <ScalarProperty Name="StartTime" ColumnName="StartTime" />
+          <ScalarProperty Name="LastName" ColumnName="LastName" />
+          <ScalarProperty Name="FirstName" ColumnName="FirstName" />
+          <ScalarProperty Name="TeamName" ColumnName="TeamName" />
+          <ScalarProperty Name="Description" ColumnName="Description" />
+          <ScalarProperty Name="TeamId" ColumnName="TeamId" />
+          <ScalarProperty Name="AgentNo" ColumnName="AgentNo" />
+          <ScalarProperty Name="CalendarEventId" ColumnName="CalendarEventId" />
+          <ScalarProperty Name="EventType" ColumnName="EventType" />
+          <ScalarProperty Name="Id" ColumnName="Id" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="BUS_WFMDashboard_Repeating_Event">
+      <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_Repeating_Event">
+        <MappingFragment StoreEntitySet="BUS_WFMDashboard_Repeating_Event">
+          <ScalarProperty Name="EndType" ColumnName="EndType" />
+          <ScalarProperty Name="RepeatSummary" ColumnName="RepeatSummary" />
+          <ScalarProperty Name="EndDate" ColumnName="EndDate" />
+          <ScalarProperty Name="EndAfterOccurences" ColumnName="EndAfterOccurences" />
+          <ScalarProperty Name="StartDate" ColumnName="StartDate" />
+          <ScalarProperty Name="RepeatOnDays" ColumnName="RepeatOnDays" />
+          <ScalarProperty Name="RepeatEveryNumber" ColumnName="RepeatEveryNumber" />
+          <ScalarProperty Name="RepeatType" ColumnName="RepeatType" />
           <ScalarProperty Name="EventId" ColumnName="EventId" />
           <ScalarProperty Name="Id" ColumnName="Id" />
         </MappingFragment>

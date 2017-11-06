@@ -203,9 +203,13 @@
     <Compile Include="Models\BUS_WFMDashboard_LateShiftManager.cs">
       <DependentUpon>OnyxEntities.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\BUS_WFMDashboard_Repeating_Event.cs">
+      <DependentUpon>OnyxEntities.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\BUS_WFMDashboard_WFO_Schedule.cs">
       <DependentUpon>OnyxEntities.tt</DependentUpon>
     </Compile>
+    <Compile Include="ViewModels\FormViewModels.cs" />
     <Compile Include="ViewModels\ViewEvent.cs" />
     <Compile Include="ViewModels\Reports.cs" />
     <Compile Include="ViewModels\TeamInfo.cs" />

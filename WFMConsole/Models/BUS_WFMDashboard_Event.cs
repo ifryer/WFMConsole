@@ -28,5 +28,9 @@ namespace WFMConsole.Models
         public bool FullDay { get; set; }
         public string Notes { get; set; }
         public string Color { get; set; }
+        public System.DateTime CreatedAt { get; set; }
+        public Nullable<System.DateTime> UpdatedAt { get; set; }
+        public string CreatedBy { get; set; }
+        public string UpdatedBy { get; set; }
     }
 }
