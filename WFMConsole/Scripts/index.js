@@ -211,7 +211,7 @@ indexScript = (function () {
         let repeat_on_days = ""; //MO TU WE , etc.
          //Get the days of the week to mrepeat on
         $.each($(".repeat-day-checkboxes input:checked"), function (index, item) {
-            repeat_on_days += $(item).val() + " ";
+            repeat_on_days += $(item).val() + ",";
         })
         let repeat_start_date = $("#repeat-start-date").val();
         let end_type = $(".repeat-end:checked").val(); // Get the repeat end type (Never, Number, Date)
@@ -289,6 +289,11 @@ indexScript = (function () {
 
     //Edit Event Form
 
+    $(document).on("click", ".event-color-modal", function () {
+        $(".event-color-modal.chosen").removeClass("chosen");
+        $(this).addClass("chosen");
+    })
+
     //TODO: Click event for repeating checkbox
     $(document).on("click", "#repeatingCheckbox-modal", function () {
         $("#save-repeat-modal-btn").attr("origin", "modal")
@@ -353,6 +358,7 @@ indexScript = (function () {
         let eventTitle = $("#event-title-modal").val();
         let eventId = $("#editing-event-id").val();
         let checkbox = $("#repeatingCheckbox-modal")
+        let color = $(".event-color-modal.chosen").attr("colorId");
         let repeatingEvent = checkbox.is(":checked")
         //if (checkbox.attr("checked")) {
             let repeatType = checkbox.attr("repeat-type");
@@ -378,8 +384,6 @@ indexScript = (function () {
         if (endDate == null || endDate == "") {
             endDate = startDate;
         }
-
-        let color = "7";
 
 
         $.ajax({
@@ -429,6 +433,7 @@ indexScript = (function () {
 
                     $('#event-calendar').fullCalendar('updateEvents', [originalEvent]);
                     $("#edit-calendar-event-modal").modal("toggle")
+                    $("#repeatingCheckbox-modal").removeAttr("checked")
                     //$(".event-form").slideUp();
                     //$(".event-form input, textarea").val("")
                     showSmallAlert(data.msg);
@@ -438,6 +443,11 @@ indexScript = (function () {
     }
 
     //Create Event Form
+
+    $(document).on("click", ".event-color", function () {
+        $(".event-color.chosen").removeClass("chosen");
+        $(this).addClass("chosen");
+    })
 
     //TODO: Click event for repeating checkbox
     $(document).on("click", "#repeatingCheckbox", function () {
@@ -496,11 +506,10 @@ indexScript = (function () {
     $("#pto-section").on("click", "#submit-event-form-btn", function () {
         submitEventForm();
     });
-
+    //TODO: Make sure if they selected "number" as end type, they have actually put in a number > 0
     function submitEventForm() {
         let startDate = $("#event-start-date").val();
         let endDate = $("#event-end-date").val();
-
         let startTime = $("#event-start-time").val();
         let endTime = $("#event-end-time").val();
         let fullDay = $("#fullDayCheckbox:checked").length > 0;
@@ -510,6 +519,7 @@ indexScript = (function () {
         let agentId = $("#select-name-staff").val();
         let checkbox = $("#repeatingCheckbox")
         let repeatingEvent = checkbox.is(":checked")
+        let color = $(".event-color.chosen").attr("colorId");
         //if (checkbox.attr("checked"))
         //{
             let repeatType = checkbox.attr("repeat-type");
@@ -536,8 +546,10 @@ indexScript = (function () {
         {
             endDate = startDate;
         }
+        //TODO: get the right color here...
+        //let color = "7";
+        //let color = GetColor(eventType)
 
-        let color = "7";
         if (agentId == "" || agentId == null) {
             showSmallError("Please select a staff member to submit time off.");
             return;
@@ -579,10 +591,29 @@ indexScript = (function () {
                         $('#event-calendar').fullCalendar('addEventSource', [data.eventObject]);
                         $(".event-form").slideUp("fast");
                         $(".event-form input, textarea").val("")
+                        $("#repeatingCheckbox").removeAttr("checked")
                         showSmallAlert(data.msg);
                     }
                 }
             });
+        }
+    }
+
+
+    function GetColor(eventType)
+    {
+        switch (eventType) {
+            case "Training":
+                return "7"; //Teal training
+            case "PTO (Unplanned)":
+            case "Unpaid Time Off (Unplanned)":
+            case "LOA":
+                return "9"; //Blue unplanned PTO / LOA
+            case "PTO (Planned)":
+            case "Unpaid Time Off (Planned)":
+                return "10"; //Green Planned PTO
+            default:
+                return "4"; //Pink
         }
     }
 
@@ -1273,12 +1304,24 @@ indexScript = (function () {
                 let startTime = calEvent.StartTime;
                 let endTime = calEvent.EndTime;
                 let eventType = calEvent.EventType;
+                let repeating = calEvent.repeating;
+                let colorId = calEvent.ColorId;
+                //TODO: Save the repeating event info to the cal event and pull it up here so we can edit it...
 
                 if (allDay) {
                     $("#event-start-time-modal, #event-end-time-modal").attr("disabled", "disabled")
+                    $("#fullDayCheckbox-modal").attr("checked", "checked")
                 }
                 else {
                     $("#event-start-time-modal, #event-end-time-modal").removeAttr("disabled", "disabled")
+                    $("#fullDayCheckbox-modal").removeAttr("checked")
+                }
+
+                if (repeating) {
+                    $("#repeatingCheckbox-modal").attr("checked", "checked")
+                }
+                else {
+                    $("#repeatingCheckbox-modal").removeAttr("checked")
                 }
 
                 $("#event-title-modal").val(title);
@@ -1291,6 +1334,10 @@ indexScript = (function () {
                 $("#editing-event-id").val(eventId)
                 $("#editing-event-calendar-id").val(calendarId)
                 $("#edit-calendar-event-modal").modal();
+                $(".event-color-modal").removeClass("chosen");
+                $(".event-color-modal.color-"+colorId).addClass("chosen")
+
+                //TODO: select the color
 
                 // change the border color just for fun
                 //$(this).css('border-color', 'red');

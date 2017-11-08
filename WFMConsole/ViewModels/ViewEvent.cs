@@ -14,6 +14,7 @@ namespace WFMConsole.ViewModels
         public string end { get; set; }
         public string title { get; set; }
         public bool allDay { get; set; }
+        public bool repeating { get; set; }
         public string backgroundColor { get; set; }
         public string borderColor { get; set; }
         public string textColor { get; set; }

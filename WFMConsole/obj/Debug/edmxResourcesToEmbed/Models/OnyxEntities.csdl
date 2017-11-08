@@ -121,5 +121,6 @@
     <Property Name="EndDate" Type="DateTime" Precision="0" />
     <Property Name="RepeatSummary" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
     <Property Name="EndType" Type="String" Nullable="false" MaxLength="25" FixedLength="false" Unicode="true" />
+    <Property Name="CalculatedEndDate" Type="DateTime" Precision="3" />
   </EntityType>
 </Schema>

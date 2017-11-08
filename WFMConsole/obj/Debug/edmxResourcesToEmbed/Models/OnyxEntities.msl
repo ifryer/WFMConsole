@@ -108,6 +108,7 @@
     <EntitySetMapping Name="BUS_WFMDashboard_Repeating_Event">
       <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_Repeating_Event">
         <MappingFragment StoreEntitySet="BUS_WFMDashboard_Repeating_Event">
+          <ScalarProperty Name="CalculatedEndDate" ColumnName="CalculatedEndDate" />
           <ScalarProperty Name="EndType" ColumnName="EndType" />
           <ScalarProperty Name="RepeatSummary" ColumnName="RepeatSummary" />
           <ScalarProperty Name="EndDate" ColumnName="EndDate" />

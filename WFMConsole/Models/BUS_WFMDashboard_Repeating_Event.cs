@@ -24,5 +24,6 @@ namespace WFMConsole.Models
         public Nullable<System.DateTime> EndDate { get; set; }
         public string RepeatSummary { get; set; }
         public string EndType { get; set; }
+        public Nullable<System.DateTime> CalculatedEndDate { get; set; }
     }
 }

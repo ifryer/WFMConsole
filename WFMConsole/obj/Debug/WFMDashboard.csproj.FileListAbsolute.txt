@@ -76,3 +76,6 @@ C:\Projects\WFMConsole\WFMConsole\bin\System.Net.Http.xml
 C:\Projects\WFMConsole\WFMConsole\bin\System.Net.Http.WebRequest.xml
 C:\Projects\WFMConsole\WFMConsole\bin\Mvc.Mailer.dll
 C:\Projects\WFMConsole\WFMConsole\obj\Debug\WFMDashboard.csprojResolveAssemblyReference.cache
+C:\Projects\WFMConsole\WFMConsole\bin\FluentDateTime.dll
+C:\Projects\WFMConsole\WFMConsole\bin\FluentDateTime.pdb
+C:\Projects\WFMConsole\WFMConsole\bin\FluentDateTime.xml

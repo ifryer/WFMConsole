@@ -26,7 +26,6 @@ namespace WFMDashboard.Controllers
 
         public async Task<ActionResult> Index(CancellationToken cancellationToken)
         {
-
             var user = HttpContext.KmIdentity();
             var WFMUser = getWFMUser(user.LdapUserId);
             if (WFMUser == null) return RedirectToAction("Error", new { msg = "You are not authorized to use WFM Dashboard" });

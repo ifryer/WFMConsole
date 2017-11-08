@@ -94,6 +94,7 @@
           <Property Name="EndDate" Type="date" />
           <Property Name="RepeatSummary" Type="nvarchar" MaxLength="100" Nullable="false" />
           <Property Name="EndType" Type="nvarchar" MaxLength="25" Nullable="false" />
+          <Property Name="CalculatedEndDate" Type="datetime" />
         </EntityType>
         <EntityType Name="BUS_WFMDashboard_ReportLog">
           <Key>
@@ -252,6 +253,7 @@
           <Property Name="EndDate" Type="DateTime" Precision="0" />
           <Property Name="RepeatSummary" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
           <Property Name="EndType" Type="String" Nullable="false" MaxLength="25" FixedLength="false" Unicode="true" />
+          <Property Name="CalculatedEndDate" Type="DateTime" Precision="3" />
         </EntityType>
       </Schema>
     </edmx:ConceptualModels>
@@ -366,6 +368,7 @@
           <EntitySetMapping Name="BUS_WFMDashboard_Repeating_Event">
             <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_Repeating_Event">
               <MappingFragment StoreEntitySet="BUS_WFMDashboard_Repeating_Event">
+                <ScalarProperty Name="CalculatedEndDate" ColumnName="CalculatedEndDate" />
                 <ScalarProperty Name="EndType" ColumnName="EndType" />
                 <ScalarProperty Name="RepeatSummary" ColumnName="RepeatSummary" />
                 <ScalarProperty Name="EndDate" ColumnName="EndDate" />

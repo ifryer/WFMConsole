@@ -89,6 +89,7 @@
     <Property Name="EndDate" Type="date" />
     <Property Name="RepeatSummary" Type="nvarchar" MaxLength="100" Nullable="false" />
     <Property Name="EndType" Type="nvarchar" MaxLength="25" Nullable="false" />
+    <Property Name="CalculatedEndDate" Type="datetime" />
   </EntityType>
   <EntityType Name="BUS_WFMDashboard_ReportLog">
     <Key>
