@@ -208,11 +208,14 @@ indexScript = (function () {
         let validationText = "";
         let repeat_type = $("#repeat-type").val(); //repeat type, 0-6 same as google calendar
         let repeat_every_number = $("#repeat-every-number").val(); // repeat every X ___s
+        if (repeat_every_number <= 0)
+            repeat_every_number = 1;
         let repeat_on_days = ""; //MO TU WE , etc.
          //Get the days of the week to mrepeat on
         $.each($(".repeat-day-checkboxes input:checked"), function (index, item) {
             repeat_on_days += $(item).val() + ",";
         })
+        let repeat_summary = $(".repeat-form-summary").html();
         let repeat_start_date = $("#repeat-start-date").val();
         let end_type = $(".repeat-end:checked").val(); // Get the repeat end type (Never, Number, Date)
         let end_date = $("#repeat-end-date-input").val();
@@ -249,6 +252,7 @@ indexScript = (function () {
             checkbox.attr("end-type", end_type);
             checkbox.attr("end-date", end_date);
             checkbox.attr("end-after-number", end_after_number);
+            checkbox.attr("summary", repeat_summary)
         }
         else
         {
@@ -288,6 +292,30 @@ indexScript = (function () {
 
 
     //Edit Event Form
+
+    $(document).on("change", "#event-type-modal", function () {
+        switch ($(this).val()) {
+            case "PTO (Unplanned)":
+            case "Unpaid Time Off (Unplanned)":
+            case "LOA":
+                $(".event-color-modal.chosen").removeClass("chosen");
+                $(".event-color-modal.color-9").addClass("chosen");
+                break;
+            case "Training":
+                $(".event-color-modal.chosen").removeClass("chosen");
+                $(".event-color-modal.color-7").addClass("chosen");
+                break;
+            case "PTO (Planned)":
+            case "Unpaid Time Off (Planned)":
+                $(".event-color-modal.chosen").removeClass("chosen");
+                $(".event-color-modal.color-10").addClass("chosen");
+                break;
+            case "Other":
+                $(".event-color-modal.chosen").removeClass("chosen");
+                $(".event-color-modal.color-11").addClass("chosen");
+                break;
+        }
+    })
 
     $(document).on("click", ".event-color-modal", function () {
         $(".event-color-modal.chosen").removeClass("chosen");
@@ -367,6 +395,7 @@ indexScript = (function () {
             let repeatEndType = checkbox.attr("end-type");
             let repeatEndDate = checkbox.attr("end-date");
             let repeatEndAfterNumber = checkbox.attr("end-after-number");
+            let repeatSummary = checkbox.attr("summary");
         //}
 
 
@@ -408,7 +437,8 @@ indexScript = (function () {
                     repeatEndType: repeatEndType,
                     repeatEndDate: repeatEndDate,
                     repeatEndAfterNumber: repeatEndAfterNumber,
-                    repeatingEvent: repeatingEvent
+                    repeatingEvent: repeatingEvent,
+                    repeatSummary: repeatSummary
                 }
             },
             url: toUrl("Home/SubmitEventForm"),
@@ -496,6 +526,27 @@ indexScript = (function () {
             let eventType = $("#event-type").val();
             $("#event-title").val("*" + teamName + " - " + selectedStaffLastName + " - " + eventType);
         }
+        switch ($(this).val()) {
+            case "PTO (Unplanned)":
+            case "Unpaid Time Off (Unplanned)":
+            case "LOA":
+                $(".event-color.chosen").removeClass("chosen");
+                $(".event-color.color-9").addClass("chosen");
+                break;
+            case "Training":
+                $(".event-color.chosen").removeClass("chosen");
+                $(".event-color.color-7").addClass("chosen");
+                break;
+            case "Unpaid Time Off (Planned)":
+            case "PTO (Planned)":
+                $(".event-color.chosen").removeClass("chosen");
+                $(".event-color.color-10").addClass("chosen");
+                break;
+            case "Other":
+                $(".event-color.chosen").removeClass("chosen");
+                $(".event-color.color-11").addClass("chosen");
+                break;
+        }
     })
 
     $("#pto-section").on("click", "#close-event-form-btn", function () {
@@ -528,6 +579,7 @@ indexScript = (function () {
             let repeatEndType = checkbox.attr("end-type");
             let repeatEndDate = checkbox.attr("end-date");
             let repeatEndAfterNumber = checkbox.attr("end-after-number");
+            let repeatSummary = checkbox.attr("summary")
         //}
         
 
@@ -577,7 +629,8 @@ indexScript = (function () {
                         repeatEndType: repeatEndType,
                         repeatEndDate: repeatEndDate,
                         repeatEndAfterNumber: repeatEndAfterNumber,
-                        repeatingEvent: repeatingEvent
+                        repeatingEvent: repeatingEvent,
+                        repeatSummary: repeatSummary
                     }
                     
                 },

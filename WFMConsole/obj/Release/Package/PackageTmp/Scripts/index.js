@@ -84,7 +84,7 @@ indexScript = (function () {
                 }
             }
         });
-        $("#repeat-end-date").datepicker();
+        $("#repeat-end-date-input").datepicker();
         $(".late-shift-date").datepicker();
         $('#start-end-event-section').datepair();
         $('#start-end-event-section-modal').datepair();
@@ -99,9 +99,13 @@ indexScript = (function () {
 
     $(document).on("click", "#mow-tab.unclicked", function () {
         $(this).removeClass("unclicked")
-        $(".mow-schedule-list").scrollTop(
-            $("#mow-date-" + new moment().format("MMDDYYYY")).offset().top - $(".mow-schedule-list").offset().top + $(".mow-schedule-list").scrollTop()
-        );
+        if ($("#mow-date-" + new moment().format("MMDDYYYY")).length > 0)
+        {
+            $(".mow-schedule-list").scrollTop(
+                $("#mow-date-" + new moment().format("MMDDYYYY")).offset().top - $(".mow-schedule-list").offset().top + $(".mow-schedule-list").scrollTop()
+            );
+        }
+        
     })
 
     $(document).on("click", ".log-off-google", function () {
@@ -202,30 +206,29 @@ indexScript = (function () {
         //Here are all the values we need to submit for this...
         let validationErrors = false;
         let validationText = "";
-        let repeat_type = $("#repeat-type") //repeat type, 0-6 same as google calendar
-        let repeat_number = $("#repeat-number") // repeat every X ___s
-        let repeat_days = "";
+        let repeat_type = $("#repeat-type").val(); //repeat type, 0-6 same as google calendar
+        let repeat_every_number = $("#repeat-every-number").val(); // repeat every X ___s
+        let repeat_on_days = ""; //MO TU WE , etc.
          //Get the days of the week to mrepeat on
         $.each($(".repeat-day-checkboxes input:checked"), function (index, item) {
-            repeat_days += $(item).val() + " ";
+            repeat_on_days += $(item).val() + ",";
         })
-        console.log(repeat_days)
-        let repeat_start_date = $("#repeat-start-date")
-        let end_type = $(".repeat-end:checked") // Get the repeat end type (Never, Number, Date)
+        let repeat_start_date = $("#repeat-start-date").val();
+        let end_type = $(".repeat-end:checked").val(); // Get the repeat end type (Never, Number, Date)
         let end_date = $("#repeat-end-date-input").val();
-        let end_number = $("#repeat-end-count-input").val();
+        let end_after_number = $("#repeat-end-count-input").val();
         let origin_form = $(this).attr("origin");
 
         if (repeat_type == "0" || repeat_type == "4" || repeat_type == "5" || repeat_type == "6")
         {
-            if (Number.parseInt(repeat_number) <= 0)
+            if (Number.parseInt(repeat_every_number) <= 0)
             {
                 validationErrors = true;
-                validationText += " Please enter a valid repeat frequency.  " + repeat_number + " is not a valid input. \r\n "
+                validationText += " Please enter a valid repeat frequency.  " + repeat_every_number + " is not a valid input. \r\n "
             }
             if (repeat_type == "4")
             {
-                if (repeat_days == "")
+                if (repeat_on_days == "")
                 {
                     validationErrors = true;
                     validationText += " Please choose at least one day of the week to repeat the event on. "
@@ -233,10 +236,19 @@ indexScript = (function () {
             }
         }
         
-
         if (!validationErrors)
         {
             $("#repeating-event-modal").modal("hide")
+            if (origin_form == "create")
+                var checkbox = $("#repeatingCheckbox");
+            else
+                var checkbox = $("#repeatingCheckbox-modal");
+            checkbox.attr("repeat-type", repeat_type);
+            checkbox.attr("repeat-every-number", repeat_every_number);
+            checkbox.attr("repeat-on-days", repeat_on_days);
+            checkbox.attr("end-type", end_type);
+            checkbox.attr("end-date", end_date);
+            checkbox.attr("end-after-number", end_after_number);
         }
         else
         {
@@ -264,7 +276,7 @@ indexScript = (function () {
     });
 
 
-    $("document").on("click", '#close-repeat-modal', function () {
+    $(document).on("click", "#close-repeat-modal", function () {
         let origin = $("#save-repeat-modal-btn").attr("origin")
         $("#repeating-event-modal").modal("hide")
         if(origin == "create")
@@ -276,6 +288,35 @@ indexScript = (function () {
 
 
     //Edit Event Form
+
+    $(document).on("change", "#event-type-modal", function () {
+        switch ($(this).val()) {
+            case "PTO (Unplanned)":
+            case "Unpaid Time Off (Unplanned)":
+            case "LOA":
+                $(".event-color-modal.chosen").removeClass("chosen");
+                $(".event-color-modal.color-9").addClass("chosen");
+                break;
+            case "Training":
+                $(".event-color-modal.chosen").removeClass("chosen");
+                $(".event-color-modal.color-7").addClass("chosen");
+                break;
+            case "PTO (Planned)":
+            case "Unpaid Time Off (Planned)":
+                $(".event-color-modal.chosen").removeClass("chosen");
+                $(".event-color-modal.color-10").addClass("chosen");
+                break;
+            case "Other":
+                $(".event-color-modal.chosen").removeClass("chosen");
+                $(".event-color-modal.color-11").addClass("chosen");
+                break;
+        }
+    })
+
+    $(document).on("click", ".event-color-modal", function () {
+        $(".event-color-modal.chosen").removeClass("chosen");
+        $(this).addClass("chosen");
+    })
 
     //TODO: Click event for repeating checkbox
     $(document).on("click", "#repeatingCheckbox-modal", function () {
@@ -340,6 +381,18 @@ indexScript = (function () {
         let eventType = $("#event-type-modal").val();
         let eventTitle = $("#event-title-modal").val();
         let eventId = $("#editing-event-id").val();
+        let checkbox = $("#repeatingCheckbox-modal")
+        let color = $(".event-color-modal.chosen").attr("colorId");
+        let repeatingEvent = checkbox.is(":checked")
+        //if (checkbox.attr("checked")) {
+            let repeatType = checkbox.attr("repeat-type");
+            let repeatEveryNumber = checkbox.attr("repeat-every-number");
+            let repeatOnDays = checkbox.attr("repeat-on-days");
+            let repeatEndType = checkbox.attr("end-type");
+            let repeatEndDate = checkbox.attr("end-date");
+            let repeatEndAfterNumber = checkbox.attr("end-after-number");
+        //}
+
 
         let originalEvent = $('#event-calendar').fullCalendar('clientEvents', calendarId)[0];
 
@@ -356,24 +409,31 @@ indexScript = (function () {
             endDate = startDate;
         }
 
-        let color = "7";
-
 
         $.ajax({
             dataType: "json",
             type: "post",
             data: {
-                agentId: 0,
-                eventId: eventId,
-                title: eventTitle,
-                color: color,
-                startDate: startDate,
-                endDate: endDate,
-                fullDay: fullDay,
-                startTime: startTime,
-                endTime: endTime,
-                notes: notes,
-                eventType: eventType
+                inputForm: {
+                    eventId: eventId,
+                    agentId: agentId,
+                    title: eventTitle,
+                    color: color,
+                    startDate: startDate,
+                    endDate: endDate,
+                    fullDay: fullDay,
+                    startTime: startTime,
+                    endTime: endTime,
+                    notes: notes,
+                    eventType: eventType,
+                    repeatType: repeatType,
+                    repeatEveryNumber: repeatEveryNumber,
+                    repeatOnDays: repeatOnDays,
+                    repeatEndType: repeatEndType,
+                    repeatEndDate: repeatEndDate,
+                    repeatEndAfterNumber: repeatEndAfterNumber,
+                    repeatingEvent: repeatingEvent
+                }
             },
             url: toUrl("Home/SubmitEventForm"),
             success: function (data) {
@@ -397,27 +457,36 @@ indexScript = (function () {
 
                     $('#event-calendar').fullCalendar('updateEvents', [originalEvent]);
                     $("#edit-calendar-event-modal").modal("toggle")
+                    $("#repeatingCheckbox-modal").removeAttr("checked")
                     //$(".event-form").slideUp();
                     //$(".event-form input, textarea").val("")
                     showSmallAlert(data.msg);
                 }
             }
         });
-
     }
 
     //Create Event Form
 
+    $(document).on("click", ".event-color", function () {
+        $(".event-color.chosen").removeClass("chosen");
+        $(this).addClass("chosen");
+    })
+
     //TODO: Click event for repeating checkbox
     $(document).on("click", "#repeatingCheckbox", function () {
-        $("#save-repeat-modal-btn").attr("origin", "create")
-        $("#repeating-event-modal").modal("toggle")
-        let start_date = $("#event-start-date").val();
-        $("#repeat-start-date").val(start_date);
-        $("#repeat-type").val("0");
-        $("#repeat-every-weekday-checkboxes-tr").hide();
-        $("#repeat-every-number-tr").show();
-        $("#repeat-every-unit").html("days");
+        if ($(this).is(":checked"))
+        {
+            $("#save-repeat-modal-btn").attr("origin", "create")
+            $("#repeating-event-modal").modal("toggle")
+            let start_date = $("#event-start-date").val();
+            $("#repeat-start-date").val(start_date);
+            $("#repeat-type").val("0");
+            $("#repeat-every-weekday-checkboxes-tr").hide();
+            $("#repeat-every-number-tr").show();
+            $("#repeat-every-unit").html("days");
+        }
+        
     });
 
     $("#pto-section").on("click", "#new-event-btn", function () {
@@ -451,6 +520,27 @@ indexScript = (function () {
             let eventType = $("#event-type").val();
             $("#event-title").val("*" + teamName + " - " + selectedStaffLastName + " - " + eventType);
         }
+        switch ($(this).val()) {
+            case "PTO (Unplanned)":
+            case "Unpaid Time Off (Unplanned)":
+            case "LOA":
+                $(".event-color.chosen").removeClass("chosen");
+                $(".event-color.color-9").addClass("chosen");
+                break;
+            case "Training":
+                $(".event-color.chosen").removeClass("chosen");
+                $(".event-color.color-7").addClass("chosen");
+                break;
+            case "Unpaid Time Off (Planned)":
+            case "PTO (Planned)":
+                $(".event-color.chosen").removeClass("chosen");
+                $(".event-color.color-10").addClass("chosen");
+                break;
+            case "Other":
+                $(".event-color.chosen").removeClass("chosen");
+                $(".event-color.color-11").addClass("chosen");
+                break;
+        }
     })
 
     $("#pto-section").on("click", "#close-event-form-btn", function () {
@@ -461,18 +551,30 @@ indexScript = (function () {
     $("#pto-section").on("click", "#submit-event-form-btn", function () {
         submitEventForm();
     });
-
+    //TODO: Make sure if they selected "number" as end type, they have actually put in a number > 0
     function submitEventForm() {
         let startDate = $("#event-start-date").val();
         let endDate = $("#event-end-date").val();
-
         let startTime = $("#event-start-time").val();
         let endTime = $("#event-end-time").val();
-        let fullDay = $("#fullDayCheckbox:checked").length > 0
-        let notes = $("#event-notes").val();to
+        let fullDay = $("#fullDayCheckbox:checked").length > 0;
+        let notes = $("#event-notes").val();
         let eventType = $("#event-type").val();
         let eventTitle = $("#event-title").val();
         let agentId = $("#select-name-staff").val();
+        let checkbox = $("#repeatingCheckbox")
+        let repeatingEvent = checkbox.is(":checked")
+        let color = $(".event-color.chosen").attr("colorId");
+        //if (checkbox.attr("checked"))
+        //{
+            let repeatType = checkbox.attr("repeat-type");
+            let repeatEveryNumber = checkbox.attr("repeat-every-number");
+            let repeatOnDays = checkbox.attr("repeat-on-days");
+            let repeatEndType = checkbox.attr("end-type");
+            let repeatEndDate = checkbox.attr("end-date");
+            let repeatEndAfterNumber = checkbox.attr("end-after-number");
+        //}
+        
 
         if (!fullDay && (startTime == null || startTime == "" || endTime == null || endTime == ""))
         {
@@ -489,8 +591,10 @@ indexScript = (function () {
         {
             endDate = startDate;
         }
+        //TODO: get the right color here...
+        //let color = "7";
+        //let color = GetColor(eventType)
 
-        let color = "7";
         if (agentId == "" || agentId == null) {
             showSmallError("Please select a staff member to submit time off.");
             return;
@@ -500,17 +604,27 @@ indexScript = (function () {
                 dataType: "json",
                 type: "post",
                 data: {
-                    eventId: 0,
-                    agentId: agentId,
-                    title: eventTitle,
-                    color: color,
-                    startDate: startDate,
-                    endDate: endDate,
-                    fullDay: fullDay,
-                    startTime: startTime,
-                    endTime: endTime,
-                    notes: notes,
-                    eventType: eventType
+                    inputForm: {
+                        eventId: 0,
+                        agentId: agentId,
+                        title: eventTitle,
+                        color: color,
+                        startDate: startDate,
+                        endDate: endDate,
+                        fullDay: fullDay,
+                        startTime: startTime,
+                        endTime: endTime,
+                        notes: notes,
+                        eventType: eventType,
+                        repeatType: repeatType,
+                        repeatEveryNumber: repeatEveryNumber,
+                        repeatOnDays: repeatOnDays,
+                        repeatEndType: repeatEndType,
+                        repeatEndDate: repeatEndDate,
+                        repeatEndAfterNumber: repeatEndAfterNumber,
+                        repeatingEvent: repeatingEvent
+                    }
+                    
                 },
                 url: toUrl("Home/SubmitEventForm"),
                 success: function (data) {
@@ -522,10 +636,29 @@ indexScript = (function () {
                         $('#event-calendar').fullCalendar('addEventSource', [data.eventObject]);
                         $(".event-form").slideUp("fast");
                         $(".event-form input, textarea").val("")
+                        $("#repeatingCheckbox").removeAttr("checked")
                         showSmallAlert(data.msg);
                     }
                 }
             });
+        }
+    }
+
+
+    function GetColor(eventType)
+    {
+        switch (eventType) {
+            case "Training":
+                return "7"; //Teal training
+            case "PTO (Unplanned)":
+            case "Unpaid Time Off (Unplanned)":
+            case "LOA":
+                return "9"; //Blue unplanned PTO / LOA
+            case "PTO (Planned)":
+            case "Unpaid Time Off (Planned)":
+                return "10"; //Green Planned PTO
+            default:
+                return "4"; //Pink
         }
     }
 
@@ -1216,12 +1349,24 @@ indexScript = (function () {
                 let startTime = calEvent.StartTime;
                 let endTime = calEvent.EndTime;
                 let eventType = calEvent.EventType;
+                let repeating = calEvent.repeating;
+                let colorId = calEvent.ColorId;
+                //TODO: Save the repeating event info to the cal event and pull it up here so we can edit it...
 
                 if (allDay) {
                     $("#event-start-time-modal, #event-end-time-modal").attr("disabled", "disabled")
+                    $("#fullDayCheckbox-modal").attr("checked", "checked")
                 }
                 else {
                     $("#event-start-time-modal, #event-end-time-modal").removeAttr("disabled", "disabled")
+                    $("#fullDayCheckbox-modal").removeAttr("checked")
+                }
+
+                if (repeating) {
+                    $("#repeatingCheckbox-modal").attr("checked", "checked")
+                }
+                else {
+                    $("#repeatingCheckbox-modal").removeAttr("checked")
                 }
 
                 $("#event-title-modal").val(title);
@@ -1234,6 +1379,10 @@ indexScript = (function () {
                 $("#editing-event-id").val(eventId)
                 $("#editing-event-calendar-id").val(calendarId)
                 $("#edit-calendar-event-modal").modal();
+                $(".event-color-modal").removeClass("chosen");
+                $(".event-color-modal.color-"+colorId).addClass("chosen")
+
+                //TODO: select the color
 
                 // change the border color just for fun
                 //$(this).css('border-color', 'red');

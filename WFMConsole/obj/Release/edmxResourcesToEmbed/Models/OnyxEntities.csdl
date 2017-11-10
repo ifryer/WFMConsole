@@ -9,6 +9,7 @@
     <EntitySet Name="BUS_WFMDashboard_LateShiftManager" EntityType="OnyxModel.BUS_WFMDashboard_LateShiftManager" />
     <EntitySet Name="BUS_WFMDashboard_Action_History" EntityType="OnyxModel.BUS_WFMDashboard_Action_History" />
     <EntitySet Name="BUS_WFMDashboard_Event" EntityType="OnyxModel.BUS_WFMDashboard_Event" />
+    <EntitySet Name="BUS_WFMDashboard_Repeating_Event" EntityType="OnyxModel.BUS_WFMDashboard_Repeating_Event" />
   </EntityContainer>
   <EntityType Name="BUS_WFMDashboard_Google_Credentials">
     <Key>
@@ -105,5 +106,21 @@
     <Property Name="UpdatedAt" Type="DateTime" Precision="3" />
     <Property Name="CreatedBy" Type="String" Nullable="false" MaxLength="45" FixedLength="false" Unicode="true" />
     <Property Name="UpdatedBy" Type="String" Nullable="false" MaxLength="45" FixedLength="false" Unicode="true" />
+  </EntityType>
+  <EntityType Name="BUS_WFMDashboard_Repeating_Event">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="EventId" Type="Int32" Nullable="false" />
+    <Property Name="RepeatType" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="true" />
+    <Property Name="RepeatEveryNumber" Type="Int32" />
+    <Property Name="RepeatOnDays" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
+    <Property Name="StartDate" Type="DateTime" Nullable="false" Precision="0" />
+    <Property Name="EndAfterOccurences" Type="Int32" />
+    <Property Name="EndDate" Type="DateTime" Precision="0" />
+    <Property Name="RepeatSummary" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+    <Property Name="EndType" Type="String" Nullable="false" MaxLength="25" FixedLength="false" Unicode="true" />
+    <Property Name="CalculatedEndDate" Type="DateTime" Precision="3" />
   </EntityType>
 </Schema>

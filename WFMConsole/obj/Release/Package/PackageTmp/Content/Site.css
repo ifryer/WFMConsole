@@ -333,3 +333,15 @@ h4.box-header{
     padding-top: 10px;
     background: rgba(255, 202, 122, 0.72);
 }
+
+.color-selector{
+    display: inline-block;
+    margin-right: 2px;
+    height: 18px;
+    width: 18px;
+    margin-bottom: -3px;
+}
+    .color-selector.chosen {
+        background: url(images/ui-icons_ffffff_256x240.png);
+        background-position: -63px -144px;
+    }

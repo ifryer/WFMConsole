@@ -94,7 +94,7 @@ namespace WFMDashboard.Controllers
             var WFMUser = getWFMUser(user.LdapUserId);
             if (WFMUser == null) return JsonConvert.SerializeObject(new { success = false, msg = "You are not authorized to access WFM Dashboard" });
 
-            log.Info($"User {user.LdapUserId} called SubmitEventForm - Params: InputForm: {inputForm.ToString()}");
+            log.Info($"User {user.LdapUserId} called SubmitEventForm \r\n Params: InputForm: {inputForm.ToString()}");
             string msg = "";
             //bool success = false;
             var googleAuth = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata()).AuthorizeAsync(cancellationToken);
@@ -111,7 +111,7 @@ namespace WFMDashboard.Controllers
             string msg = "";
             log.Info($"User {user.LdapUserId} called DeleteEvent /r/n id: {id}");
             var googleAuth = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata()).AuthorizeAsync(cancellationToken);
-            var success = WFMHelper.DeleteEvent(googleAuth, id, out msg);
+            var success = WFMHelper.DeleteEvent(googleAuth, id, user.LdapUserId, out msg);
             return JsonConvert.SerializeObject(new { success = success, msg = msg });
         }
 

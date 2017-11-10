@@ -105,5 +105,22 @@
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
+    <EntitySetMapping Name="BUS_WFMDashboard_Repeating_Event">
+      <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_Repeating_Event">
+        <MappingFragment StoreEntitySet="BUS_WFMDashboard_Repeating_Event">
+          <ScalarProperty Name="CalculatedEndDate" ColumnName="CalculatedEndDate" />
+          <ScalarProperty Name="EndType" ColumnName="EndType" />
+          <ScalarProperty Name="RepeatSummary" ColumnName="RepeatSummary" />
+          <ScalarProperty Name="EndDate" ColumnName="EndDate" />
+          <ScalarProperty Name="EndAfterOccurences" ColumnName="EndAfterOccurences" />
+          <ScalarProperty Name="StartDate" ColumnName="StartDate" />
+          <ScalarProperty Name="RepeatOnDays" ColumnName="RepeatOnDays" />
+          <ScalarProperty Name="RepeatEveryNumber" ColumnName="RepeatEveryNumber" />
+          <ScalarProperty Name="RepeatType" ColumnName="RepeatType" />
+          <ScalarProperty Name="EventId" ColumnName="EventId" />
+          <ScalarProperty Name="Id" ColumnName="Id" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
   </EntityContainerMapping>
 </Mapping>

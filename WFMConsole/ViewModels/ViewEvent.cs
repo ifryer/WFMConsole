@@ -29,8 +29,9 @@ namespace WFMConsole.ViewModels
         public string CalendarEventId { get; set; }
         public string ColorId { get; set; }
 
-        private static Dictionary<string, string> colorList = new Dictionary<string, string>() { { "1", "#a4bbfc" }, { "2", "" }, { "3", "" }, { "4", "#ff887c" }, { "5", "" }, { "6", "" }, { "7", "#46d6db" }, { "8", "" }, { "9", "#5484ed" }, { "10", "#51b749" }, { "11", "#dc2127" }, { "12", "" }, };
-        private static Dictionary<string, string> colorListPast = new Dictionary<string, string>() { { "1", "#d6e1ff" }, { "2", "" }, { "3", "" }, { "4", "#ffdbd7" }, { "5", "" }, { "6", "" }, { "7", "#c7f3f4" }, { "8", "" }, { "9", "#dde6fb" }, { "10", "#dcf1db" }, { "11", "#ecafb1" }, { "12", "" }, };
+        private static Dictionary<string, string> colorList = new Dictionary<string, string>() { { "1", "#a4bbfc" }, { "2", "" }, { "3", "" }, { "4", "#ff887c" }, { "5", "#fbd75b" }, { "6", "" }, { "7", "#46d6db" }, { "8", "" }, { "9", "#5484ed" }, { "10", "#51b749" }, { "11", "#dc2127" }, { "12", "" }, };
+        private static Dictionary<string, string> colorListPast = new Dictionary<string, string>() { { "1", "#d6e1ff" }, { "2", "" }, { "3", "" }, { "4", "#ffdbd7" }, { "5", "rgb(255, 240, 190)" }, { "6", "" }, { "7", "#c7f3f4" }, { "8", "" }, { "9", "#dde6fb" }, { "10", "#dcf1db" }, { "11", "#ecafb1" }, { "12", "" }, };
+        //TODO: change Past color ID 5 to be more accurate to the actual color
 
         public ViewEvent(BUS_WFMDashboard_Event item, bool past)
         {
@@ -45,14 +46,8 @@ namespace WFMConsole.ViewModels
             CalendarEventId = item.CalendarEventId;
             if (allDay)
             {
-                StartDate = item.StartTime.ToShortDateString();
-                EndDate = item.EndTime.ToShortDateString();
-                //StartTime = item.StartTime.ToShortDateString();
-                //EndTime = item.EndTime.ToShortDateString();
-                //start = DateTime.Today.ToShortDateString();
-                start = item.StartTime.ToShortDateString();
-                end = item.EndTime.ToShortDateString();
-
+                start = StartDate = item.StartTime.ToShortDateString();
+                end = EndDate = item.EndTime.ToShortDateString();
             }
             else
             {
@@ -60,8 +55,8 @@ namespace WFMConsole.ViewModels
                 EndDate = item.EndTime.ToShortDateString();
                 StartTime = item.StartTime.ToShortTimeString();
                 EndTime = item.EndTime.ToShortTimeString();
-                start = item.StartTime.ToShortDateString() + " " + item.StartTime.ToShortTimeString();
-                end = item.EndTime.ToShortDateString() + " " + item.EndTime.ToShortTimeString();
+                start = StartDate + " " + StartTime;
+                end = EndDate + " " + EndTime;
             }
             if (item.Color != null)
             {
@@ -77,6 +72,47 @@ namespace WFMConsole.ViewModels
                     borderColor = "black";
                     backgroundColor = colorList[item.Color];
                 }
+            }
+            else
+            {
+                backgroundColor = "#3a87ad";
+            }
+
+        }
+
+        public ViewEvent(BUS_WFMDashboard_Event item, DateTime inputDate)
+        {
+            ColorId = item.Color;
+            Id = item.Id;
+            title = item.Description;
+            TeamName = item.TeamName;
+            LastName = item.LastName;
+            allDay = item.FullDay;
+            EventType = item.EventType;
+            Notes = item.Notes;
+            CalendarEventId = item.CalendarEventId;
+
+            var daysDifference = (inputDate - item.StartTime).Days;
+
+            if (allDay)
+            {
+                StartDate = start = inputDate.ToShortDateString();
+                EndDate = end = item.EndTime.AddDays(daysDifference).ToShortDateString();
+            }
+            else
+            {
+                StartDate = inputDate.ToShortDateString();
+                EndDate = item.EndTime.AddDays(daysDifference).ToShortDateString();
+                StartTime = item.StartTime.ToShortTimeString();
+                EndTime = item.EndTime.ToShortTimeString();
+                start = StartDate + " " + StartTime;
+                end = EndDate + " " + EndTime;
+            }
+            if (item.Color != null)
+            {
+                textColor = "black";
+                borderColor = "black";
+                backgroundColor = colorList[item.Color];
             }
             else
             {

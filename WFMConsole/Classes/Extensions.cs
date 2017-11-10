@@ -50,17 +50,26 @@ namespace WFMConsole.Classes
                     }
                     results.Add(workingDate);
                 }
+            }
+            return results;
+        }
 
+        public static List<DateTime> GetSpecifiedDaysFromDateWithMaxDate(DateTime date, List<DayOfWeek> days, DateTime maxDate, int repeatEveryWeeks)
+        {
+            List<DateTime> results = new List<DateTime>();
+            var workingDate = date;
+            var endOfWorkingWeek = FluentDateTime.DateTimeExtensions.LastDayOfWeek(workingDate);
 
-                //Get the rest of the repeat days on this week
-                //Increment startIndex with each one
-
-                //i = startIndex
-                //While i < repeatCount
-                // go to first day of next week to repeat on
-                // Add (repeatEveryWeeks-1) weeks
-                //Get the rest of the repeat days on this week, as long as i < repeatcount
-                //Increment i with each one
+            while(workingDate < maxDate)
+            {
+                workingDate = WFMConsole.Classes.DateTimeExtensions.GetNextWeekday(workingDate, days);
+                if (workingDate > endOfWorkingWeek)
+                {
+                    //Don't add it, skip to the next valid week and add that day, then continue
+                    workingDate = workingDate.AddDays(7 * (repeatEveryWeeks - 1));
+                    endOfWorkingWeek = FluentDateTime.DateTimeExtensions.LastDayOfWeek(workingDate);
+                }
+                results.Add(workingDate);
             }
             return results;
         }

@@ -29,7 +29,7 @@ namespace WFMConsole.ViewModels
 
         public override string ToString()
         {
-            return $"\r\n eventId: {eventId} /r/n agentId: {agentId} \r\n title: {title} \r\n color: {color} \r\n start date: {startDate} \r\n end date: {endDate} \r\n fullDay: {fullDay} \r\n startTime: {startTime} \r\n endTime: {endTime} \r\n notes: {notes} \r\n eventType: {eventType} \r\n repeatType: {repeatType} \r\n repeatEveryNumber: {repeatEveryNumber} \r\n repeatOnDays: {repeatOnDays} \r\n repeatEndType: {repeatEndType} \r\n repeatEnddate: {repeatEndDate} \r\n repeatEndAfterNumber: {repeatEndAfterNumber}";
+            return $"\r\n eventId: {eventId} /r/n agentId: {agentId} \r\n title: {title} \r\n color: {color} \r\n start date: {startDate} \r\n end date: {endDate} \r\n fullDay: {fullDay} \r\n startTime: {startTime} \r\n endTime: {endTime} \r\n notes: {notes} \r\n eventType: {eventType} \r\n repeatType: {repeatType} \r\n repeatEveryNumber: {repeatEveryNumber} \r\n repeatOnDays: {repeatOnDays} \r\n repeatEndType: {repeatEndType} \r\n repeatEnddate: {repeatEndDate} \r\n repeatEndAfterNumber: {repeatEndAfterNumber} \r\n repeatingEvent: {repeatingEvent}";
         }
     }
 }
