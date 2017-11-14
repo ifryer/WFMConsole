@@ -32,13 +32,14 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6 unpadded-left">
+                        <div class="col-md-7 unpadded-left">
                             <div class="form-group">
                                 <div style="margin-top: 5px;">
                                     <input type="checkbox" id="fullDayCheckbox-modal" checked="checked" />
                                     <label for="fullDayCheckbox-modal"> Full Day </label>
-                                    <input style="margin-left:10px;" type="checkbox" id="repeatingCheckbox" />
+                                    <input style="margin-left:10px;" type="checkbox" id="repeatingCheckbox-modal" />
                                     <label for="repeatingCheckbox-modal"> Repeat </label>
+                                    <a id="repeatingCheckbox-modal-edit" style="display:none; cursor:pointer;">Edit</a>
                                     <label style="margin-left:20px;"> Color: </label>
                                     <div class="event-color-modal color-selector color-1" colorId="1" style="background-color: #a4bbfc"></div>
                                     <div class="event-color-modal color-selector color-4" colorId="4" style="background-color: #ff887c"></div>
@@ -50,7 +51,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6 unpadded-left">
+                        <div class="col-md-5 unpadded-left">
                             <div class="form-group">
                                 <label for="event-type-modal">Event Type</label>
                                 <div class="form-inline">
@@ -125,31 +126,31 @@
                                 <td>
                                     <div class="repeat-day-checkboxes">
                                         <span class="repeat-day-checkboxes">
-                                            <input id="repeat-sunday" value="SU" name="SU" type="checkbox" aria-label="Repeat on Sunday" title="Sunday">
+                                            <input class="repeat-day-checkbox" id="repeat-sunday" value="SU" name="SU" type="checkbox" aria-label="Repeat on Sunday" title="Sunday">
                                             <label for="repeat-sunday" title="Sunday">S</label>
                                         </span>
                                         <span class="ep-rec-dow">
-                                            <input id="repeat-monday" value="MO" name="MO" type="checkbox" aria-label="Repeat on Monday" title="Monday">
+                                            <input class="repeat-day-checkbox" id="repeat-monday" value="MO" name="MO" type="checkbox" aria-label="Repeat on Monday" title="Monday">
                                             <label for="repeat-monday" title="Monday">M</label>
                                         </span>
                                         <span class="ep-rec-dow">
-                                            <input id="repeat-tuesday" value="TU" name="TU" type="checkbox" aria-label="Repeat on Tuesday" title="Tuesday">
+                                            <input class="repeat-day-checkbox" id="repeat-tuesday" value="TU" name="TU" type="checkbox" aria-label="Repeat on Tuesday" title="Tuesday">
                                             <label for="repeat-tuesday" title="Tuesday">T</label>
                                         </span>
                                         <span class="ep-rec-dow">
-                                            <input id="repeat-wednesday" value="WE" name="WE" type="checkbox" aria-label="Repeat on Wednesday" title="Wednesday">
+                                            <input class="repeat-day-checkbox" id="repeat-wednesday" value="WE" name="WE" type="checkbox" aria-label="Repeat on Wednesday" title="Wednesday">
                                             <label for="repeat-wednesday" title="Wednesday">W</label>
                                         </span>
                                         <span class="ep-rec-dow">
-                                            <input id="repeat-thursday" value="TH" name="TH" type="checkbox" aria-label="Repeat on Thursday" title="Thursday">
+                                            <input class="repeat-day-checkbox" id="repeat-thursday" value="TH" name="TH" type="checkbox" aria-label="Repeat on Thursday" title="Thursday">
                                             <label for="repeat-thursday" title="Thursday">T</label>
                                         </span>
                                         <span class="ep-rec-dow">
-                                            <input id="repeat-friday" value="FR" name="FR" type="checkbox" aria-label="Repeat on Friday" title="Friday">
+                                            <input class="repeat-day-checkbox" id="repeat-friday" value="FR" name="FR" type="checkbox" aria-label="Repeat on Friday" title="Friday">
                                             <label for="repeat-friday" title="Friday">F</label>
                                         </span>
                                         <span class="ep-rec-dow">
-                                            <input id="repeat-saturday" value="SA" name="SA" type="checkbox" aria-label="Repeat on Saturday" title="Saturday">
+                                            <input class="repeat-day-checkbox" id="repeat-saturday" value="SA" name="SA" type="checkbox" aria-label="Repeat on Saturday" title="Saturday">
                                             <label for="repeat-saturday" title="Saturday">S</label>
                                         </span>
                                     </div>
@@ -168,10 +169,10 @@
                                             <label for="repeat-end-never" title="Ends never">Never</label>
                                         </span>
                                         <span style="display:block" class="ep-rec-ends-opt">
-                                            <input id="repeat-end-count" value="number" class="repeat-end" name="endson" type="radio" aria-label="Ends after a number of occurrences" title="Ends after a number of occurrences">
-                                            <label for="repeat-end-count" title="Ends after a number of occurrences">
+                                            <input id="repeat-end-number" value="number" class="repeat-end" name="endson" type="radio" aria-label="Ends after a number of occurrences" title="Ends after a number of occurrences">
+                                            <label for="repeat-end-number" title="Ends after a number of occurrences">
                                                 After
-                                                <input id="repeat-end-count-input" style="width: 60px;" type="number" value="" disabled="disabled" title="Occurrences">
+                                                <input id="repeat-end-number-input" style="width: 60px;" type="number" value="" disabled="disabled" title="Occurrences">
                                                 occurrences
                                             </label>
                                         </span>
@@ -349,7 +350,7 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div style="cursor:default" class="col-md-6 unpadded-left">
+                            <div style="cursor:default" class="col-md-7 unpadded-left">
                                 <div style="margin-top: 5px;">
                                     <input type="checkbox" id="fullDayCheckbox" checked="checked" />
                                     <label for="fullDayCheckbox"> Full Day </label>
@@ -368,7 +369,7 @@
                                 @*<label for="selectNameForm">Submitting For</label>
                                 <div class="selected-staff-name"> No Staff Member Selected </div>*@
                             </div>
-                            <div class="col-md-6 unpadded-left">
+                            <div class="col-md-5 unpadded-left">
                                     <label for="event-type">Event Type</label>
                                     <div class="form-inline">
                                         <select class="form-control input-sm" id="event-type" placeholder="">

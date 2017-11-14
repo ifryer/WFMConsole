@@ -37,12 +37,23 @@ namespace WFMDashboard.Classes
                 //var dbList = db.BUS_WFMDashboard_Event.Where(t => t.StartTime <= DateTime.Today.Date && t.EndTime > DateTime.Today.Date).ToList();
                 var events = db.BUS_WFMDashboard_Event.Where(t => t.EndTime >= DateTime.Now || (t.FullDay && t.EndTime >= DateTime.Today.Date)).ToList();
                 var pastEvents = db.BUS_WFMDashboard_Event.Where(t => (t.EndTime < DateTime.Now && !t.FullDay) || (t.EndTime < DateTime.Today.Date && t.FullDay)).ToList();
+                foreach (var item in events)
+                {
+                    var newEvent = new ViewEvent(item, false, false);
+                    eventList.Add(newEvent);
+                }
+                foreach (var item in pastEvents)
+                {
+                    var newEvent = new ViewEvent(item, true, false);
+                    eventList.Add(newEvent);
+                }
 
-                //var maxRepeatDate = DateTime.Now.AddMonths(1).Date;
-                //var minRepeatDate = DateTime.Now.Date;
-                var repeatingEvents = db.BUS_WFMDashboard_Repeating_Event.Where(t => t.CalculatedEndDate >= DateTime.Today.Date).ToList();
+                var repeatingEvents = db.BUS_WFMDashboard_Repeating_Event.Where(t => t.CalculatedEndDate >= DateTime.Today.Date || t.CalculatedEndDate == null).ToList();
                 foreach (var item in repeatingEvents)
                 {
+                    var addRepeat = eventList.Where(t => t.Id == item.EventId).FirstOrDefault();
+                    if (addRepeat != null)
+                        addRepeat.repeating = true;
                     var eventItem = db.BUS_WFMDashboard_Event.Where(t => t.Id == item.EventId).FirstOrDefault();
                     var dateList = GetRepeatingEventDateList(item, DateTime.Now.Date, DateTime.Now.Date.AddMonths(1));
                     foreach (var dateItem in dateList)
@@ -52,16 +63,50 @@ namespace WFMDashboard.Classes
                     }
                 }
 
+                
+                return eventList;
+            }
+        }
+
+        public static List<ViewEvent> GetEventList(string start, string end)
+        {
+            using (var db = new OnyxEntities())
+            {
+                var startDateInput = DateTime.Parse(start);
+                var endDateInput = DateTime.Parse(end);
+                var eventList = new List<ViewEvent>();
+                //var dbList = db.BUS_WFMDashboard_Event.Where(t => t.StartTime <= DateTime.Today.Date && t.EndTime > DateTime.Today.Date).ToList();
+                var events = db.BUS_WFMDashboard_Event.Where(t => (t.StartTime >= startDateInput && t.StartTime <= endDateInput) || (t.FullDay && t.EndTime >= DateTime.Today.Date)).ToList();
+                var pastEvents = events.Where(t => (t.EndTime < DateTime.Now && !t.FullDay) || (t.EndTime < DateTime.Today.Date && t.FullDay)).ToList();
+                events = events.Except(pastEvents).ToList();
+                //var pastEvents = db.BUS_WFMDashboard_Event.Where(t => ((t.StartTime >= startDateInput && t.StartTime <= endDateInput) && (t.EndTime < DateTime.Now && !t.FullDay)) || (t.EndTime < DateTime.Today.Date && t.FullDay && (t.StartTime >= startDateInput && t.StartTime <= endDateInput))).ToList();
                 foreach (var item in events)
                 {
-                    var newEvent = new ViewEvent(item, false);
+                    var newEvent = new ViewEvent(item, false, false);
                     eventList.Add(newEvent);
                 }
                 foreach (var item in pastEvents)
                 {
-                    var newEvent = new ViewEvent(item, true);
+                    var newEvent = new ViewEvent(item, true, false);
                     eventList.Add(newEvent);
                 }
+
+                var repeatingEvents = db.BUS_WFMDashboard_Repeating_Event.Where(t => t.CalculatedEndDate >= startDateInput || t.CalculatedEndDate == null).ToList();
+                foreach (var item in repeatingEvents)
+                {
+                    var addRepeat = eventList.Where(t => t.Id == item.EventId).FirstOrDefault();
+                    if (addRepeat != null)
+                        addRepeat.repeating = true;
+                    var eventItem = db.BUS_WFMDashboard_Event.Where(t => t.Id == item.EventId).FirstOrDefault();
+                    var dateList = GetRepeatingEventDateList(item, startDateInput, endDateInput);
+                    foreach (var dateItem in dateList)
+                    {
+                        var newEvent = new ViewEvent(eventItem, dateItem);
+                        eventList.Add(newEvent);
+                    }
+                }
+
+
                 return eventList;
             }
         }
@@ -103,6 +148,15 @@ namespace WFMDashboard.Classes
             {
                 var weekLateShift = db.BUS_WFMDashboard_LateShiftManager.Where(t => t.Date >= weekStart && t.Date <= weekEnd).OrderBy(t => t.Date).Select(t => new ViewLateShiftSchedule() {AgentNo = t.AgentNo, Date = t.Date, Id = t.Id, ManagerName = t.FirstName + " " + t.LastName }).ToList();
                 return weekLateShift;
+            }
+        }
+
+        public static ViewRepeatingItem GetRepeatingEventInfo(int eventId)
+        {
+            using (var db = new OnyxEntities())
+            {
+                var eventItem = db.BUS_WFMDashboard_Repeating_Event.Where(t => t.EventId == eventId).FirstOrDefault();
+                return new ViewRepeatingItem(eventItem);
             }
         }
 
@@ -221,10 +275,13 @@ namespace WFMDashboard.Classes
         }
 
         //Color IDs : 4 = Scheduled Event = Pink ----- 7 = Teal = Training ----- 9 = Blue = Unplanned PTO ----- 10 = Green = Planned PTO ----- 11 = Red = Scheduled Event
-        public static ViewEvent SubmitEventForm(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, EventForm inputForm, string user, out string msg)
+        public static List<ViewEvent> SubmitEventForm(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, EventForm inputForm, string user, out string msg)
         {
             try
             {
+                List<ViewEvent> eventItemList = new List<ViewEvent>();
+                ViewEvent eventItem = new ViewEvent();
+
                 var startDate = $"{inputForm.startDate} {inputForm.startTime}";
                 var endDate = $"{inputForm.endDate} {inputForm.endTime}";
 
@@ -261,29 +318,43 @@ namespace WFMDashboard.Classes
 
                     var googleEventId = SubmitTimeOff_GoogleCalendar(googleAuth, inputForm, startDateTime, endDateTime, staffMember);
 
-                    var eventItem = CreateEvent(googleEventId, inputForm, startDateTime, endDateTime, staffMember, user);
-
+                    eventItem = CreateEvent(googleEventId, inputForm, startDateTime, endDateTime, staffMember, user);
+                    eventItemList.Add(eventItem);
                     //SubmitTimeOff_Nice();
 
-                    return eventItem;
+                    //return new List<ViewEvent>eventItem;
                 }
                 else
                 {
                     msg = "Successfully updated event";
-                    var eventItem = UpdateEvent(inputForm, startDateTime, endDateTime, user);
-
+                    eventItem = UpdateEvent(inputForm, startDateTime, endDateTime, user);
+                    eventItemList.Add(eventItem);
                     //TODO: Make sure recurring events edited work properly.
                     //If its an issue, just delete the event, make a new one with the recurring thing, and save that ID to the object again.
 
                     var message = UpdateEvent_GoogleCalendar(googleAuth, eventItem, inputForm);
-                    if(message.ToLower().Contains("success"))
-                        return eventItem;
-                    else
+                    if(!(message.ToLower().Contains("success")))
                     {
                         msg = message;
                         return null;
                     }
                 }
+                if(inputForm.repeatingEvent)
+                {
+                    using (var db = new OnyxEntities())
+                    {
+                        //TODO: we should have these variables somewhere, let's use them instead of re-grabbing them from the database
+                        var item = db.BUS_WFMDashboard_Repeating_Event.Where(t => t.EventId == eventItem.Id).FirstOrDefault();
+                        var editingEvent = db.BUS_WFMDashboard_Event.Where(t => t.Id == eventItem.Id).FirstOrDefault();
+                        var dateList = GetRepeatingEventDateList(item, DateTime.Now.Date, DateTime.Now.Date.AddMonths(1));
+                        foreach (var dateItem in dateList)
+                        {
+                            var newEvent = new ViewEvent(editingEvent, dateItem);
+                            eventItemList.Add(newEvent);
+                        }
+                    }
+                }
+                return eventItemList;
             }
             catch(Exception ex)
             {
@@ -300,12 +371,16 @@ namespace WFMDashboard.Classes
                 using (var db = new OnyxEntities())
                 {
                     var eventItem = db.BUS_WFMDashboard_Event.Where(t => t.Id == id).FirstOrDefault();
+                    var repeatingItem = db.BUS_WFMDashboard_Repeating_Event.Where(t => t.EventId == eventItem.Id).FirstOrDefault();
+                    
                     var googleCalId = eventItem.CalendarEventId;
                     
-                    var before = ObjectPrintHelper.PrintEvent(eventItem);
-                    var after = "";
+                    var before = ObjectPrintHelper.PrintEvent(eventItem, repeatingItem);
+                    var after = "-----";
                     CreateActionHistory(eventItem.Id, 0, null, "delete", $"Event deleted by {user}", before, after, user);
 
+                    if (repeatingItem != null)
+                        db.BUS_WFMDashboard_Repeating_Event.Remove(repeatingItem);
                     db.BUS_WFMDashboard_Event.Remove(eventItem);
                     db.SaveChanges();
 
@@ -1184,7 +1259,7 @@ namespace WFMDashboard.Classes
                         CalculateRepeatingEvents(inputForm, db);
                     }
                 }
-                return new ViewEvent(busEvent, false);
+                return new ViewEvent(busEvent, false, inputForm.repeatingEvent);
             }
             catch (Exception ex)
             {
@@ -1192,7 +1267,7 @@ namespace WFMDashboard.Classes
             }
         }
 
-        private static bool CalculateRepeatingEvents(EventForm inputForm, OnyxEntities db)
+        private static BUS_WFMDashboard_Repeating_Event CalculateRepeatingEvents(EventForm inputForm, OnyxEntities db)
         {
             try
             {
@@ -1215,22 +1290,28 @@ namespace WFMDashboard.Classes
                 }
                 else
                 {
-                    if (inputForm.repeatEndDate != null)
-                        repeatItem.EndDate = DateTime.Parse(inputForm.repeatEndDate);
-                    repeatItem.EndAfterOccurences = inputForm.repeatEndAfterNumber;
-                    repeatItem.RepeatType = inputForm.repeatType;
-                    repeatItem.RepeatEveryNumber = inputForm.repeatEveryNumber;
-                    repeatItem.RepeatOnDays = inputForm.repeatOnDays;
-                    repeatItem.RepeatSummary = inputForm.repeatSummary;
-                    repeatItem.StartDate = DateTime.Parse(inputForm.startDate);
-                    repeatItem.EndType = inputForm.repeatEndType;
-                }
-                if(inputForm.repeatEndType.ToLower() != "never")
-                {
-                    if(inputForm.repeatEndType.ToLower() == "number")
+                    if(inputForm.repeatSummary != null && repeatItem.EndType != null)
                     {
+                        if (inputForm.repeatEndDate != null)
+                            repeatItem.EndDate = DateTime.Parse(inputForm.repeatEndDate);
 
-                        
+                        repeatItem.EndAfterOccurences = inputForm.repeatEndAfterNumber;
+                        repeatItem.RepeatType = inputForm.repeatType;
+                        repeatItem.RepeatEveryNumber = inputForm.repeatEveryNumber;
+                        repeatItem.RepeatOnDays = inputForm.repeatOnDays;
+                        repeatItem.RepeatSummary = inputForm.repeatSummary;
+                        repeatItem.StartDate = DateTime.Parse(inputForm.startDate);
+                        repeatItem.EndType = inputForm.repeatEndType;
+                        if (inputForm.repeatEndType == "date")
+                            repeatItem.EndAfterOccurences = null;
+                        else
+                            repeatItem.EndDate = null;
+                    }
+                }
+                if(repeatItem.EndType.ToLower() != "never")
+                {
+                    if(repeatItem.EndType.ToLower() == "number")
+                    {
                         var startDate = repeatItem.StartDate;
                         var workingDate = startDate;
                         var repeatEvery = repeatItem.RepeatEveryNumber;
@@ -1240,16 +1321,19 @@ namespace WFMDashboard.Classes
                                 repeatItem.CalculatedEndDate = repeatItem.StartDate.AddDays(repeatItem.EndAfterOccurences.Value * repeatEvery.Value);
                                 break;
                             case "1": // Weekdays
+                                repeatItem.RepeatOnDays = "MO,TU,WE,TH,FR";
                                 repeatItem.CalculatedEndDate = repeatItem.StartDate.AddBusinessDays(repeatItem.EndAfterOccurences.Value);
                                 break;
                             case "2": // M W F
+                                repeatItem.RepeatOnDays = "MO,WE,FR";
                                 repeatItem.CalculatedEndDate = WFMConsole.Classes.DateTimeExtensions.GetSpecifiedDaysFromDate(workingDate, new List<DayOfWeek>() { DayOfWeek.Monday, DayOfWeek.Wednesday, DayOfWeek.Friday }, repeatItem.EndAfterOccurences.Value, repeatEvery.Value).Last();
                                 break;
                             case "3": // TU TH
+                                repeatItem.RepeatOnDays = "TU,TH";
                                 repeatItem.CalculatedEndDate = WFMConsole.Classes.DateTimeExtensions.GetSpecifiedDaysFromDate(workingDate, new List<DayOfWeek>() { DayOfWeek.Tuesday, DayOfWeek.Thursday }, repeatItem.EndAfterOccurences.Value, repeatEvery.Value).Last();
                                 break;
                             case "4": // Weekly on certain days
-                                var specifiedDays = inputForm.repeatOnDays.TrimEnd(',').Split(',');
+                                var specifiedDays = repeatItem.RepeatOnDays.TrimEnd(',').Split(',');
                                 var importantDays = new List<DayOfWeek>();
                                 foreach (var item in specifiedDays)
                                 {
@@ -1285,12 +1369,12 @@ namespace WFMDashboard.Classes
                     db.BUS_WFMDashboard_Repeating_Event.Add(repeatItem);
 
                 db.SaveChanges();
-                return true;
+                return repeatItem;
             }
             catch(Exception ex)
             {
                 log.Error("Error with calculating repeating event", ex);
-                return false;
+                return null;
             }
         }
 
@@ -1301,7 +1385,8 @@ namespace WFMDashboard.Classes
                 using (var db = new OnyxEntities())
                 {
                     BUS_WFMDashboard_Event busEvent = db.BUS_WFMDashboard_Event.Where(t => t.Id == inputForm.eventId).FirstOrDefault();
-                    var before = ObjectPrintHelper.PrintEvent(busEvent);
+                    var eventRepeatItem = db.BUS_WFMDashboard_Repeating_Event.Where(t => t.EventId == busEvent.Id).FirstOrDefault();
+                    var before = ObjectPrintHelper.PrintEvent(busEvent, eventRepeatItem);
                     busEvent.FullDay = inputForm.fullDay;
                     busEvent.EventType = inputForm.eventType;
                     busEvent.StartTime = startDateTime;
@@ -1312,15 +1397,17 @@ namespace WFMDashboard.Classes
                     busEvent.UpdatedAt = DateTime.Now;
                     busEvent.UpdatedBy = user;
                     db.SaveChanges();
-                    var after = ObjectPrintHelper.PrintEvent(busEvent);
+                    
+                    if (inputForm.repeatingEvent)
+                    {
+                        eventRepeatItem = CalculateRepeatingEvents(inputForm, db);
+                    }
+                    
+                    var after = ObjectPrintHelper.PrintEvent(busEvent, eventRepeatItem);
 
                     //TODO: Show repeating stuff in action history here...
                     CreateActionHistory(busEvent.Id, 0, null, "delete", $"Event deleted by {user}", before, after, user);
-                    if (inputForm.repeatingEvent)
-                    {
-                        CalculateRepeatingEvents(inputForm, db);
-                    }
-                    return new ViewEvent(busEvent, false);
+                    return new ViewEvent(busEvent, false, inputForm.repeatingEvent);
 
                 }
             }
@@ -1494,7 +1581,7 @@ namespace WFMDashboard.Classes
                     ColorId = eventItem.ColorId,
                     End = end
                 };
-                if(inputForm.repeatingEvent)
+                if(inputForm.repeatingEvent && inputForm.repeatEndType != null && inputForm.repeatSummary != null)
                 {
                     var rRule = CreateGCalRecurringString(inputForm);
                     newEvent.Recurrence = new String[] {

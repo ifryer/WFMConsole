@@ -9,11 +9,9 @@ namespace WFMConsole.Classes
 {
     public class ObjectPrintHelper
     {
-
-        public static string PrintEvent(BUS_WFMDashboard_Event eventItem)
+        public static string PrintEvent(BUS_WFMDashboard_Event eventItem, BUS_WFMDashboard_Repeating_Event repeatingItem)
         {
-            StringBuilder outputString = new StringBuilder("");
-
+            StringBuilder outputString = new StringBuilder("Event:");
             outputString.AppendLine("AgentNo: " + eventItem.AgentNo);
             outputString.AppendLine("CalendarEventId: " + eventItem.CalendarEventId);
             outputString.AppendLine("Color: " + eventItem.Color);
@@ -29,6 +27,21 @@ namespace WFMConsole.Classes
             outputString.AppendLine("Notes: " + eventItem.Notes);
             outputString.AppendLine("TeamName: " + eventItem.TeamName);
             outputString.AppendLine("TeamId: " + eventItem.TeamId);
+            if(repeatingItem != null)
+            {
+                outputString.AppendLine("Repeating Event: ");
+                outputString.AppendLine("Repeat Type: " + repeatingItem.RepeatType);
+                outputString.AppendLine("Repeat Every Number: " + repeatingItem.RepeatEveryNumber);
+                outputString.AppendLine("Repeat On Days: " + repeatingItem.RepeatOnDays);
+                outputString.AppendLine("Start Date: " + repeatingItem.StartDate.ToShortDateString());
+                outputString.AppendLine("End After Occurences: " + repeatingItem.EndAfterOccurences);
+                if(repeatingItem.EndDate != null)
+                    outputString.AppendLine("End Date: " + repeatingItem.EndDate.Value.ToShortDateString());
+                outputString.AppendLine("Repeat Summary: " + repeatingItem.RepeatSummary);
+                outputString.AppendLine("End Type: " + repeatingItem.EndType);
+                if(repeatingItem.CalculatedEndDate != null)
+                    outputString.AppendLine("Calculated End Date: " + repeatingItem.CalculatedEndDate.Value.ToShortDateString());
+            }
             return outputString.ToString();
         }
     }
