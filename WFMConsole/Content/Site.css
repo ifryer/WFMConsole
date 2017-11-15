@@ -9,6 +9,22 @@
     margin-top: 20px;
 }
 
+@media (min-width: 1500px) {
+    .container {
+        max-width: 1470px;
+    }
+}
+
+@media (min-width: 1700px) {
+    .container {
+        max-width: 1570px;
+    }
+}
+
+.fc-title{
+    cursor: pointer;
+}
+
 /*input,
 select,
 textarea {

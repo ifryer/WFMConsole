@@ -299,6 +299,21 @@ indexScript = (function () {
         $(this).addClass("chosen");
     })
 
+    $(document).on("change", "#event-start-date-modal", function () {
+        let startDate = $(this).val();
+        if (moment(startDate) > moment($("#event-end-date-modal").val()))
+        {
+            $("#event-end-date-modal").val(startDate);
+        }
+    })
+
+    $(document).on("change", "#event-end-date-modal", function () {
+        let endDate = $(this).val();
+        if (moment(endDate) < moment($("#event-start-date-modal").val())) {
+            $("#event-start-date-modal").val(endDate);
+        }
+    })
+
     //TODO: Click event for repeating checkbox
     $(document).on("click", "#repeatingCheckbox-modal", function () {
         if ($(this).is(":checked")) {
@@ -321,7 +336,7 @@ indexScript = (function () {
     });
 
     $(document).on("click", "#save-event-modal-btn", function () {
-        $("#save-event-modal-btn").prop("disabled", "disabled")
+        
         submitEditEventForm();
     });
 
@@ -385,7 +400,7 @@ indexScript = (function () {
     })
 
     function submitEditEventForm() {
-        startLoading();
+        
         let startDate = $("#event-start-date-modal").val();
         let endDate = $("#event-end-date-modal").val();
         let calendarId = $("#editing-event-calendar-id").val();
@@ -425,8 +440,8 @@ indexScript = (function () {
         if (endDate == null || endDate == "") {
             endDate = startDate;
         }
-
-
+        startLoading();
+        $("#save-event-modal-btn").prop("disabled", "disabled")
         $.ajax({
             dataType: "json",
             type: "post",
@@ -466,11 +481,12 @@ indexScript = (function () {
                         if (eventObject.Id == eventId)
                             return true;
                     });
-                    $.each(data.eventObject, function (index, item) {
-                        console.log(item)
-                        let newEventHash = item;
-                        $('#event-calendar').fullCalendar('addEventSource', [newEventHash]);
-                    });
+                    //$.each(data.eventObject, function (index, item) {
+                    //    console.log(item)
+                    //    let newEventHash = item;
+                    //    $('#event-calendar').fullCalendar('addEventSource', [newEventHash]);
+                    //});
+                    $("#event-calendar").fullCalendar('refetchEvents')
                     
                     $("#edit-calendar-event-modal").modal("toggle")
                     $("#repeatingCheckbox-modal").removeAttr("checked")
@@ -561,8 +577,7 @@ indexScript = (function () {
     });
 
     $("#pto-section").on("click", "#submit-event-form-btn", function () {
-        startLoading();
-        $(this).prop("disabled", "disabled");
+        
         submitEventForm();
     });
     //TODO: Make sure if they selected "number" as end type, they have actually put in a number > 0
@@ -617,6 +632,8 @@ indexScript = (function () {
             return;
         }
         else {
+            $("#submit-event-form-btn").prop("disabled", "disabled");
+            startLoading();
             $.ajax({
                 dataType: "json",
                 type: "post",
@@ -653,12 +670,12 @@ indexScript = (function () {
                         showSmallError(data.msg);
                     }
                     else {
-                        $.each(data.eventObject, function (index, item) {
-                            console.log(item)
-                            let newEventHash = item;
-                            $('#event-calendar').fullCalendar('addEventSource', [newEventHash]);
-                        });
-
+                        //$.each(data.eventObject, function (index, item) {
+                        //    console.log(item)
+                        //    let newEventHash = item;
+                        //    $('#event-calendar').fullCalendar('addEventSource', [newEventHash]);
+                        //});
+                        $("#event-calendar").fullCalendar('refetchEvents')
                         showSmallAlert(data.msg);
                         $(".event-form").slideUp("fast");
                         $(".event-form input, textarea").val("")

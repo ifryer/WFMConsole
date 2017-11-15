@@ -18,8 +18,8 @@ namespace WFMConsole.Classes
             outputString.AppendLine("CreatedBy: " + eventItem.CreatedBy);
             outputString.AppendLine("CreatedAt: " + eventItem.CreatedAt);
             outputString.AppendLine("Description: " + eventItem.Description);
-            outputString.AppendLine("StartTime: " + eventItem.StartTime.ToString("MM/dd/YYYY HH:mm"));
-            outputString.AppendLine("EndTime: " + eventItem.EndTime.ToString("MM/dd/YYYY HH:mm"));
+            outputString.AppendLine("StartTime: " + eventItem.StartTime.ToString("MM/dd/yyyy HH:mm"));
+            outputString.AppendLine("EndTime: " + eventItem.EndTime.ToString("MM/dd/yyyy HH:mm"));
             outputString.AppendLine("EventType: " + eventItem.EventType);
             outputString.AppendLine("FirstName: " + eventItem.FirstName);
             outputString.AppendLine("LastName: " + eventItem.LastName);

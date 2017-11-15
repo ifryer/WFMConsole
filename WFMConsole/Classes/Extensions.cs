@@ -54,6 +54,18 @@ namespace WFMConsole.Classes
             return results;
         }
 
+        public static List<DateTime> GetSpecifiedDailyDaysFromDateWithMaxDate(DateTime date, DateTime maxDate, int repeatEveryDays)
+        {
+            List<DateTime> results = new List<DateTime>();
+            var workingDate = date;
+            while (workingDate < maxDate)
+            {
+                workingDate = workingDate.AddDays(repeatEveryDays);
+                results.Add(workingDate);
+            }
+            return results;
+        }
+
         public static List<DateTime> GetSpecifiedDaysFromDateWithMaxDate(DateTime date, List<DayOfWeek> days, DateTime maxDate, int repeatEveryWeeks)
         {
             List<DateTime> results = new List<DateTime>();

@@ -731,43 +731,53 @@ namespace WFMDashboard.Classes
                             eventType = "Other";
                             break;
                     }
-                    report.TotalDown++;
-                    report.Sections[eventType].TotalDown++;
+                    bool foundTeam = false;
                     if (teamName.Contains("RA"))
                     {
                         report.Sections[eventType].RA = report.Sections[eventType].RA.TrimStart('0');
                         report.Sections[eventType].RA += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
                         report.Sections[eventType].RA = report.Sections[eventType].RA.TrimStart(',').TrimStart(' ');
+                        foundTeam = true;
                     }
                     if (teamName.Contains("AD"))
                     {
                         report.Sections[eventType].AD = report.Sections[eventType].AD.TrimStart('0');
                         report.Sections[eventType].AD += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
                         report.Sections[eventType].AD = report.Sections[eventType].AD.TrimStart(',').TrimStart(' ');
+                        foundTeam = true;
                     }
                     if (teamName.Contains("IRC"))
                     {
                         report.Sections[eventType].IRC = report.Sections[eventType].IRC.TrimStart('0');
                         report.Sections[eventType].IRC += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
                         report.Sections[eventType].IRC = report.Sections[eventType].IRC.TrimStart(',').TrimStart(' ');
+                        foundTeam = true;
                     }
                     if (teamName.ToLower().Contains("printer"))
                     {
                         report.Sections[eventType].PrinterOps = report.Sections[eventType].PrinterOps.TrimStart('0');
                         report.Sections[eventType].PrinterOps += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
                         report.Sections[eventType].PrinterOps = report.Sections[eventType].PrinterOps.TrimStart(',').TrimStart(' ');
+                        foundTeam = true;
                     }
                     if (teamName.Contains("MGR") || teamName.ToLower().Contains("manage"))
                     {
                         report.Sections[eventType].MGR = report.Sections[eventType].MGR.TrimStart('0');
                         report.Sections[eventType].MGR += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
                         report.Sections[eventType].MGR = report.Sections[eventType].MGR.TrimStart(',').TrimStart(' ');
+                        foundTeam = true;
                     }
                     if (teamName.Contains("POA"))
                     {
                         report.Sections[eventType].POA = report.Sections[eventType].POA.TrimStart('0');
                         report.Sections[eventType].POA += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
                         report.Sections[eventType].POA = report.Sections[eventType].POA.TrimStart(',').TrimStart(' ');
+                        foundTeam = true;
+                    }
+                    if(foundTeam)
+                    {
+                        report.TotalDown++;
+                        report.Sections[eventType].TotalDown++;
                     }
                 }
             }
@@ -805,43 +815,53 @@ namespace WFMDashboard.Classes
                     TimeSpan diff = item.EndTime - item.StartTime;
                     double hours = diff.TotalHours;
                     var fraction = Math.Round((hours / 8.0), 1);
-                    report.TotalDown += fraction;
-                    report.Sections[eventType].TotalDown += fraction;
+                    bool foundTeam = false;
                     if (teamName.Contains("RA"))
                     {
+                        foundTeam = true;
                         report.Sections[eventType].RA = report.Sections[eventType].RA.TrimStart('0');
                         report.Sections[eventType].RA += $", {staffName.TrimStart(' ').TrimEnd(' ')} ({item.StartTime.ToShortTimeString()}-{item.EndTime.ToShortTimeString()})";
                         report.Sections[eventType].RA = report.Sections[eventType].RA.TrimStart(',').TrimStart(' ');
                     }
                     if (teamName.Contains("AD"))
                     {
+                        foundTeam = true;
                         report.Sections[eventType].AD = report.Sections[eventType].AD.TrimStart('0');
                         report.Sections[eventType].AD += $", {staffName.TrimStart(' ').TrimEnd(' ')} ({item.StartTime.ToShortTimeString()}-{item.EndTime.ToShortTimeString()})";
                         report.Sections[eventType].AD = report.Sections[eventType].AD.TrimStart(',').TrimStart(' ');
                     }
                     if (teamName.Contains("IRC"))
                     {
+                        foundTeam = true;
                         report.Sections[eventType].IRC = report.Sections[eventType].IRC.TrimStart('0');
                         report.Sections[eventType].IRC += $", {staffName.TrimStart(' ').TrimEnd(' ')} ({item.StartTime.ToShortTimeString()}-{item.EndTime.ToShortTimeString()})";
                         report.Sections[eventType].IRC = report.Sections[eventType].IRC.TrimStart(',').TrimStart(' ');
                     }
                     if (teamName.ToLower().Contains("printer"))
                     {
+                        foundTeam = true;
                         report.Sections[eventType].PrinterOps = report.Sections[eventType].PrinterOps.TrimStart('0');
                         report.Sections[eventType].PrinterOps += $", {staffName.TrimStart(' ').TrimEnd(' ')} ({item.StartTime.ToShortTimeString()}-{item.EndTime.ToShortTimeString()})";
                         report.Sections[eventType].PrinterOps = report.Sections[eventType].PrinterOps.TrimStart(',').TrimStart(' ');
                     }
                     if (teamName.Contains("MGR"))
                     {
+                        foundTeam = true;
                         report.Sections[eventType].MGR = report.Sections[eventType].MGR.TrimStart('0');
                         report.Sections[eventType].MGR += $", {staffName.TrimStart(' ').TrimEnd(' ')} ({item.StartTime.ToShortTimeString()}-{item.EndTime.ToShortTimeString()})";
                         report.Sections[eventType].MGR = report.Sections[eventType].MGR.TrimStart(',').TrimStart(' ');
                     }
                     if (teamName.Contains("POA"))
                     {
+                        foundTeam = true;
                         report.Sections[eventType].POA = report.Sections[eventType].POA.TrimStart('0');
                         report.Sections[eventType].POA += $", {staffName.TrimStart(' ').TrimEnd(' ')} ({item.StartTime.ToShortTimeString()}-{item.EndTime.ToShortTimeString()})";
                         report.Sections[eventType].POA = report.Sections[eventType].POA.TrimStart(',').TrimStart(' ');
+                    }
+                    if (foundTeam)
+                    {
+                        report.TotalDown += fraction;
+                        report.Sections[eventType].TotalDown += fraction;
                     }
                 }
             }
@@ -1290,7 +1310,7 @@ namespace WFMDashboard.Classes
                 }
                 else
                 {
-                    if(inputForm.repeatSummary != null && repeatItem.EndType != null)
+                    if(inputForm.repeatEndType != null)
                     {
                         if (inputForm.repeatEndDate != null)
                             repeatItem.EndDate = DateTime.Parse(inputForm.repeatEndDate);
@@ -1300,7 +1320,6 @@ namespace WFMDashboard.Classes
                         repeatItem.RepeatEveryNumber = inputForm.repeatEveryNumber;
                         repeatItem.RepeatOnDays = inputForm.repeatOnDays;
                         repeatItem.RepeatSummary = inputForm.repeatSummary;
-                        repeatItem.StartDate = DateTime.Parse(inputForm.startDate);
                         repeatItem.EndType = inputForm.repeatEndType;
                         if (inputForm.repeatEndType == "date")
                             repeatItem.EndAfterOccurences = null;
@@ -1308,7 +1327,8 @@ namespace WFMDashboard.Classes
                             repeatItem.EndDate = null;
                     }
                 }
-                if(repeatItem.EndType.ToLower() != "never")
+                repeatItem.StartDate = DateTime.Parse(inputForm.startDate);
+                if (repeatItem.EndType.ToLower() != "never")
                 {
                     if(repeatItem.EndType.ToLower() == "number")
                     {
@@ -1690,7 +1710,7 @@ namespace WFMDashboard.Classes
             switch (repeatItem.RepeatType)
             {
                 case "0": //Daily
-                    dateList = WFMConsole.Classes.DateTimeExtensions.GetSpecifiedDaysFromDateWithMaxDate(workingDate, new List<DayOfWeek>() { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday }, maxDate, repeatEvery.Value);
+                    dateList = WFMConsole.Classes.DateTimeExtensions.GetSpecifiedDailyDaysFromDateWithMaxDate(workingDate, maxDate, repeatEvery.Value);
                     break;
                 case "1": // Weekdays
                     dateList = WFMConsole.Classes.DateTimeExtensions.GetSpecifiedDaysFromDateWithMaxDate(workingDate, new List<DayOfWeek>() { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday}, maxDate, repeatEvery.Value);
@@ -1760,6 +1780,7 @@ namespace WFMDashboard.Classes
                 newRow.PerformedAt = DateTime.Now;
                 newRow.PerformedBy = performedBy;
                 db.BUS_WFMDashboard_Action_History.Add(newRow);
+                db.SaveChanges();
             }
             return true;
         }
