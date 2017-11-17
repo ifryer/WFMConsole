@@ -6,6 +6,13 @@ using FluentDateTime;
 
 namespace WFMConsole.Classes
 {
+    public static class Extensions
+    {
+        public static string TrimStart(this string target, string trimChars)
+        {
+            return target.TrimStart(trimChars.ToCharArray());
+        }
+    }
     public static class DateTimeExtensions
     {
         public static DateTime StartOfWeek(this DateTime dt, DayOfWeek startOfWeek)

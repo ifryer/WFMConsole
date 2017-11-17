@@ -37,6 +37,7 @@
     <Property Name="UpdatedAt" Type="datetime" />
     <Property Name="CreatedBy" Type="nvarchar" MaxLength="45" Nullable="false" />
     <Property Name="UpdatedBy" Type="nvarchar" MaxLength="45" Nullable="false" />
+    <Property Name="Cancelled" Type="bit" Nullable="false" />
   </EntityType>
   <EntityType Name="BUS_WFMDashboard_Google_Credentials">
     <Key>

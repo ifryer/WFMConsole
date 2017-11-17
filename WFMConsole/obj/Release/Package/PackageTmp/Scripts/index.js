@@ -67,7 +67,9 @@ indexScript = (function () {
                     //})
 
                     //Set up calendar
-                    SetUpCalendar(data.eventList);
+                    //SetUpCalendar(data.eventList);
+                    SetUpCalendar();
+
 
                     //Set up MOW stuff
                     SetUpMowTable(data.mowSchedule, data.mowList, new moment().format("MM/DD/YYYY"))
@@ -297,6 +299,21 @@ indexScript = (function () {
         $(this).addClass("chosen");
     })
 
+    $(document).on("change", "#event-start-date-modal", function () {
+        let startDate = $(this).val();
+        if (moment(startDate) > moment($("#event-end-date-modal").val()))
+        {
+            $("#event-end-date-modal").val(startDate);
+        }
+    })
+
+    $(document).on("change", "#event-end-date-modal", function () {
+        let endDate = $(this).val();
+        if (moment(endDate) < moment($("#event-start-date-modal").val())) {
+            $("#event-start-date-modal").val(endDate);
+        }
+    })
+
     //TODO: Click event for repeating checkbox
     $(document).on("click", "#repeatingCheckbox-modal", function () {
         if ($(this).is(":checked")) {
@@ -319,6 +336,7 @@ indexScript = (function () {
     });
 
     $(document).on("click", "#save-event-modal-btn", function () {
+        
         submitEditEventForm();
     });
 
@@ -350,8 +368,10 @@ indexScript = (function () {
 
     $(document).on("click", "#delete-event-modal-btn", function () {
         if (confirm('Are you sure you want to delete this event?')) {
+            $(this).prop("disabled", "disabled")
+            startLoading();
             let eventId = $("#editing-event-id").val();
-            let calendarId = $("#editing-event-calendar-id").val();
+            //let calendarId = $("#editing-event-calendar-id").val();
             $.ajax({
                 dataType: "json",
                 type: "post",
@@ -360,6 +380,8 @@ indexScript = (function () {
                 },
                 url: toUrl("Home/DeleteEvent"),
                 success: function (data) {
+                    stopLoading();
+                    $("#delete-event-modal-btn").removeAttr("disabled")
                     if (!data.success) {
                         console.log("error -- " + data.msg);
                         showSmallError(data.msg);
@@ -367,7 +389,10 @@ indexScript = (function () {
                     else {
                         $("#edit-calendar-event-modal").modal("toggle")
                         showSmallAlert(data.msg);
-                        $('#event-calendar').fullCalendar('removeEvents', calendarId);
+                        $("#event-calendar").fullCalendar('removeEvents', function (eventObject) {
+                            if (eventObject.Id == eventId)
+                                return true;
+                        });
                     }
                 }
             });
@@ -375,7 +400,7 @@ indexScript = (function () {
     })
 
     function submitEditEventForm() {
-        startLoading();
+        
         let startDate = $("#event-start-date-modal").val();
         let endDate = $("#event-end-date-modal").val();
         let calendarId = $("#editing-event-calendar-id").val();
@@ -389,18 +414,19 @@ indexScript = (function () {
         let checkbox = $("#repeatingCheckbox-modal")
         let color = $(".event-color-modal.chosen").attr("colorId");
         let repeatingEvent = checkbox.is(":checked")
-        //if (checkbox.attr("checked")) {
-            let repeatType = checkbox.attr("repeat-type");
-            let repeatEveryNumber = checkbox.attr("repeat-every-number");
-            let repeatOnDays = checkbox.attr("repeat-on-days");
-            let repeatEndType = checkbox.attr("end-type");
-            let repeatEndDate = checkbox.attr("end-date");
-            let repeatEndAfterNumber = checkbox.attr("end-after-number");
-            let repeatSummary = checkbox.attr("summary");
-        //}
+        let repeatType = checkbox.attr("repeat-type");
+        let repeatEveryNumber = checkbox.attr("repeat-every-number");
+        let repeatOnDays = checkbox.attr("repeat-on-days");
+        let repeatEndType = checkbox.attr("end-type");
+        let repeatEndDate = checkbox.attr("end-date");
+        let repeatEndAfterNumber = checkbox.attr("end-after-number");
+        let repeatSummary = checkbox.attr("summary");
 
-
-        let originalEvent = $('#event-calendar').fullCalendar('clientEvents', calendarId)[0];
+        if (eventTitle.length < 1) {
+            showSmallError("Please enter a title for the event");
+            return;
+        }
+        
 
         if (!fullDay && (startTime == null || startTime == "" || endTime == null || endTime == "")) {
             showSmallError("Please make sure you have selected a start and end time, or checked the Full Day checkbox.");
@@ -414,8 +440,8 @@ indexScript = (function () {
         if (endDate == null || endDate == "") {
             endDate = startDate;
         }
-
-
+        startLoading();
+        $("#save-event-modal-btn").prop("disabled", "disabled")
         $.ajax({
             dataType: "json",
             type: "post",
@@ -444,29 +470,26 @@ indexScript = (function () {
             },
             url: toUrl("Home/SubmitEventForm"),
             success: function (data) {
+                $("#save-event-modal-btn").removeAttr("disabled");
                 stopLoading();
                 if (!data.success) {
                     console.log("error -- " + data.msg);
                     showSmallError(data.msg);
                 }
                 else {
-                    var newEventHash = data.eventObject;
-
-                    originalEvent.title = newEventHash.title;
-                    originalEvent.start = newEventHash.start;
-                    originalEvent.end = newEventHash.end;
-                    originalEvent.allDay = newEventHash.allDay;
-                    originalEvent.backgroundColor = newEventHash.backgroundColor;
-                    originalEvent.textColor = newEventHash.textColor;
-                    originalEvent.borderColor = newEventHash.borderColor;
-
-
-
-                    $('#event-calendar').fullCalendar('updateEvents', [originalEvent]);
+                    $("#event-calendar").fullCalendar('removeEvents', function (eventObject) {
+                        if (eventObject.Id == eventId)
+                            return true;
+                    });
+                    //$.each(data.eventObject, function (index, item) {
+                    //    console.log(item)
+                    //    let newEventHash = item;
+                    //    $('#event-calendar').fullCalendar('addEventSource', [newEventHash]);
+                    //});
+                    $("#event-calendar").fullCalendar('refetchEvents')
+                    
                     $("#edit-calendar-event-modal").modal("toggle")
                     $("#repeatingCheckbox-modal").removeAttr("checked")
-                    //$(".event-form").slideUp();
-                    //$(".event-form input, textarea").val("")
                     showSmallAlert(data.msg);
                 }
             }
@@ -554,6 +577,7 @@ indexScript = (function () {
     });
 
     $("#pto-section").on("click", "#submit-event-form-btn", function () {
+        
         submitEventForm();
     });
     //TODO: Make sure if they selected "number" as end type, they have actually put in a number > 0
@@ -570,17 +594,19 @@ indexScript = (function () {
         let checkbox = $("#repeatingCheckbox")
         let repeatingEvent = checkbox.is(":checked")
         let color = $(".event-color.chosen").attr("colorId");
-        //if (checkbox.attr("checked"))
-        //{
-            let repeatType = checkbox.attr("repeat-type");
-            let repeatEveryNumber = checkbox.attr("repeat-every-number");
-            let repeatOnDays = checkbox.attr("repeat-on-days");
-            let repeatEndType = checkbox.attr("end-type");
-            let repeatEndDate = checkbox.attr("end-date");
-            let repeatEndAfterNumber = checkbox.attr("end-after-number");
-            let repeatSummary = checkbox.attr("summary")
-        //}
-        
+        let repeatType = checkbox.attr("repeat-type");
+        let repeatEveryNumber = checkbox.attr("repeat-every-number");
+        let repeatOnDays = checkbox.attr("repeat-on-days");
+        let repeatEndType = checkbox.attr("end-type");
+        let repeatEndDate = checkbox.attr("end-date");
+        let repeatEndAfterNumber = checkbox.attr("end-after-number");
+        let repeatSummary = checkbox.attr("summary")
+
+
+        if (eventTitle.length < 1){
+            showSmallError("Please enter a title for the event");
+            return;
+        }
 
         if (!fullDay && (startTime == null || startTime == "" || endTime == null || endTime == ""))
         {
@@ -606,6 +632,8 @@ indexScript = (function () {
             return;
         }
         else {
+            $("#submit-event-form-btn").prop("disabled", "disabled");
+            startLoading();
             $.ajax({
                 dataType: "json",
                 type: "post",
@@ -635,12 +663,20 @@ indexScript = (function () {
                 },
                 url: toUrl("Home/SubmitEventForm"),
                 success: function (data) {
+                    stopLoading();
+                    $("#submit-event-form-btn").removeAttr("disabled");
                     if (!data.success) {
                         console.log("error -- " + data.msg);
                         showSmallError(data.msg);
                     }
                     else {
-                        $('#event-calendar').fullCalendar('addEventSource', [data.eventObject]);
+                        //$.each(data.eventObject, function (index, item) {
+                        //    console.log(item)
+                        //    let newEventHash = item;
+                        //    $('#event-calendar').fullCalendar('addEventSource', [newEventHash]);
+                        //});
+                        $("#event-calendar").fullCalendar('refetchEvents')
+                        showSmallAlert(data.msg);
                         $(".event-form").slideUp("fast");
                         $(".event-form input, textarea").val("")
                         $("#repeatingCheckbox").removeAttr("checked")
@@ -1022,7 +1058,6 @@ indexScript = (function () {
         if (dataList.length > 0) {
             let currentMonday = $("#mow-wfo-schedule-date-span").attr("current-monday")
             $("#save-new-mow-schedule-form").attr("disabled", "disabled")
-            var stringDataList = JSON.stringify(dataList)
             $.ajax({
                 type: "post",
                 data: { Item: { InputItems: dataList, Date: $(".mow-schedule-event-date").val() }, MondayString: currentMonday },
@@ -1383,8 +1418,7 @@ indexScript = (function () {
         }
     }
 
-
-    function SetUpCalendar(eventList) {
+    function SetUpCalendar() {
         $('#event-calendar').fullCalendar({
             defaultView: 'agendaDay',
             minTime: "07:00:00",
@@ -1392,26 +1426,33 @@ indexScript = (function () {
             header: {
                 left: 'prev,next today',
                 center: 'title',
-                right: 'month,agendaWeek,agendaDay,listWeek'
+                right: 'agendaWeek,agendaDay,listWeek'
             },
             height: 965,
-            events: eventList,
+            //events: eventList,
+            eventSources: [
+                {
+                    url: toUrl("/Home/GetEvents"),
+                    type: 'POST',
+                    error: function () {
+                        showSmallAlert("There was an error getting the calendar events!");
+                    },
+                }
+            ],
             navLinks: true,
             resources: [
                 // resources go here
             ],
             dayClick: function (date, jsEvent, view) {
-
                 let strTime = date.format("h:mma")
                 let dateString = date.format("MM/DD/YYYY")
-
                 $(".event-form").show();
                 $("#event-start-date, #event-end-date").val(dateString);
                 $("#event-start-time").val(strTime);
                 $("#create-event-form")[0].scrollIntoView({ behavior: "smooth" });
-
             },
             eventClick: function (calEvent, jsEvent, view) {
+                console.log(calEvent)
                 let calendarId = calEvent._id;
                 let eventId = calEvent.Id
                 let notes = calEvent.Notes;
@@ -1426,39 +1467,6 @@ indexScript = (function () {
                 let colorId = calEvent.ColorId;
                 let repeatedEvent = calEvent.repeatedEvent
                 //TODO: Save the repeating event info to the cal event and pull it up here so we can edit it...
-
-                if (allDay) {
-                    $("#event-start-time-modal, #event-end-time-modal").attr("disabled", "disabled")
-                    $("#fullDayCheckbox-modal").prop("checked", "checked")
-                }
-                else {
-                    $("#event-start-time-modal, #event-end-time-modal").removeAttr("disabled", "disabled")
-                    $("#fullDayCheckbox-modal").removeAttr("checked")
-                }
-
-                if (repeating) {
-                    $("#repeatingCheckbox-modal").prop("checked", "checked")
-                    $("#repeatingCheckbox-modal-edit").show();
-                }
-                else {
-                    $("#repeatingCheckbox-modal").removeAttr("checked")
-                    $("#repeatingCheckbox-modal-edit").hide();
-                }
-
-                if (repeatedEvent)
-                {
-                    $("#event-start-date-modal").val(calEvent.OriginalStartDate)
-                    $("#event-start-date-modal").prop("disabled", "disabled");
-                    $("#event-end-date-modal").prop("disabled", "disabled");
-                    $("#repeatingCheckbox-modal").prop("checked", "checked")
-                    $("#repeatingCheckbox-modal-edit").show();
-                }
-                else
-                {
-                    $("#event-start-date-modal").removeAttr("disabled");
-                    $("#event-end-date-modal").removeAttr("disabled");
-                }
-
                 $("#event-title-modal").val(title);
                 $("#event-notes-modal").val(notes);
                 $("#event-start-date-modal").val(startDate);
@@ -1470,7 +1478,37 @@ indexScript = (function () {
                 $("#editing-event-calendar-id").val(calendarId)
                 $("#edit-calendar-event-modal").modal();
                 $(".event-color-modal").removeClass("chosen");
-                $(".event-color-modal.color-"+colorId).addClass("chosen")
+                $(".event-color-modal.color-" + colorId).addClass("chosen")
+                if (allDay) {
+                    $("#event-start-time-modal, #event-end-time-modal").attr("disabled", "disabled")
+                    $("#fullDayCheckbox-modal").prop("checked", "checked")
+                }
+                else {
+                    $("#event-start-time-modal, #event-end-time-modal").removeAttr("disabled", "disabled")
+                    $("#fullDayCheckbox-modal").removeAttr("checked")
+                }
+                if (repeating) {
+                    $("#repeatingCheckbox-modal").prop("checked", "checked")
+                    $("#repeatingCheckbox-modal-edit").show();
+                }
+                else {
+                    $("#repeatingCheckbox-modal").removeAttr("checked")
+                    $("#repeatingCheckbox-modal-edit").hide();
+                }
+                if (repeatedEvent)
+                {
+                    $("#event-start-date-modal").val(calEvent.OriginalStartDate)
+                    $("#event-end-date-modal").val(calEvent.OriginalEndDate)
+                    $("#event-start-date-modal").prop("disabled", "disabled");
+                    $("#event-end-date-modal").prop("disabled", "disabled");
+                    $("#repeatingCheckbox-modal").prop("checked", "checked")
+                    $("#repeatingCheckbox-modal-edit").show();
+                }
+                else
+                {
+                    $("#event-start-date-modal").removeAttr("disabled");
+                    $("#event-end-date-modal").removeAttr("disabled");
+                }
             }
         })
     }

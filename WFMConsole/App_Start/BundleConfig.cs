@@ -24,6 +24,19 @@ namespace WFMDashboard
             bundles.Add(new ScriptBundle("~/bundles/modernizr").Include(
                         "~/Scripts/modernizr-*"));
 
+            bundles.Add(new ScriptBundle("~/bundles/libraries").Include(
+                        "~/node_modules/tinymce/tinymce.js",
+                        "~/node_modules/tinymce/plugins/textcolor/plugin.js",
+                        "~/node_modules/tinymce/plugins/paste/plugin.js",
+                        "~/node_modules/tinymce/plugins/colorpicker/plugin.js",
+                        "~/node_modules/tinymce/plugins/link/plugin.js",
+                        "~/node_modules/tinymce/plugins/preview/plugin.js",
+                        "~/node_modules/tinymce/plugins/searchreplace/plugin.js",
+                        "~/node_modules/tinymce/plugins/autolink/plugin.js",
+                        "~/node_modules/tinymce/plugins/image/plugin.js",
+                        "~/node_modules/tinymce/plugins/code/plugin.js",
+                        "~/node_modules/tinymce/plugins/table/plugin.js"));
+
             bundles.Add(new ScriptBundle("~/bundles/bootstrap").Include(
                       "~/Scripts/bootstrap.js",
                       "~/Scripts/respond.js"));

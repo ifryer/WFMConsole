@@ -42,6 +42,7 @@
           <Property Name="UpdatedAt" Type="datetime" />
           <Property Name="CreatedBy" Type="nvarchar" MaxLength="45" Nullable="false" />
           <Property Name="UpdatedBy" Type="nvarchar" MaxLength="45" Nullable="false" />
+          <Property Name="Cancelled" Type="bit" Nullable="false" />
         </EntityType>
         <EntityType Name="BUS_WFMDashboard_Google_Credentials">
           <Key>
@@ -238,6 +239,7 @@
           <Property Name="UpdatedAt" Type="DateTime" Precision="3" />
           <Property Name="CreatedBy" Type="String" Nullable="false" MaxLength="45" FixedLength="false" Unicode="true" />
           <Property Name="UpdatedBy" Type="String" Nullable="false" MaxLength="45" FixedLength="false" Unicode="true" />
+          <Property Name="Cancelled" Type="Boolean" Nullable="false" />
         </EntityType>
         <EntityType Name="BUS_WFMDashboard_Repeating_Event">
           <Key>
@@ -344,6 +346,7 @@
           <EntitySetMapping Name="BUS_WFMDashboard_Event">
             <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_Event">
               <MappingFragment StoreEntitySet="BUS_WFMDashboard_Event">
+                <ScalarProperty Name="Cancelled" ColumnName="Cancelled" />
                 <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
                 <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
                 <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />

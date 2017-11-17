@@ -16,6 +16,7 @@ namespace WFMConsole.ViewModels
         public bool allDay { get; set; }
         public bool repeating { get; set; }
         public bool repeatedEvent { get; set; }
+        public bool Cancelled { get; set; }
         public string OriginalStartDate { get; set; }
         public string OriginalEndDate { get; set; }
         public string backgroundColor { get; set; }
@@ -39,6 +40,7 @@ namespace WFMConsole.ViewModels
         public ViewEvent(BUS_WFMDashboard_Event item, bool past, bool Repeating)
         {
             repeating = Repeating;
+            Cancelled = item.Cancelled;
             ColorId = item.Color;
             Id = item.Id;
             title = item.Description;
@@ -98,7 +100,7 @@ namespace WFMConsole.ViewModels
             Notes = item.Notes;
             CalendarEventId = item.CalendarEventId;
             repeatedEvent = true;
-            var daysDifference = (inputDate - item.StartTime).Days;
+            var daysDifference = (inputDate - item.StartTime.Date).Days;
 
             if (allDay)
             {

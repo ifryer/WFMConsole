@@ -274,6 +274,34 @@ namespace WFMDashboard.Classes
             return;
         }
 
+        public static bool CancelEvent(CancellationToken cancellationToken, int eventId)
+        {
+            try
+            {
+                using (var db = new OnyxEntities())
+                {
+                    var editEvent = db.BUS_WFMDashboard_Event.Where(t => t.Id == eventId).FirstOrDefault();
+                    editEvent.Cancelled = !editEvent.Cancelled;
+                    if(editEvent.Cancelled)
+                    {
+                        editEvent.Description = "Cancelled " + editEvent.Description;
+                    }
+                    else
+                    {
+                        editEvent.Description = editEvent.Description.TrimStart("Cancelled ");
+                    }
+                    //TODO: cancel the event on GCal here
+                    db.SaveChanges();
+                }
+                return true;
+            }
+            catch(Exception ex)
+            {
+                log.Error("Error cancelling event", ex);
+                return false;
+            }
+        }
+
         //Color IDs : 4 = Scheduled Event = Pink ----- 7 = Teal = Training ----- 9 = Blue = Unplanned PTO ----- 10 = Green = Planned PTO ----- 11 = Red = Scheduled Event
         public static List<ViewEvent> SubmitEventForm(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, EventForm inputForm, string user, out string msg)
         {
@@ -1422,6 +1450,15 @@ namespace WFMDashboard.Classes
                     {
                         eventRepeatItem = CalculateRepeatingEvents(inputForm, db);
                     }
+                    else
+                    {
+                        if(eventRepeatItem != null)
+                        {
+                            db.BUS_WFMDashboard_Repeating_Event.Remove(eventRepeatItem);
+                            db.SaveChanges();
+                        }
+                        
+                    }
                     
                     var after = ObjectPrintHelper.PrintEvent(busEvent, eventRepeatItem);
 
@@ -1559,7 +1596,6 @@ namespace WFMDashboard.Classes
             return rRule;
         }
 
-
         private static string UpdateEvent_GoogleCalendar(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, ViewEvent eventItem, EventForm inputForm)
         {
             try
@@ -1690,74 +1726,79 @@ namespace WFMDashboard.Classes
         private static List<DateTime> GetRepeatingEventDateList(BUS_WFMDashboard_Repeating_Event repeatItem, DateTime minDate, DateTime maxDate)
         {
             var dateList = new List<DateTime>();
-
-            var startDate = repeatItem.StartDate;
-            var workingDate = startDate;
-            var repeatEvery = repeatItem.RepeatEveryNumber;
-
-            var repeatEndDate = repeatItem.CalculatedEndDate;
-            if (repeatEndDate > maxDate)
-                repeatEndDate = maxDate;
-            var repeatEndType = repeatItem.EndType;
-            var repeatOccurences = repeatItem.EndAfterOccurences;
-
-            if(repeatEndType == "never")
+            if (!(repeatItem.EndType == "date" && repeatItem.EndDate <= repeatItem.StartDate))
             {
-                repeatEndType = "date";
-                repeatEndDate = maxDate;
-            }
+                
 
-            switch (repeatItem.RepeatType)
-            {
-                case "0": //Daily
-                    dateList = WFMConsole.Classes.DateTimeExtensions.GetSpecifiedDailyDaysFromDateWithMaxDate(workingDate, maxDate, repeatEvery.Value);
-                    break;
-                case "1": // Weekdays
-                    dateList = WFMConsole.Classes.DateTimeExtensions.GetSpecifiedDaysFromDateWithMaxDate(workingDate, new List<DayOfWeek>() { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday}, maxDate, repeatEvery.Value);
-                    break;
-                case "2": // M W F
-                    dateList = WFMConsole.Classes.DateTimeExtensions.GetSpecifiedDaysFromDateWithMaxDate(workingDate, new List<DayOfWeek>() { DayOfWeek.Monday, DayOfWeek.Wednesday, DayOfWeek.Friday }, maxDate, repeatEvery.Value);
-                    break;
-                case "3": // TU TH
-                    dateList = WFMConsole.Classes.DateTimeExtensions.GetSpecifiedDaysFromDateWithMaxDate(workingDate, new List<DayOfWeek>() { DayOfWeek.Tuesday, DayOfWeek.Thursday }, maxDate, repeatEvery.Value);
-                    break;
-                case "4": // Weekly on certain days
-                    var specifiedDays = repeatItem.RepeatOnDays.TrimEnd(',').Split(',');
-                    var importantDays = new List<DayOfWeek>();
-                    foreach (var item in specifiedDays)
-                    {
-                        switch (item)
+                var startDate = repeatItem.StartDate;
+                var workingDate = startDate;
+                var repeatEvery = repeatItem.RepeatEveryNumber;
+
+                var repeatEndDate = repeatItem.CalculatedEndDate;
+                if (repeatEndDate > maxDate)
+                    repeatEndDate = maxDate;
+                var repeatEndType = repeatItem.EndType;
+                var repeatOccurences = repeatItem.EndAfterOccurences;
+
+                if (repeatEndType == "never")
+                {
+                    repeatEndType = "date";
+                    repeatEndDate = maxDate;
+                }
+
+                switch (repeatItem.RepeatType)
+                {
+                    case "0": //Daily
+                        dateList = WFMConsole.Classes.DateTimeExtensions.GetSpecifiedDailyDaysFromDateWithMaxDate(workingDate, maxDate, repeatEvery.Value);
+                        break;
+                    case "1": // Weekdays
+                        dateList = WFMConsole.Classes.DateTimeExtensions.GetSpecifiedDaysFromDateWithMaxDate(workingDate, new List<DayOfWeek>() { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday }, maxDate, repeatEvery.Value);
+                        break;
+                    case "2": // M W F
+                        dateList = WFMConsole.Classes.DateTimeExtensions.GetSpecifiedDaysFromDateWithMaxDate(workingDate, new List<DayOfWeek>() { DayOfWeek.Monday, DayOfWeek.Wednesday, DayOfWeek.Friday }, maxDate, repeatEvery.Value);
+                        break;
+                    case "3": // TU TH
+                        dateList = WFMConsole.Classes.DateTimeExtensions.GetSpecifiedDaysFromDateWithMaxDate(workingDate, new List<DayOfWeek>() { DayOfWeek.Tuesday, DayOfWeek.Thursday }, maxDate, repeatEvery.Value);
+                        break;
+                    case "4": // Weekly on certain days
+                        var specifiedDays = repeatItem.RepeatOnDays.TrimEnd(',').Split(',');
+                        var importantDays = new List<DayOfWeek>();
+                        foreach (var item in specifiedDays)
                         {
-                            case "SU": importantDays.Add(DayOfWeek.Sunday); break;
-                            case "MO": importantDays.Add(DayOfWeek.Monday); break;
-                            case "TU": importantDays.Add(DayOfWeek.Tuesday); break;
-                            case "WE": importantDays.Add(DayOfWeek.Wednesday); break;
-                            case "TH": importantDays.Add(DayOfWeek.Thursday); break;
-                            case "FR": importantDays.Add(DayOfWeek.Friday); break;
-                            case "SA": importantDays.Add(DayOfWeek.Saturday); break;
+                            switch (item)
+                            {
+                                case "SU": importantDays.Add(DayOfWeek.Sunday); break;
+                                case "MO": importantDays.Add(DayOfWeek.Monday); break;
+                                case "TU": importantDays.Add(DayOfWeek.Tuesday); break;
+                                case "WE": importantDays.Add(DayOfWeek.Wednesday); break;
+                                case "TH": importantDays.Add(DayOfWeek.Thursday); break;
+                                case "FR": importantDays.Add(DayOfWeek.Friday); break;
+                                case "SA": importantDays.Add(DayOfWeek.Saturday); break;
+                            }
                         }
-                    }
-                    dateList = WFMConsole.Classes.DateTimeExtensions.GetSpecifiedDaysFromDateWithMaxDate(workingDate, importantDays, maxDate, repeatEvery.Value);
-                    break;
-                case "5": //Monthly
-                    while(workingDate < maxDate)
-                    {
-                        dateList.Add(workingDate);
-                        workingDate = workingDate.AddMonths(1 * repeatEvery.Value);
-                    }
-                    break;
-                case "6": //Annually
-                    while (workingDate < maxDate)
-                    {
-                        dateList.Add(workingDate);
-                        workingDate = workingDate.AddYears(1 * repeatEvery.Value);
-                    }
-                    break;
-                default:
-                    break;
+                        dateList = WFMConsole.Classes.DateTimeExtensions.GetSpecifiedDaysFromDateWithMaxDate(workingDate, importantDays, maxDate, repeatEvery.Value);
+                        break;
+                    case "5": //Monthly
+                        while (workingDate < maxDate)
+                        {
+                            dateList.Add(workingDate);
+                            workingDate = workingDate.AddMonths(1 * repeatEvery.Value);
+                        }
+                        break;
+                    case "6": //Annually
+                        while (workingDate < maxDate)
+                        {
+                            dateList.Add(workingDate);
+                            workingDate = workingDate.AddYears(1 * repeatEvery.Value);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                
             }
-
             return dateList;
+
         }
 
 

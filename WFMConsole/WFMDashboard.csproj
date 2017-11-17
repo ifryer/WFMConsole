@@ -483,9 +483,12 @@
     <Content Include="Scripts\jquery.datepair.min.js" />
     <Content Include="Scripts\jquery.timepicker.min.js" />
     <Content Include="Scripts\modernizr-2.6.2.js" />
+    <Content Include="Scripts\MowTab.js" />
+    <Content Include="Scripts\report.js" />
     <Content Include="Scripts\respond.js" />
     <Content Include="Scripts\respond.min.js" />
     <None Include="Views\Mailer\MowReport.cshtml" />
+    <Content Include="Scripts\ScheduleTab.js" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>

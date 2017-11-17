@@ -9,6 +9,22 @@
     margin-top: 20px;
 }
 
+@media (min-width: 1500px) {
+    .container {
+        max-width: 1470px;
+    }
+}
+
+@media (min-width: 1700px) {
+    .container {
+        max-width: 1570px;
+    }
+}
+
+.fc-title{
+    cursor: pointer;
+}
+
 /*input,
 select,
 textarea {
@@ -73,7 +89,7 @@ textarea {
 .loading-div {
     position: fixed;
     background-color: white;
-    z-index: 10;
+    z-index: 1050;
     top: 34vh;
     left: 40vw;
     padding: 5vh;
@@ -94,7 +110,7 @@ textarea {
     background: #000;
     opacity: 0.15;
     filter: alpha(opacity=15);
-    z-index: 5;
+    z-index: 1049;
 }
 
 .success-msg {

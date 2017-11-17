@@ -84,6 +84,7 @@
     <EntitySetMapping Name="BUS_WFMDashboard_Event">
       <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_Event">
         <MappingFragment StoreEntitySet="BUS_WFMDashboard_Event">
+          <ScalarProperty Name="Cancelled" ColumnName="Cancelled" />
           <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
           <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
           <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />

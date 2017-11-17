@@ -92,6 +92,16 @@ namespace WFMDashboard.Controllers
             return JsonConvert.SerializeObject(new { success = results != null, results = results });
         }
 
+        public async Task<string> CancelEvent(CancellationToken cancellationToken, int eventId)
+        {
+            var user = HttpContext.KmIdentity();
+            var WFMUser = getWFMUser(user.LdapUserId);
+            if (WFMUser == null) return JsonConvert.SerializeObject(new { success = false, msg = "You are not authorized to access WFM Dashboard" });
+            log.Info($"User {user.LdapUserId} cancelled event {eventId}");
+            var success = WFMHelper.CancelEvent(cancellationToken, eventId);
+            return JsonConvert.SerializeObject(new { success = success });
+        }
+
         public async Task<string> SubmitEventForm(CancellationToken cancellationToken, EventForm inputForm)
         {
             var user = HttpContext.KmIdentity();
@@ -100,8 +110,15 @@ namespace WFMDashboard.Controllers
             log.Info($"User {user.LdapUserId} called SubmitEventForm \r\n Params: InputForm: {inputForm.ToString()}");
             string msg = "";
             var googleAuth = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata()).AuthorizeAsync(cancellationToken);
-            List<ViewEvent> eventObject = WFMHelper.SubmitEventForm(googleAuth, inputForm, user.LdapUserId, out msg);
-            return JsonConvert.SerializeObject(new { success = eventObject != null, msg = msg, eventObject = eventObject });
+            if (googleAuth.Credential == null)
+            {
+                return JsonConvert.SerializeObject(new { success = false, msg = "Error - please refresh page and log back into Google Calendar" });
+            }
+            else
+            {
+                List<ViewEvent> eventObject = WFMHelper.SubmitEventForm(googleAuth, inputForm, user.LdapUserId, out msg);
+                return JsonConvert.SerializeObject(new { success = eventObject != null, msg = msg, eventObject = eventObject });
+            }
         }
 
         public async Task<string> DeleteEvent(CancellationToken cancellationToken, int id)
@@ -112,8 +129,16 @@ namespace WFMDashboard.Controllers
             string msg = "";
             log.Info($"User {user.LdapUserId} called DeleteEvent /r/n id: {id}");
             var googleAuth = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata()).AuthorizeAsync(cancellationToken);
-            var success = WFMHelper.DeleteEvent(googleAuth, id, user.LdapUserId, out msg);
-            return JsonConvert.SerializeObject(new { success = success, msg = msg });
+            if (googleAuth.Credential == null)
+            {
+                return JsonConvert.SerializeObject(new { success = false, msg = "Error - please refresh page and log back into Google Calendar" });
+            }
+            else
+            {
+                var success = WFMHelper.DeleteEvent(googleAuth, id, user.LdapUserId, out msg);
+                return JsonConvert.SerializeObject(new { success = success, msg = msg });
+            }
+            
         }
 
         #region Reports
@@ -127,17 +152,27 @@ namespace WFMDashboard.Controllers
             string msg = "";
             //bool success = false;
             var googleAuth = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata()).AuthorizeAsync(cancellationToken);
-            var report = WFMHelper.CreateDownByReport(googleAuth, out msg);
-            if (report != null)
+            if (googleAuth.Credential != null)
             {
-                ViewBag.report = report;
-                return View("~/Views/Mailer/DownByReport.cshtml");
+                var report = WFMHelper.CreateDownByReport(googleAuth, out msg);
+                if (report != null)
+                {
+                    ViewBag.report = report;
+                    return View("~/Views/Mailer/DownByReport.cshtml");
+                }
+                else
+                {
+                    log.Warn("Something went wrong creating Down By report");
+                    return RedirectToAction("Error", new { msg = msg });
+                }
             }
             else
             {
-                log.Warn("Something went wrong creating Down By report");
-                return RedirectToAction("Error", new { msg = msg});
+                log.Info($"User {user.LdapUserId} is logging into google calendar");
+                ViewBag.Title = "WFM Dashboard";
+                return new RedirectResult(googleAuth.RedirectUri);
             }
+            
         }
 
         public ActionResult CreateMOWReport()
