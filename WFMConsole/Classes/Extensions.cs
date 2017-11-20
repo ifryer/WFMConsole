@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using FluentDateTime;
+using System.IO;
+using System.Web.Mvc;
 
 namespace WFMConsole.Classes
 {
@@ -12,6 +14,8 @@ namespace WFMConsole.Classes
         {
             return target.TrimStart(trimChars.ToCharArray());
         }
+
+        
     }
     public static class DateTimeExtensions
     {

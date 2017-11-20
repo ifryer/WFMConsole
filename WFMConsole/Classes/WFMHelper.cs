@@ -116,6 +116,7 @@ namespace WFMDashboard.Classes
             var staffList = new List<ViewAgent>();
             using (var db = new inContact_NGEntities())
             {
+                
                 var staffListDb = db.Agents.Where(t => t.Status == "Active").OrderBy(t => t.LastName);
                 foreach (var item in staffListDb)
                 {

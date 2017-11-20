@@ -1,0 +1,10 @@
+﻿<div class="reports-area">
+    <div class="row">
+        <h3 style="font-weight: normal"> Confirm report contents before sending as email.</h3>
+        <textarea id="report-text">@ViewBag.ReportText</textarea>   
+    </div>
+    <div class="row"><br /><button class="btn btn-sm btn-success" id="submit-report-btn"> <span class="glyphicon glyphicon-envelope"></span> Send Report </button></div>
+</div>
+@section Scripts {
+    <script src="~/Scripts/report.js"></script>
+}

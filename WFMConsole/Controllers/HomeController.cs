@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -151,14 +152,20 @@ namespace WFMDashboard.Controllers
             log.Info($"User {user.LdapUserId} created Down By Report");
             string msg = "";
             //bool success = false;
+            ViewBag.Title = "WFM Dashboard - Confirm Report";
             var googleAuth = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata()).AuthorizeAsync(cancellationToken);
             if (googleAuth.Credential != null)
             {
+
                 var report = WFMHelper.CreateDownByReport(googleAuth, out msg);
+                
                 if (report != null)
                 {
                     ViewBag.report = report;
-                    return View("~/Views/Mailer/DownByReport.cshtml");
+                    //return View("~/Views/Mailer/DownByReport.cshtml");
+                    var reportString = RenderRazorViewToString("~/Views/Mailer/DownByReport.cshtml", ViewBag);
+                    ViewBag.ReportText = reportString;
+                    return View("~/Views/Home/Report.cshtml");
                 }
                 else
                 {
@@ -172,7 +179,6 @@ namespace WFMDashboard.Controllers
                 ViewBag.Title = "WFM Dashboard";
                 return new RedirectResult(googleAuth.RedirectUri);
             }
-            
         }
 
         public ActionResult CreateMOWReport()
@@ -182,11 +188,14 @@ namespace WFMDashboard.Controllers
             if (WFMUser == null) return RedirectToAction("Error", new { msg = "You are not authorized to use WFM Dashboard" });
             log.Info($"User {user.LdapUserId} created MOW Report");
             string msg = "";
+            ViewBag.Title = "WFM Dashboard";
             var report = WFMHelper.CreateMOWReport(out msg);
             if (report != null)
             {
                 ViewBag.report = report;
-                return View("~/Views/Mailer/MowReport.cshtml");
+                var reportString = RenderRazorViewToString("~/Views/Mailer/MowReport.cshtml", ViewBag);
+                ViewBag.ReportText = reportString;
+                return View("~/Views/Home/Report.cshtml");
             }
             else
             {
@@ -273,6 +282,21 @@ namespace WFMDashboard.Controllers
         }
 
         //Misc
+
+        public string RenderRazorViewToString(string viewName, object model)
+        {
+            ViewData.Model = model;
+            using (var sw = new StringWriter())
+            {
+                var viewResult = ViewEngines.Engines.FindPartialView(ControllerContext,
+                                                                         viewName);
+                var viewContext = new ViewContext(ControllerContext, viewResult.View,
+                                             ViewData, TempData, sw);
+                viewResult.View.Render(viewContext, sw);
+                viewResult.ViewEngine.ReleaseView(ControllerContext, viewResult.View);
+                return sw.GetStringBuilder().ToString();
+            }
+        }
 
         public ActionResult Error(string msg)
         {
