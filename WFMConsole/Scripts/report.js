@@ -2,7 +2,8 @@
 reportScript = (function () {
 
     function initialize() {
-        initializeTiny()
+        initializeTiny();
+        stopLoading();
     }
 
     function initializeTiny(){
@@ -24,6 +25,42 @@ reportScript = (function () {
             selector: `#report-text`
         });
     }
+
+    function ShowSuccessForm()
+    {
+        $(".message-div, .message-div-back").show();
+    };
+
+    $(document).on("click", "#close-message", function () {
+        window.close();
+    });
+
+    $(document).on("click", "#submit-report-btn", function () {
+        let reportType = $(this).attr("report");
+        let reportContent = tinymce.activeEditor.getContent({ format: 'raw' });
+        startLoading();
+        $.ajax({
+            dataType: "json",
+            type: "post",
+            data: {
+                reportContent: reportContent.toString(),
+                reportType: reportType
+            },
+            url: toUrl("/Home/SendReport"),
+            success: function (data) {
+                stopLoading();
+                if (data.success)
+                {
+                    ShowSuccessForm();
+                }
+                else {
+                    console.log("error -- " + data.msg);
+                    showSmallError(data.msg);
+                }
+                //window.close();
+            }
+        });
+    });
 
     $(document).ready(function () {
         initialize();

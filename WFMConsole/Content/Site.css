@@ -86,7 +86,7 @@ textarea {
     overflow-y: auto;
 }
 
-.loading-div {
+.loading-div, .message-div {
     position: fixed;
     background-color: white;
     z-index: 1050;
@@ -101,7 +101,7 @@ textarea {
     box-shadow: #b7b7b7 2px 2px 2px 2px;
 }
 
-.loading-div-back {
+.loading-div-back, .message-div-back {
     position: absolute;
     top: 0;
     left: 0;
@@ -112,6 +112,7 @@ textarea {
     filter: alpha(opacity=15);
     z-index: 1049;
 }
+
 
 .success-msg {
     background-color: #d9edf7;

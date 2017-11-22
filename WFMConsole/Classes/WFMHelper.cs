@@ -19,6 +19,7 @@ using System.Configuration;
 using WFMConsole.ViewModels;
 using System.Globalization;
 using FluentDateTime;
+using System.Net.Mail;
 
 namespace WFMDashboard.Classes
 {
@@ -600,6 +601,49 @@ namespace WFMDashboard.Classes
                 msg = ex.ToString();
                 log.Error("Error in CreateDownByReport", ex);
                 return null;
+            }
+        }
+
+        public static bool SendReport(string reportContent, string reportType)
+        {
+            try
+            {
+                string subject = "Report";
+                var dateNow = DateTime.Now;
+                string recipients = "";
+                if (reportType.ToLower() == "mow")
+                {
+                    subject = $"MOW/Inventory Control Mgr./Late Shift Mgr. - " + String.Format("{0:dddd, MMMM dd, yyyy - hh:mm tt}", dateNow);
+                    recipients = ConfigurationManager.AppSettings["MowReportDistributionList"];
+                }
+                if(reportType.ToLower() == "down")
+                {
+                    subject = $"CSC Daily Staffing Report – " + String.Format("{0:dddd, MMMM dd, yyyy - hh:mm tt}", dateNow);
+                    recipients = ConfigurationManager.AppSettings["DownReportDistributionList"];
+                }
+
+                string to = recipients;
+                string from = ConfigurationManager.AppSettings["ReportEmailFrom"];
+                MailMessage message = new MailMessage(from, to);
+                message.Subject = subject;
+                message.Body = reportContent;
+                SmtpClient client = new SmtpClient(ConfigurationManager.AppSettings["SmtpHost"], int.Parse(ConfigurationManager.AppSettings["SmtpPort"]));
+                message.IsBodyHtml = true;
+                try
+                {
+                    client.Send(message);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Exception caught in CreateTestMessage2(): {0}",
+                                ex.ToString());
+                }
+
+                return true;
+            }
+            catch(Exception ex)
+            {
+                return false;
             }
         }
 

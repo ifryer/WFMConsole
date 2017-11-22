@@ -153,6 +153,7 @@ namespace WFMDashboard.Controllers
             string msg = "";
             //bool success = false;
             ViewBag.Title = "WFM Dashboard - Confirm Report";
+            ViewBag.ReportType = "Down";
             var googleAuth = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata()).AuthorizeAsync(cancellationToken);
             if (googleAuth.Credential != null)
             {
@@ -189,6 +190,7 @@ namespace WFMDashboard.Controllers
             log.Info($"User {user.LdapUserId} created MOW Report");
             string msg = "";
             ViewBag.Title = "WFM Dashboard";
+            ViewBag.ReportType = "MOW";
             var report = WFMHelper.CreateMOWReport(out msg);
             if (report != null)
             {
@@ -204,6 +206,18 @@ namespace WFMDashboard.Controllers
             }
             //success = WFMHelper.CreateMOWReport();
             //return JsonConvert.SerializeObject(new { success = success, msg = msg });
+        }
+
+        [ValidateInput(false)]
+        public string SendReport(string reportContent, string reportType)
+        {
+            var user = HttpContext.KmIdentity();
+            var WFMUser = getWFMUser(user.LdapUserId);
+            if (WFMUser == null) return JsonConvert.SerializeObject(new { success = false, msg = "Error - you are not authorized to use WFM DAshboard" });
+            log.Info($"User {user.LdapUserId} sent the {reportType} Report");
+
+            var success =  WFMHelper.SendReport(reportContent, reportType);
+            return JsonConvert.SerializeObject(new { success = success, msg = "Successfully sent report" });
         }
 
         #endregion
