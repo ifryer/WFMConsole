@@ -33,8 +33,8 @@ namespace WFMConsole.ViewModels
         public string CalendarEventId { get; set; }
         public string ColorId { get; set; }
 
-        private static Dictionary<string, string> colorList = new Dictionary<string, string>() { { "1", "#a4bbfc" }, { "2", "" }, { "3", "" }, { "4", "#ff887c" }, { "5", "#fbd75b" }, { "6", "" }, { "7", "#46d6db" }, { "8", "" }, { "9", "#5484ed" }, { "10", "#51b749" }, { "11", "#dc2127" }, { "12", "" }, };
-        private static Dictionary<string, string> colorListPast = new Dictionary<string, string>() { { "1", "#d6e1ff" }, { "2", "" }, { "3", "" }, { "4", "#ffdbd7" }, { "5", "rgb(255, 240, 190)" }, { "6", "" }, { "7", "#c7f3f4" }, { "8", "" }, { "9", "#dde6fb" }, { "10", "#dcf1db" }, { "11", "#ecafb1" }, { "12", "" }, };
+        private static Dictionary<string, string> colorList = new Dictionary<string, string>() { { "1", "#a4bbfc" }, { "2", "#7ae7bf" }, { "3", "#dbadff" }, { "4", "#ff887c" }, { "5", "#fbd75b" }, { "6", "#ffb878" }, { "7", "#46d6db" }, { "8", "#e1e1e1" }, { "9", "#5484ed" }, { "10", "#51b749" }, { "11", "#dc2127" }, { "12", "" }, };
+        private static Dictionary<string, string> colorListPast = new Dictionary<string, string>() { { "1", "#d6e1ff" }, { "2", "#d7f8ec" }, { "3", "#f4e6ff" }, { "4", "#ffdbd7" }, { "5", "rgb(255, 240, 190)" }, { "6", "#ffead6" }, { "7", "#c7f3f4" }, { "8", "#f6f6f6" }, { "9", "#dde6fb" }, { "10", "#dcf1db" }, { "11", "#ecafb1" }, { "12", "" }, };
         //TODO: change Past color ID 5 to be more accurate to the actual color
         public ViewEvent(){}
         public ViewEvent(BUS_WFMDashboard_Event item, bool past, bool Repeating)
@@ -53,7 +53,8 @@ namespace WFMConsole.ViewModels
             if (allDay)
             {
                 start = StartDate = item.StartTime.ToShortDateString();
-                end = EndDate = item.EndTime.ToShortDateString();
+                end = item.EndTime.ToShortDateString();
+                EndDate = item.EndTime.AddDays(-1).ToShortDateString();
             }
             else
             {
@@ -105,7 +106,9 @@ namespace WFMConsole.ViewModels
             if (allDay)
             {
                 StartDate = start = inputDate.ToShortDateString();
-                EndDate = end = item.EndTime.AddDays(daysDifference).ToShortDateString();
+                end = item.EndTime.AddDays(daysDifference).ToShortDateString();
+                EndDate = item.EndTime.AddDays(daysDifference).AddDays(-1).ToShortDateString();
+                OriginalEndDate = item.EndTime.AddDays(-1).ToShortDateString();
             }
             else
             {

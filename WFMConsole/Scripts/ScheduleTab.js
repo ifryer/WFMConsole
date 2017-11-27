@@ -1,5 +1,7 @@
 ﻿scheduleTab = (function () {
 
+    var editedEventTitle = false;
+
     function initialize() {
         $("#event-start-time").timepicker({
             'defaultTimeDelta': null,
@@ -73,7 +75,6 @@
                     $("#team-info-down-total").html(data.teamInfo.TotalDown);
                     $("#team-info-list").slideDown("fast");
                     $("#loading-team-info").hide();
-                    showSmallAlert(data.msg);
                 }
             }
         });
@@ -258,7 +259,6 @@
     });
 
     $(document).on("click", "#save-event-modal-btn", function () {
-
         submitEditEventForm();
     });
 
@@ -311,6 +311,7 @@
                     else {
                         $("#edit-calendar-event-modal").modal("toggle")
                         showSmallAlert(data.msg);
+                        ReloadTeamInfo();
                         $("#event-calendar").fullCalendar('removeEvents', function (eventObject) {
                             if (eventObject.Id == eventId)
                                 return true;
@@ -338,6 +339,7 @@
                     showSmallError(data.msg);
                 }
                 else {
+                    ReloadTeamInfo();
                     $("#event-calendar").fullCalendar('refetchEvents')
                     $("#edit-calendar-event-modal").modal("toggle")
                     $("#repeatingCheckbox-modal").removeAttr("checked")
@@ -424,17 +426,8 @@
                     showSmallError(data.msg);
                 }
                 else {
-                    $("#event-calendar").fullCalendar('removeEvents', function (eventObject) {
-                        if (eventObject.Id == eventId)
-                            return true;
-                    });
-                    //$.each(data.eventObject, function (index, item) {
-                    //    console.log(item)
-                    //    let newEventHash = item;
-                    //    $('#event-calendar').fullCalendar('addEventSource', [newEventHash]);
-                    //});
+                    ReloadTeamInfo();
                     $("#event-calendar").fullCalendar('refetchEvents')
-
                     $("#edit-calendar-event-modal").modal("toggle")
                     $("#repeatingCheckbox-modal").removeAttr("checked")
                     showSmallAlert(data.msg);
@@ -489,7 +482,11 @@
         if (!editedEventTitle) {
             let selectedStaffLastName = $("#select-name-staff option:selected").attr("lastName");
             let teamName = $("#select-name-staff option:selected").attr("teamName");
+            if (teamName == null)
+                teamName = "Team Name"
             let eventType = $("#event-type").val();
+            if (selectedStaffLastName == null)
+                selectedStaffLastName = "Name"
             $("#event-title").val("*" + teamName + " - " + selectedStaffLastName + " - " + eventType);
         }
         switch ($(this).val()) {
@@ -612,11 +609,7 @@
                         showSmallError(data.msg);
                     }
                     else {
-                        //$.each(data.eventObject, function (index, item) {
-                        //    console.log(item)
-                        //    let newEventHash = item;
-                        //    $('#event-calendar').fullCalendar('addEventSource', [newEventHash]);
-                        //});
+                        ReloadTeamInfo();
                         $("#event-calendar").fullCalendar('refetchEvents')
                         showSmallAlert(data.msg);
                         $(".event-form").slideUp("fast");
@@ -627,6 +620,36 @@
                 }
             });
         }
+    }
+
+    function ReloadTeamInfo()
+    {
+        let selectedStaff = $("#select-name-staff").val();
+        $("#loading-team-info").show();
+        $.ajax({
+            dataType: "json",
+            type: "post",
+            data: {
+                agentNo: selectedStaff,
+            },
+            url: toUrl("Home/GetTeamInfo"),
+            success: function (data) {
+                if (!data.success) {
+                    console.log("error -- " + data.msg);
+                    showSmallError(data.msg);
+                }
+                else {
+                    $("#team-info-name").html(" - " + data.teamInfo.TeamName);
+                    $("#team-info-down-pto").html(data.teamInfo.PTO);
+                    $("#team-info-down-training").html(data.teamInfo.Training);
+                    $("#team-info-down-loa").html(data.teamInfo.LOA);
+                    $("#team-info-down-other").html(data.teamInfo.Other);
+                    $("#team-info-down-total").html(data.teamInfo.TotalDown);
+                    $("#team-info-list").slideDown("fast");
+                    $("#loading-team-info").hide();
+                }
+            }
+        });
     }
 
     function GetColor(eventType) {
@@ -734,14 +757,15 @@
             ],
             dayClick: function (date, jsEvent, view) {
                 let strTime = date.format("h:mma")
+                let strTimeEnd = (date.add(1, "hours")).format("h:mma")
                 let dateString = date.format("MM/DD/YYYY")
                 $(".event-form").show();
                 $("#event-start-date, #event-end-date").val(dateString);
                 $("#event-start-time").val(strTime);
+                $("#event-end-time").val(strTimeEnd);
                 $("#create-event-form")[0].scrollIntoView({ behavior: "smooth" });
             },
             eventClick: function (calEvent, jsEvent, view) {
-                console.log(calEvent)
                 let calendarId = calEvent._id;
                 let eventId = calEvent.Id
                 let notes = calEvent.Notes;

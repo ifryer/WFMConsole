@@ -314,11 +314,19 @@ namespace WFMDashboard.Classes
 
                 var startDate = $"{inputForm.startDate} {inputForm.startTime}";
                 var endDate = $"{inputForm.endDate} {inputForm.endTime}";
-
                 var startDateTime = DateTime.Parse(startDate);
                 var endDateTime = DateTime.Parse(endDate);
+                if (inputForm.fullDay)
+                {
+                    startDate = $"{inputForm.startDate} 00:00";
+                    endDate = $"{inputForm.endDate} 00:00";
+                    startDateTime = DateTime.Parse(startDate);
+                    endDateTime = DateTime.Parse(endDate).AddDays(1);
+                }
 
-                if (endDateTime < startDateTime)
+                
+
+                if (endDateTime <= startDateTime)
                 {
                     if(inputForm.fullDay)
                     {
@@ -326,8 +334,11 @@ namespace WFMDashboard.Classes
                     }
                     else
                     {
-                        msg = "Start time must be before end time";
-                        return null;
+                        if (endDateTime < startDateTime)
+                        {
+                            msg = "Start time must be before end time";
+                            return null;
+                        }
                     }
                 }
                 if(inputForm.notes == null)
@@ -1283,16 +1294,25 @@ namespace WFMDashboard.Classes
                 using (var db = new OnyxEntities())
                 {
                     var totalDown = 0;
-
-                    var events = db.BUS_WFMDashboard_Event.Where(t => t.TeamId == team && t.StartTime <= DateTime.Today.Date && t.EndTime > DateTime.Today.Date).ToList();
-                    var ptoCount = events.Where(t => t.EventType == "PTO").ToList();
+                    var tomorrow = DateTime.Today.Date.AddDays(1);
+                    var events = db.BUS_WFMDashboard_Event.Where(t => t.TeamId == team && t.FullDay && !t.Cancelled && t.StartTime <= tomorrow && t.EndTime > DateTime.Today.Date).ToList();
+                    var ptoCount = events.Where(t => t.EventType.Contains("PTO")).ToList();
                     var trainingCount = events.Where(t => t.EventType == "Training").ToList();
+                    var loaCount = events.Where(t => t.EventType == "LOA").ToList();
+                    var otherCount = events.Where(t => t.EventType == "Other" || t.EventType == "Unpaid Time Off").ToList();
+
 
                     totalDown += ptoCount.Count;
                     teamInfo.PTO = ptoCount.Count.ToString();
 
                     totalDown += trainingCount.Count;
                     teamInfo.Training = trainingCount.Count.ToString();
+
+                    totalDown += loaCount.Count;
+                    teamInfo.LOA = loaCount.Count.ToString();
+
+                    totalDown += otherCount.Count;
+                    teamInfo.Other = otherCount.Count.ToString();
 
                     teamInfo.TotalDown = totalDown.ToString();
                     return teamInfo;
@@ -1646,17 +1666,12 @@ namespace WFMDashboard.Classes
             try
             {
                 String calendarId = ConfigurationManager.AppSettings["CalendarId"];
-                //string colorId = color; //Color for unplanned PTO
 
-                EventDateTime start = new EventDateTime();
-                EventDateTime end = new EventDateTime();
-
-                start = new EventDateTime()
+                CTMEventDateTime start = new CTMEventDateTime()
                 {
                     TimeZone = "America/New_York"
-
                 };
-                end = new EventDateTime()
+                CTMEventDateTime end = new CTMEventDateTime()
                 {
                     TimeZone = "America/New_York"
                 };
@@ -1665,11 +1680,15 @@ namespace WFMDashboard.Classes
                 {
                     start.Date = DateTime.Parse(eventItem.StartDate).ToString("yyyy-MM-dd");
                     end.Date = DateTime.Parse(eventItem.StartDate).ToString("yyyy-MM-dd");
+                    start.DateTime = null;
+                    end.DateTime = null;
                 }
                 else
                 {
                     start.DateTime = DateTime.Parse(eventItem.start);
                     end.DateTime = DateTime.Parse(eventItem.end);
+                    start.Date = null;
+                    end.Date = null;
                 }
 
                 var service = CreateCalendarService(googleAuth);

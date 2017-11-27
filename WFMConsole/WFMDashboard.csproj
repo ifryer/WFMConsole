@@ -191,6 +191,7 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Classes\AppFlowMetadata.cs" />
     <Compile Include="Classes\AuthorizationCodeMvcAppOverride.cs" />
+    <Compile Include="Classes\GoogleCalendarApiOverride.cs" />
     <Compile Include="Classes\Mailer.cs" />
     <Compile Include="Classes\ObjectPrintHelper.cs" />
     <Compile Include="Configuration\Configuration.cs" />

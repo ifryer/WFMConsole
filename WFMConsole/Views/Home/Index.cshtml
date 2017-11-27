@@ -6,7 +6,6 @@
                 <div class="col-md-12 event-form-modal">
                     <h4 class="form-header-modal"> Edit Event Form </h4>
                     <div class="row">
-
                         <input style="display:none" id="editing-event-id" />
                         <input style="display:none" id="editing-event-calendar-id" />
                         <input style="display:none" id="editing-event-same-date" />
@@ -22,10 +21,8 @@
                                 <span style="width: 5%"> to </span>
                                 <input class="form-control time end" id="event-end-time-modal" disabled="disabled" style="width: 20%; display: inline-block" placeholder="">
                                 <input class="form-control" id="event-end-date-modal" style="width: 25%; display: inline-block" placeholder="">
-
                                 @*<input class="form-control" id="event-start-date" placeholder="">*@
                             </div>
-
                         </div>
                     </div>
                     <div class="row">
@@ -37,11 +34,15 @@
                                     <input style="margin-left:10px;" type="checkbox" id="repeatingCheckbox-modal" />
                                     <label for="repeatingCheckbox-modal"> Repeat </label>
                                     <a id="repeatingCheckbox-modal-edit" style="display:none; cursor:pointer;">Edit</a>
-                                    <label style="margin-left:20px;"> Color: </label>
+                                    <label style="margin-left:15px;"> Color: </label>
                                     <div class="event-color-modal color-selector color-1" colorId="1" style="background-color: #a4bbfc"></div>
+                                    <div class="event-color-modal color-selector color-2" colorId="2" style="background-color: #7ae7bf"></div>
+                                    <div class="event-color-modal color-selector color-3" colorId="3" style="background-color: #dbadff"></div>
                                     <div class="event-color-modal color-selector color-4" colorId="4" style="background-color: #ff887c"></div>
                                     <div class="event-color-modal color-selector color-5" colorId="5" style="background-color: #fbd75b"></div>
+                                    <div class="event-color-modal color-selector color-6" colorId="6" style="background-color: #ffb878"></div>
                                     <div class="event-color-modal color-selector color-7" colorId="7" style="background-color: #46d6db"></div>
+                                    <div class="event-color-modal color-selector color-8" colorId="8" style="background-color: #e1e1e1"></div>
                                     <div class="event-color-modal color-selector chosen color-9" colorId="9" style="background-color: #5484ed"></div>
                                     <div class="event-color-modal color-selector color-10" colorId="10" style="background-color: #51b749"></div>
                                     <div class="event-color-modal color-selector color-11" colorId="11" style="background-color: #dc2127"></div>
@@ -72,9 +73,7 @@
                                 <textarea rows="5" class="form-control" id="event-notes-modal" placeholder="" style="margin-bottom: 10px; resize:vertical"></textarea>
                             </div>
                         </div>
-
                     </div>
-
                 </div>
             </div>
             <div class="modal-footer">
@@ -306,11 +305,15 @@
                                         <label for="fullDayCheckbox"> Full Day </label>
                                         <input style="margin-left:10px;" type="checkbox" id="repeatingCheckbox" />
                                         <label for="repeatingCheckbox"> Repeat </label>
-                                        <label style="margin-left:20px;"> Color: </label>
+                                        <label style="margin-left:15px;"> Color: </label>
                                         <div class="event-color color-selector color-1" colorId="1" style="background-color: #a4bbfc"></div>
+                                        <div class="event-color color-selector color-2" colorId="2" style="background-color: #7ae7bf"></div>
+                                        <div class="event-color color-selector color-3" colorId="3" style="background-color: #dbadff"></div>
                                         <div class="event-color color-selector color-4" colorId="4" style="background-color: #ff887c"></div>
                                         <div class="event-color color-selector color-5" colorId="5" style="background-color: #fbd75b"></div>
+                                        <div class="event-color color-selector color-6" colorId="6" style="background-color: #ffb878"></div>
                                         <div class="event-color color-selector color-7" colorId="7" style="background-color: #46d6db"></div>
+                                        <div class="event-color color-selector color-8" colorId="8" style="background-color: #e1e1e1"></div>
                                         <div class="event-color color-selector chosen color-9" colorId="9" style="background-color: #5484ed"></div>
                                         <div class="event-color color-selector color-10" colorId="10" style="background-color: #51b749"></div>
                                         <div class="event-color color-selector color-11" colorId="11" style="background-color: #dc2127"></div>

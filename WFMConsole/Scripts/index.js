@@ -2,7 +2,7 @@
 
 
 indexScript = (function () {
-    var editedEventTitle = false;
+   
     
     function initialize() {
         mowTab.initialize();
