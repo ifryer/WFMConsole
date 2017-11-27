@@ -7,6 +7,8 @@
     <link rel="shortcut icon" type="image/x-icon" href="/WFMDashboard/Images/favicon.ico" />
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
+    @*@Styles.Render("~/Content/css")*@
+    <script type="text/javascript" src="../Scripts/tinymce/tinymce.min.js"></script>
     <link rel="stylesheet" href="~/Scripts/chosen_v1.8.2/chosen.css" />
     <script src="~/Scripts/common.js"></script>
 </head>
@@ -27,6 +29,11 @@
         </div>
     </div>
     <div class="container body-content">
+        <div class="loading-div-back" id="loadingDivBack"></div>
+        <div class="loading-div" id="loadingDiv">
+            <img src='~/Images/loading.gif' /> Loading...
+        </div>
+        <div class="small-alert-box" style="display:none"> - </div>
         @RenderBody()
         <hr />
         <footer>
@@ -37,6 +44,7 @@
 
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/libraries")
     @RenderSection("scripts", required: false)
 </body>
 </html>

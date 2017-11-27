@@ -106,6 +106,7 @@
     <Property Name="UpdatedAt" Type="DateTime" Precision="3" />
     <Property Name="CreatedBy" Type="String" Nullable="false" MaxLength="45" FixedLength="false" Unicode="true" />
     <Property Name="UpdatedBy" Type="String" Nullable="false" MaxLength="45" FixedLength="false" Unicode="true" />
+    <Property Name="Cancelled" Type="Boolean" Nullable="false" />
   </EntityType>
   <EntityType Name="BUS_WFMDashboard_Repeating_Event">
     <Key>

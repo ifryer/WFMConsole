@@ -1,8 +1,4 @@
-﻿<div class="small-alert-box" style="display:none"> - </div>
-<div class="loading-div-back" id="loadingDivBack"></div>
-<div class="loading-div" id="loadingDiv">
-    <img src='~/Images/loading.gif' /> Loading...
-</div>
+﻿
 <div id="edit-calendar-event-modal" class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog wide" role="document">
         <div class="modal-content">
@@ -10,9 +6,9 @@
                 <div class="col-md-12 event-form-modal">
                     <h4 class="form-header-modal"> Edit Event Form </h4>
                     <div class="row">
-
                         <input style="display:none" id="editing-event-id" />
                         <input style="display:none" id="editing-event-calendar-id" />
+                        <input style="display:none" id="editing-event-same-date" />
                         <div class="col-md-12 unpadded-left" style="margin-bottom: 10px;">
                             <label for="event-title-modal">Title</label>
                             <div class="form-inline">
@@ -25,10 +21,8 @@
                                 <span style="width: 5%"> to </span>
                                 <input class="form-control time end" id="event-end-time-modal" disabled="disabled" style="width: 20%; display: inline-block" placeholder="">
                                 <input class="form-control" id="event-end-date-modal" style="width: 25%; display: inline-block" placeholder="">
-
                                 @*<input class="form-control" id="event-start-date" placeholder="">*@
                             </div>
-
                         </div>
                     </div>
                     <div class="row">
@@ -40,11 +34,15 @@
                                     <input style="margin-left:10px;" type="checkbox" id="repeatingCheckbox-modal" />
                                     <label for="repeatingCheckbox-modal"> Repeat </label>
                                     <a id="repeatingCheckbox-modal-edit" style="display:none; cursor:pointer;">Edit</a>
-                                    <label style="margin-left:20px;"> Color: </label>
+                                    <label style="margin-left:15px;"> Color: </label>
                                     <div class="event-color-modal color-selector color-1" colorId="1" style="background-color: #a4bbfc"></div>
+                                    <div class="event-color-modal color-selector color-2" colorId="2" style="background-color: #7ae7bf"></div>
+                                    <div class="event-color-modal color-selector color-3" colorId="3" style="background-color: #dbadff"></div>
                                     <div class="event-color-modal color-selector color-4" colorId="4" style="background-color: #ff887c"></div>
                                     <div class="event-color-modal color-selector color-5" colorId="5" style="background-color: #fbd75b"></div>
+                                    <div class="event-color-modal color-selector color-6" colorId="6" style="background-color: #ffb878"></div>
                                     <div class="event-color-modal color-selector color-7" colorId="7" style="background-color: #46d6db"></div>
+                                    <div class="event-color-modal color-selector color-8" colorId="8" style="background-color: #e1e1e1"></div>
                                     <div class="event-color-modal color-selector chosen color-9" colorId="9" style="background-color: #5484ed"></div>
                                     <div class="event-color-modal color-selector color-10" colorId="10" style="background-color: #51b749"></div>
                                     <div class="event-color-modal color-selector color-11" colorId="11" style="background-color: #dc2127"></div>
@@ -75,13 +73,12 @@
                                 <textarea rows="5" class="form-control" id="event-notes-modal" placeholder="" style="margin-bottom: 10px; resize:vertical"></textarea>
                             </div>
                         </div>
-
                     </div>
-
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger pull-left" id="delete-event-modal-btn"> Delete Event </button>
+                <button type="button" class="btn btn-warning pull-left" id="cancel-event-modal-btn"> Cancel Event </button>
                 <button type="button" class="btn btn-primary" id="save-event-modal-btn"> Save</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             </div>
@@ -186,7 +183,7 @@
                                     </div>
                                 </td>
                             </tr>
-                            <tr>
+                            <tr style="display:none;">
                                 <th>Summary:</th>
                                 <td class="repeat-form-summary">Daily</td>
                             </tr>
@@ -244,7 +241,7 @@
                     </div>*@
                         </div>
                         <div class="row" id="pto-info-staff">
-                            <div class="col-md-6">
+                            <div style="display:none;" class="col-md-6">
                                 <div class="col-md-2 col-xs-2 center-text">
                                     <div class="row underlined">
                                         Total PTO
@@ -277,6 +274,80 @@
                             <div class="col-md-4">
                                 <button class="btn btn-default" id="new-event-btn"> New Event </button>
                             </div>
+                        </div>
+                        <div class="row event-form" id="create-event-form" style="display: none; margin-top: 10px;">
+                            <h4 class="form-header"> Create Event Form </h4>
+                            <div class="row">
+
+
+                                <div class="col-md-12 unpadded-left" style="margin-bottom: 10px;">
+                                    <label for="event-title">Title</label>
+                                    <div class="form-inline">
+                                        <input class="form-control input-sm" id="event-title" placeholder="">
+                                    </div>
+                                    <label for="event-day">Date</label>
+                                    <div class="form-inline" id="start-end-event-section" style="margin-bottom: 10px;">
+                                        <input class="form-control input-sm" id="event-start-date" style="width: 25%; display: inline-block" placeholder="">
+                                        <input class="form-control input-sm time start" id="event-start-time" disabled="disabled" style="width: 20%; display: inline-block" placeholder="">
+                                        <span style="width: 5%"> to </span>
+                                        <input class="form-control input-sm time end" id="event-end-time" disabled="disabled" style="width: 20%; display: inline-block" placeholder="">
+                                        <input class="form-control input-sm" id="event-end-date" style="width: 25%; display: inline-block" placeholder="">
+
+                                        @*<input class="form-control" id="event-start-date" placeholder="">*@
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div style="cursor:default" class="col-md-7 unpadded-left">
+                                    <div style="margin-top: 5px;">
+                                        <input type="checkbox" id="fullDayCheckbox" checked="checked" />
+                                        <label for="fullDayCheckbox"> Full Day </label>
+                                        <input style="margin-left:10px;" type="checkbox" id="repeatingCheckbox" />
+                                        <label for="repeatingCheckbox"> Repeat </label>
+                                        <label style="margin-left:15px;"> Color: </label>
+                                        <div class="event-color color-selector color-1" colorId="1" style="background-color: #a4bbfc"></div>
+                                        <div class="event-color color-selector color-2" colorId="2" style="background-color: #7ae7bf"></div>
+                                        <div class="event-color color-selector color-3" colorId="3" style="background-color: #dbadff"></div>
+                                        <div class="event-color color-selector color-4" colorId="4" style="background-color: #ff887c"></div>
+                                        <div class="event-color color-selector color-5" colorId="5" style="background-color: #fbd75b"></div>
+                                        <div class="event-color color-selector color-6" colorId="6" style="background-color: #ffb878"></div>
+                                        <div class="event-color color-selector color-7" colorId="7" style="background-color: #46d6db"></div>
+                                        <div class="event-color color-selector color-8" colorId="8" style="background-color: #e1e1e1"></div>
+                                        <div class="event-color color-selector chosen color-9" colorId="9" style="background-color: #5484ed"></div>
+                                        <div class="event-color color-selector color-10" colorId="10" style="background-color: #51b749"></div>
+                                        <div class="event-color color-selector color-11" colorId="11" style="background-color: #dc2127"></div>
+
+                                    </div>
+                                    @*<label for="selectNameForm">Submitting For</label>
+                    <div class="selected-staff-name"> No Staff Member Selected </div>*@
+                                </div>
+                                <div class="col-md-5 unpadded-left">
+                                    <label for="event-type">Event Type</label>
+                                    <div class="form-inline">
+                                        <select class="form-control input-sm" id="event-type" placeholder="">
+                                            <option value="PTO (Unplanned)"> Unplanned PTO </option>
+                                            <option value="PTO (Planned)"> Planned PTO </option>
+                                            <option value="Unpaid Time Off"> Unpaid Time Off </option>
+                                            <option value="Training"> Training </option>
+                                            <option value="LOA"> LOA </option>
+                                            <option value="Other"> Other </option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 unpadded-left">
+                                    <label for="event-notes">Notes</label>
+                                    <div class="form-inline">
+                                        <textarea rows="2" class="form-control" id="event-notes" placeholder="" style="margin-bottom: 10px; resize:vertical"></textarea>
+                                    </div>
+                                    <button class="btn btn-sm btn-default pull-right" id="close-event-form-btn"> Cancel </button>
+                                    <button class="btn btn-sm btn-primary pull-right" id="submit-event-form-btn" style="margin-right: 10px"> Submit </button>
+                                </div>
+
+                            </div>
+
                         </div>
                         <br />
                         
@@ -325,82 +396,15 @@
                         </div>
                     </div>
                 </div>
-                <div class="row" style="margin-left: 0;">
-                    <div class="col-md-8 event-form" id="create-event-form" style="display: none;">
-                        <h4 class="form-header"> Create Event Form </h4>
-                        <div class="row">
-
-
-                            <div class="col-md-12 unpadded-left" style="margin-bottom: 10px;">
-                                <label for="event-title">Title</label>
-                                <div class="form-inline">
-                                    <input class="form-control input-sm" id="event-title" placeholder="">
-                                </div>
-                                <label for="event-day">Date</label>
-                                <div class="form-inline" id="start-end-event-section" style="margin-bottom: 10px;">
-                                    <input class="form-control input-sm" id="event-start-date" style="width: 25%; display: inline-block" placeholder="">
-                                    <input class="form-control input-sm time start" id="event-start-time" disabled="disabled" style="width: 20%; display: inline-block" placeholder="">
-                                    <span style="width: 5%"> to </span>
-                                    <input class="form-control input-sm time end" id="event-end-time" disabled="disabled" style="width: 20%; display: inline-block" placeholder="">
-                                    <input class="form-control input-sm" id="event-end-date" style="width: 25%; display: inline-block" placeholder="">
-
-                                    @*<input class="form-control" id="event-start-date" placeholder="">*@
-                                </div>
-
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div style="cursor:default" class="col-md-7 unpadded-left">
-                                <div style="margin-top: 5px;">
-                                    <input type="checkbox" id="fullDayCheckbox" checked="checked" />
-                                    <label for="fullDayCheckbox"> Full Day </label>
-                                    <input style="margin-left:10px;" type="checkbox" id="repeatingCheckbox" />
-                                    <label for="repeatingCheckbox"> Repeat </label>
-                                    <label style="margin-left:20px;"> Color: </label>
-                                    <div class="event-color color-selector color-1" colorId="1" style="background-color: #a4bbfc"></div>
-                                    <div class="event-color color-selector color-4" colorId="4" style="background-color: #ff887c"></div>
-                                    <div class="event-color color-selector color-5" colorId="5" style="background-color: #fbd75b"></div>
-                                    <div class="event-color color-selector color-7" colorId="7" style="background-color: #46d6db"></div>
-                                    <div class="event-color color-selector chosen color-9" colorId="9" style="background-color: #5484ed"></div>
-                                    <div class="event-color color-selector color-10" colorId="10" style="background-color: #51b749"></div>
-                                    <div class="event-color color-selector color-11" colorId="11" style="background-color: #dc2127"></div>
-
-                                </div>
-                                @*<label for="selectNameForm">Submitting For</label>
-                                <div class="selected-staff-name"> No Staff Member Selected </div>*@
-                            </div>
-                            <div class="col-md-5 unpadded-left">
-                                    <label for="event-type">Event Type</label>
-                                    <div class="form-inline">
-                                        <select class="form-control input-sm" id="event-type" placeholder="">
-                                            <option value="PTO (Unplanned)"> Unplanned PTO </option>
-                                            <option value="PTO (Planned)"> Planned PTO </option>
-                                            <option value="Unpaid Time Off"> Unpaid Time Off </option>
-                                            <option value="Training"> Training </option>
-                                            <option value="LOA"> LOA </option>
-                                            <option value="Other"> Other </option>
-                                        </select>
-                                    </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12 unpadded-left">
-                                <label for="event-notes">Notes</label>
-                                <div class="form-inline">
-                                    <textarea rows="2" class="form-control" id="event-notes" placeholder="" style="margin-bottom: 10px; resize:vertical"></textarea>
-                                </div>
-                                <button class="btn btn-sm btn-default pull-right" id="close-event-form-btn"> Cancel </button>
-                                <button class="btn btn-sm btn-primary pull-right" id="submit-event-form-btn" style="margin-right: 10px"> Submit </button>
-                            </div>
-
-                        </div>
-                            
-                    </div>
+                @*<div class="row" style="margin-left: 0;">
+                    
                     <div class="col-md-1"></div>
 
                     
+                </div>*@
+                <div class="row">
+                    <button class="button btn btn-default pull-right btn-sm" id="refresh-calendar" style="margin-right: 15px;"> <span class="glyphicon glyphicon-refresh"></span> </button>
                 </div>
-
                 <div class="row" style="margin-top: 10px;">
                     <div class="col-md-12">
                         <div id="event-calendar">
@@ -582,5 +586,7 @@
 </div>
 
 @section Scripts {
+    <script src="~/Scripts/MowTab.js"></script>
+    <script src="~/Scripts/ScheduleTab.js"></script>
     <script src="~/Scripts/index.js"></script>
 }

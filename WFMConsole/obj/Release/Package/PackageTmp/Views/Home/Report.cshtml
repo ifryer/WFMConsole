@@ -1,0 +1,16 @@
+﻿<div class="reports-area">
+    <div style="display:none" class="message-div-back" id="messageDivBack"></div>
+    <div style="display:none; text-align: center; padding:20px; padding-bottom: 10px;" class="message-div" id="messageDiv">
+        <h5 style="font-size: 16px; "> Successfully sent report. </h5>
+        <p></p>
+        <button id="close-message" class="button btn btn-default pull-right"> Close</button>
+    </div>
+    <div class="row">
+        <h3 style="font-weight: normal"> Confirm report contents before sending as email.</h3>
+        <textarea id="report-text">@ViewBag.ReportText</textarea>   
+    </div>
+    <div class="row"><br /><button class="btn btn-sm btn-success" id="submit-report-btn" report="@ViewBag.ReportType"> <span class="glyphicon glyphicon-envelope"></span> Send Report </button></div>
+</div>
+@section Scripts {
+    <script src="~/Scripts/report.js"></script>
+}
