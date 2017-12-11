@@ -9,6 +9,7 @@
                         <input style="display:none" id="editing-event-id" />
                         <input style="display:none" id="editing-event-calendar-id" />
                         <input style="display:none" id="editing-event-same-date" />
+
                         <div class="col-md-12 unpadded-left" style="margin-bottom: 10px;">
                             <label for="event-title-modal">Title</label>
                             <div class="form-inline">
@@ -33,7 +34,7 @@
                                     <label for="fullDayCheckbox-modal"> Full Day </label>
                                     <input style="margin-left:10px;" type="checkbox" id="repeatingCheckbox-modal" />
                                     <label for="repeatingCheckbox-modal"> Repeat </label>
-                                    <a id="repeatingCheckbox-modal-edit" style="display:none; cursor:pointer;">Edit</a>
+                                    <a id="repeatingEvent-modal-edit" style="display:none; cursor:pointer;">Edit</a>
                                     <label style="margin-left:15px;"> Color: </label>
                                     <div class="event-color-modal color-selector color-1" colorId="1" style="background-color: #a4bbfc"></div>
                                     <div class="event-color-modal color-selector color-2" colorId="2" style="background-color: #7ae7bf"></div>
@@ -63,6 +64,25 @@
                                         <option value="Other"> Other </option>
                                     </select>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-7 unpadded-left">
+                            <label> Notifications </label>
+                            <br />
+                            <span class="no-notifications-modal" style="display:none; color:grey"> No notifications set</span>
+                            <div class="notification-area-modal">
+                            </div>
+                            <a id="add-event-notification-modal" style="cursor:pointer;"> Add a notification </a>
+                        </div>
+                        <div class="col-md-5 unpadded-left">
+                            <label> Guests </label>
+                            <br />
+                            <input type="text" class="form-control input-xs" placeholder="Add guests" id="add-invitee-modal" />
+                            <br />
+                            <label> Participants </label>
+                            <div class="invitee-area-modal">
                             </div>
                         </div>
                     </div>
@@ -288,9 +308,9 @@
                                     <label for="event-day">Date</label>
                                     <div class="form-inline" id="start-end-event-section" style="margin-bottom: 10px;">
                                         <input class="form-control input-sm" id="event-start-date" style="width: 25%; display: inline-block" placeholder="">
-                                        <input class="form-control input-sm time start" id="event-start-time" disabled="disabled" style="width: 20%; display: inline-block" placeholder="">
+                                        <input class="form-control input-sm time start" id="event-start-time" style="width: 20%; display: inline-block" placeholder="">
                                         <span style="width: 5%"> to </span>
-                                        <input class="form-control input-sm time end" id="event-end-time" disabled="disabled" style="width: 20%; display: inline-block" placeholder="">
+                                        <input class="form-control input-sm time end" id="event-end-time" style="width: 20%; display: inline-block" placeholder="">
                                         <input class="form-control input-sm" id="event-end-date" style="width: 25%; display: inline-block" placeholder="">
 
                                         @*<input class="form-control" id="event-start-date" placeholder="">*@
@@ -301,7 +321,7 @@
                             <div class="row">
                                 <div style="cursor:default" class="col-md-8 unpadded-left">
                                     <div style="margin-top: 5px;">
-                                        <input type="checkbox" id="fullDayCheckbox" checked="checked" />
+                                        <input type="checkbox" id="fullDayCheckbox"/>
                                         <label for="fullDayCheckbox"> Full Day </label>
                                         <input style="margin-left:10px;" type="checkbox" id="repeatingCheckbox" />
                                         <label for="repeatingCheckbox"> Repeat </label>
@@ -333,6 +353,25 @@
                                             <option value="LOA"> LOA </option>
                                             <option value="Other"> Other </option>
                                         </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-7 unpadded-left">
+                                    <label> Notifications </label>
+                                    <br />
+                                    <span class="no-notifications" style="display:none; color:grey"> No notifications set</span>
+                                    <div class="notification-area">
+                                    </div>
+                                    <a id="add-event-notification" style="cursor:pointer;">Add a notification</a>
+                                </div>
+                                <div class="col-md-5 unpadded-left">
+                                    <label> Guests </label>
+                                    <br />
+                                    <input type="text" class="form-control input-xs" placeholder="Add guests" id="add-invitee" />
+                                    <br />
+                                    <label> Participants </label>
+                                    <div class="invitee-area">
                                     </div>
                                 </div>
                             </div>
@@ -549,6 +588,7 @@
                                     </table>
                                     <div class="row no-margin">
                                         <button class="btn btn-sm btn-success mow-event-add-row"> Add Row</button>
+                                        <button class="btn btn-sm btn-success mow-event-add-unavailable-row"> Add Unavailable Row</button>
                                         <button class="btn btn-sm btn-default pull-right" id="close-new-mow-schedule-form"> Close </button>
                                         <button class="btn btn-sm btn-primary pull-right" id="save-new-mow-schedule-form" style="margin-right:5px;"> Save </button>
                                     </div>
@@ -588,5 +628,6 @@
 @section Scripts {
     <script src="~/Scripts/MowTab.js"></script>
     <script src="~/Scripts/ScheduleTab.js"></script>
+    <script src="~/Scripts/emailList.js"></script>
     <script src="~/Scripts/index.js"></script>
 }

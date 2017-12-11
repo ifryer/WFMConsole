@@ -41,38 +41,92 @@
         $('#event-end-date-modal').datepicker();
     }
 
+    //Page events
+
+    $("#pto-section").on("change", "#select-name-staff", ChangeStaffName);
 
 
-    $("#pto-section").on("change", "#select-name-staff", function () {
-        //let selectedStaff = $(this).val();
+    //Repeating event modal
+
+    $(document).on("change", "#repeat-type", ChangeRepeatType);
+    $(document).on("click", "#cancel-event-modal-btn", CancelEvent);
+    $(document).on("click", "#save-repeat-modal-btn", SaveRepeatModal);
+    $(document).on("change", ".repeat-end", ChangeRepeatEnd);
+    $(document).on("click", "#close-repeat-modal", CloseRepeatModal);
+
+    //Edit event modal
+
+    $(document).on("change", "#event-type-modal", ChangeEventTypeModal);
+    $(document).on("click", ".event-color-modal", ChangeEventColorModal);
+    $(document).on("change", "#event-start-date-modal", ChangeEventStartDateModal);
+    $(document).on("change", "#event-end-date-modal", ChangeEventEndDateModal);
+    $(document).on("click", "#repeatingCheckbox-modal", ClickRepeatingCheckboxModal);
+    $(document).on("change", "#fullDayCheckbox-modal",  ChangeFullDayModal);
+    $(document).on("click", "#save-event-modal-btn", SubmitEditEventForm);
+    $(document).on("click", "#repeatingEvent-modal-edit", ClickEditRepeatingEvent);
+    $(document).on("click", "#delete-event-modal-btn", DeleteEvent);
+    $(document).on("click", "#add-event-notification-modal", AddNotificationModal);
+
+    $(document).on("click", ".remove-notification-row", RemoveNotificationRow);
+
+    //Create event modal
+    $(document).on("click", "#add-event-notification", AddEventNotification);
+    $(document).on("click", ".remove-notification-row", RemoveNotificationRow);
+    $(document).on("click", ".event-color", ChangeEventColor);
+    $(document).on("click", "#repeatingCheckbox", ClickRepeatingCheckbox);
+    $("#pto-section").on("click", "#new-event-btn", ClickNewEventButton);
+    $("#pto-section").on("change", "#fullDayCheckbox", ClickFullDay);
+    $("#pto-section").on("keyup", "#event-title", ChangeEventTitle);
+    $("#pto-section").on("change", "#event-type", ChangeEventType);
+    $("#pto-section").on("click", "#close-event-form-btn", CloseEventForm);
+    $("#pto-section").on("click", "#submit-event-form-btn", SubmitEventForm);
+    $(document).on("click", "#refresh-calendar", RefreshCalendar);
+    $(document).on("click", ".remove-invitee-row", RemoveInvitee);
+
+    //Page event functions
+    function ChangeStaffName()
+    {
         let selectedStaffName = $("#select-name-staff option:selected").text();
         let selectedStaffLastName = $("#select-name-staff option:selected").attr("lastName");
         let teamName = $("#select-name-staff option:selected").attr("teamName");
         let eventType = $("#event-type").val();
         $("#event-title").val("*" + teamName + " - " + selectedStaffLastName + " - " + eventType);
-        //$("#pto-info-staff").slideDown("fast");
         $(".selected-staff-name").html(selectedStaffName);
         $("#team-info-list").hide();
-        ReloadTeamInfo()
-    });
-
-
-    //Repeating event modal
-
-
-    $(document).on("change", "#repeat-type", function () {
-        let repeat_type = $(this).val();
-
-        SetUpRepeatForm(repeat_type, null, null, null, null, null)
-    });
-
-    $(document).on("click", "#cancel-event-modal-btn", function () {
+        ReloadTeamInfo();
+    }
+    function CancelEvent() {
         if (confirm('Are you sure you want to change the cancelled status of this event?')) {
-            CancelEvent();
+            let eventId = $("#editing-event-id").val();
+            $.ajax({
+                dataType: "json",
+                type: "post",
+                data: {
+                    eventId: eventId,
+                },
+                url: toUrl("Home/CancelEvent"),
+                success: function (data) {
+                    $("#save-event-modal-btn").removeAttr("disabled");
+                    stopLoading();
+                    if (!data.success) {
+                        console.log("error -- " + data.msg);
+                        showSmallError(data.msg);
+                    }
+                    else {
+                        ReloadTeamInfo();
+                        $("#event-calendar").fullCalendar('refetchEvents')
+                        $("#edit-calendar-event-modal").modal("toggle")
+                        $("#repeatingCheckbox-modal").removeAttr("checked")
+                    }
+                }
+            });
         };
-    });
-
-    $(document).on("click", "#save-repeat-modal-btn", function () {
+    }
+    function ChangeRepeatType() {
+        let repeat_type = $(this).val();
+        SetUpRepeatForm(repeat_type, null, null, null, null, null);
+    }
+    function SaveRepeatModal() {
         //Here are all the values we need to submit for this...
         let validationErrors = false;
         let validationText = "";
@@ -95,12 +149,12 @@
         if (repeat_type == "0" || repeat_type == "4" || repeat_type == "5" || repeat_type == "6") {
             if (Number.parseInt(repeat_every_number) <= 0) {
                 validationErrors = true;
-                validationText += " Please enter a valid repeat frequency.  " + repeat_every_number + " is not a valid input. \r\n "
+                validationText += " Please enter a valid repeat frequency.  " + repeat_every_number + " is not a valid input. \r\n ";
             }
             if (repeat_type == "4") {
                 if (repeat_on_days == "") {
                     validationErrors = true;
-                    validationText += " Please choose at least one day of the week to repeat the event on. "
+                    validationText += " Please choose at least one day of the week to repeat the event on. ";
                 }
             }
         }
@@ -117,51 +171,43 @@
             checkbox.attr("end-type", end_type);
             checkbox.attr("end-date", end_date);
             checkbox.attr("end-after-number", end_after_number);
-            checkbox.attr("summary", repeat_summary)
+            checkbox.attr("summary", repeat_summary);
         }
         else {
             showSmallAlert(validationText)
         }
-
         //TODO: Add some validation to make sure everything was filled out correctly
-
-    });
-
-    $(document).on("change", ".repeat-end", function () {
+    }
+    function ChangeRepeatEnd() {
         let end_type = $(".repeat-end:checked").val() // Get the repeat end type (Never, Number, Date)
         if (end_type == "number") {
-            $("#repeat-end-date-input").attr("disabled", "disabled")
-            $("#repeat-end-number-input").removeAttr("disabled")
+            $("#repeat-end-date-input").attr("disabled", "disabled");
+            $("#repeat-end-number-input").removeAttr("disabled");
         }
         if (end_type == "date") {
-            $("#repeat-end-number-input").attr("disabled", "disabled")
-            $("#repeat-end-date-input").removeAttr("disabled")
+            $("#repeat-end-number-input").attr("disabled", "disabled");
+            $("#repeat-end-date-input").removeAttr("disabled");
         }
         if (end_type == "never") {
-            $("#repeat-end-number-input").attr("disabled", "disabled")
-            $("#repeat-end-date-input").attr("disabled", "disabled")
+            $("#repeat-end-number-input").attr("disabled", "disabled");
+            $("#repeat-end-date-input").attr("disabled", "disabled");
         }
-    });
-
-
-    $(document).on("click", "#close-repeat-modal", function () {
-        let origin = $("#save-repeat-modal-btn").attr("origin")
-        let editing = $(this).attr("editing")
-        $("#repeating-event-modal").modal("hide")
+    }
+    function CloseRepeatModal() {
+        let origin = $("#save-repeat-modal-btn").attr("origin");
+        let editing = $(this).attr("editing");
+        $("#repeating-event-modal").modal("hide");
         if (editing != "editing") {
             if (origin == "create")
                 $("#repeatingCheckbox").removeAttr("checked");
             else
                 $("#repeatingCheckbox-modal").removeAttr("checked");
         }
-
-    });
-
+    }
 
 
-    //Edit Event Form
-
-    $(document).on("change", "#event-type-modal", function () {
+    //========== Edit event form ====================
+    function ChangeEventTypeModal() {
         switch ($(this).val()) {
             case "PTO (Unplanned)":
             case "Unpaid Time Off (Unplanned)":
@@ -183,25 +229,21 @@
                 $(".event-color-modal.color-11").addClass("chosen");
                 break;
         }
-    })
-
-    $(document).on("click", ".event-color-modal", function () {
+    }
+    function ChangeEventColorModal() {
         $(".event-color-modal.chosen").removeClass("chosen");
         $(this).addClass("chosen");
-    })
-
-    $(document).on("change", "#event-start-date-modal", function () {
+    }
+    function ChangeEventStartDateModal() {
         let startDate = $(this).val();
         if (moment(startDate) > moment($("#event-end-date-modal").val())) {
             $("#event-end-date-modal").val(startDate);
         }
-        if ($("#editing-event-same-date").attr("same") == "1")
-        {
+        if ($("#editing-event-same-date").attr("same") == "1") {
             $("#event-end-date-modal").val(startDate);
         }
-    })
-
-    $(document).on("change", "#event-end-date-modal", function () {
+    }
+    function ChangeEventEndDateModal() {
         let endDate = $(this).val();
         if (moment(endDate) < moment($("#event-start-date-modal").val())) {
             $("#event-start-date-modal").val(endDate);
@@ -209,35 +251,143 @@
         if ($("#editing-event-same-date").attr("same") == "1") {
             $("#editing-event-same-date").attr("same", "0");
         }
-    })
-
-    //TODO: Click event for repeating checkbox
-    $(document).on("click", "#repeatingCheckbox-modal", function () {
+    }
+    function ClickRepeatingCheckboxModal() {
         if ($(this).is(":checked")) {
-            SetUpRepeatForm("0", "1", null, null, null, null)
+            SetUpRepeatForm("0", "1", null, null, null, null);
             $("#save-repeat-modal-btn").attr("origin", "modal")
             $("#close-repeat-modal").removeAttr("editing")
             $("#repeating-event-modal").modal("toggle")
             let start_date = $("#event-start-date-modal").val();
             $("#repeat-start-date").val(start_date);
         }
-    });
-
-    $("#fullDayCheckbox-modal").on("change", function () {
+    }
+    function ChangeFullDayModal() {
         if (this.checked) {
             $("#event-start-time-modal, #event-end-time-modal").attr("disabled", "disabled")
         }
         else {
             $("#event-start-time-modal, #event-end-time-modal").removeAttr("disabled", "disabled")
         }
-    });
+    }
+    function SubmitEditEventForm() {
+        //Gather up all the values
+        let startDate = $("#event-start-date-modal").val();
+        let endDate = $("#event-end-date-modal").val();
+        let calendarId = $("#editing-event-calendar-id").val();
+        let startTime = $("#event-start-time-modal").val();
+        let endTime = $("#event-end-time-modal").val();
+        let fullDay = $("#fullDayCheckbox-modal:checked").length > 0
+        let notes = $("#event-notes-modal").val();
+        let eventType = $("#event-type-modal").val();
+        let eventTitle = $("#event-title-modal").val();
+        let eventId = $("#editing-event-id").val();
+        let checkbox = $("#repeatingCheckbox-modal")
+        let color = $(".event-color-modal.chosen").attr("colorId");
+        let repeatingEvent = checkbox.is(":checked")
+        let repeatType = checkbox.attr("repeat-type");
+        let repeatEveryNumber = checkbox.attr("repeat-every-number");
+        let repeatOnDays = checkbox.attr("repeat-on-days");
+        let repeatEndType = checkbox.attr("end-type");
+        let repeatEndDate = checkbox.attr("end-date");
+        let repeatEndAfterNumber = checkbox.attr("end-after-number");
+        let repeatSummary = checkbox.attr("summary");
+        let invitees = [];
+        let hasInvitees = $(".invitee-area-modal .invitee-row").length > 0;
 
-    $(document).on("click", "#save-event-modal-btn", function () {
-        submitEditEventForm();
-    });
+        //TODO: notifications and invitees
+        if (eventTitle.length < 1) {
+            showSmallError("Please enter a title for the event");
+            return;
+        }
 
-    $(document).on("click", "#repeatingCheckbox-modal-edit", function () {
-        //GetRepeatingEventInfo(eventId)
+
+        if (!fullDay && (startTime == null || startTime == "" || endTime == null || endTime == "")) {
+            showSmallError("Please make sure you have selected a start and end time, or checked the Full Day checkbox.");
+            return;
+        }
+
+        if (startDate == null || startDate == "") {
+            showSmallError("Please make sure you have selected a start date.");
+            return;
+        }
+        if (endDate == null || endDate == "") {
+            endDate = startDate;
+        }
+
+        let notifications = []
+        let notificationsPresent = $(".notification-area-modal .notification-row").length > 0
+        if (notificationsPresent) {
+            $.each($(".notification-area-modal .notification-row"), function (index, item) {
+                let notificationType = $(item).find(".notification-type").val();
+                let notificationTime = $(item).find(".notification-time").val();
+                let notificationId = $(item).find(".notification-id").val();
+                notifications.push({ Id: notificationId, notificationType: notificationType, notificationTime: notificationTime })
+            });
+        }
+
+        if (hasInvitees) {
+            $.each($(".invitee-area-modal .invitee-row"), function (index, item) {
+                let editId = $(item).attr("editId")
+                let agentNo = $(item).attr("agentNo");
+                let email = $(item).attr("email");
+                let firstName = $(item).attr("firstName");
+                let lastName = $(item).attr("lastName");
+                invitees.push({ Id: editId, firstName: firstName, lastName: lastName,  agentNo: agentNo, email: email });
+            });
+        }
+
+        startLoading();
+        $("#save-event-modal-btn").prop("disabled", "disabled")
+        $.ajax({
+            dataType: "json",
+            type: "post",
+            data: {
+                inputForm: {
+                    eventId: eventId,
+                    agentId: 0,
+                    title: eventTitle,
+                    color: color,
+                    startDate: startDate,
+                    endDate: endDate,
+                    fullDay: fullDay,
+                    startTime: startTime,
+                    endTime: endTime,
+                    notes: notes,
+                    eventType: eventType,
+                    repeatType: repeatType,
+                    repeatEveryNumber: repeatEveryNumber,
+                    repeatOnDays: repeatOnDays,
+                    repeatEndType: repeatEndType,
+                    repeatEndDate: repeatEndDate,
+                    repeatEndAfterNumber: repeatEndAfterNumber,
+                    repeatingEvent: repeatingEvent,
+                    repeatSummary: repeatSummary,
+                    notifications: notifications,
+                    notificationsPresent: notificationsPresent,
+                    hasInvitees: hasInvitees,
+                    invitees: invitees
+                }
+            },
+            url: toUrl("Home/SubmitEventForm"),
+            success: function (data) {
+                $("#save-event-modal-btn").removeAttr("disabled");
+                stopLoading();
+                if (!data.success) {
+                    console.log("error -- " + data.msg);
+                    showSmallError(data.msg);
+                }
+                else {
+                    ReloadTeamInfo();
+                    $("#event-calendar").fullCalendar('refetchEvents')
+                    $("#edit-calendar-event-modal").modal("toggle")
+                    $("#repeatingCheckbox-modal").removeAttr("checked")
+                    showSmallAlert("Successfully updated event");
+                }
+            }
+        });
+    }
+    function ClickEditRepeatingEvent() {
         let eventId = $("#editing-event-id").val();
         $.ajax({
             dataType: "json",
@@ -260,9 +410,8 @@
                 }
             }
         });
-    })
-
-    $(document).on("click", "#delete-event-modal-btn", function () {
+    }
+    function DeleteEvent() {
         if (confirm('Are you sure you want to delete this event?')) {
             $(this).prop("disabled", "disabled")
             startLoading();
@@ -294,131 +443,35 @@
                 }
             });
         }
-    })
-
-    function CancelEvent() {
-        let eventId = $("#editing-event-id").val();
-        $.ajax({
-            dataType: "json",
-            type: "post",
-            data: {
-                eventId: eventId,
-            },
-            url: toUrl("Home/CancelEvent"),
-            success: function (data) {
-                $("#save-event-modal-btn").removeAttr("disabled");
-                stopLoading();
-                if (!data.success) {
-                    console.log("error -- " + data.msg);
-                    showSmallError(data.msg);
-                }
-                else {
-                    ReloadTeamInfo();
-                    $("#event-calendar").fullCalendar('refetchEvents')
-                    $("#edit-calendar-event-modal").modal("toggle")
-                    $("#repeatingCheckbox-modal").removeAttr("checked")
-                }
-            }
-        });
     }
-
-    function submitEditEventForm() {
-
-        let startDate = $("#event-start-date-modal").val();
-        let endDate = $("#event-end-date-modal").val();
-        let calendarId = $("#editing-event-calendar-id").val();
-        let startTime = $("#event-start-time-modal").val();
-        let endTime = $("#event-end-time-modal").val();
-        let fullDay = $("#fullDayCheckbox-modal:checked").length > 0
-        let notes = $("#event-notes-modal").val();
-        let eventType = $("#event-type-modal").val();
-        let eventTitle = $("#event-title-modal").val();
-        let eventId = $("#editing-event-id").val();
-        let checkbox = $("#repeatingCheckbox-modal")
-        let color = $(".event-color-modal.chosen").attr("colorId");
-        let repeatingEvent = checkbox.is(":checked")
-        let repeatType = checkbox.attr("repeat-type");
-        let repeatEveryNumber = checkbox.attr("repeat-every-number");
-        let repeatOnDays = checkbox.attr("repeat-on-days");
-        let repeatEndType = checkbox.attr("end-type");
-        let repeatEndDate = checkbox.attr("end-date");
-        let repeatEndAfterNumber = checkbox.attr("end-after-number");
-        let repeatSummary = checkbox.attr("summary");
-
-        if (eventTitle.length < 1) {
-            showSmallError("Please enter a title for the event");
-            return;
-        }
-
-
-        if (!fullDay && (startTime == null || startTime == "" || endTime == null || endTime == "")) {
-            showSmallError("Please make sure you have selected a start and end time, or checked the Full Day checkbox.");
-            return;
-        }
-
-        if (startDate == null || startDate == "") {
-            showSmallError("Please make sure you have selected a start date.");
-            return;
-        }
-        if (endDate == null || endDate == "") {
-            endDate = startDate;
-        }
-        startLoading();
-        $("#save-event-modal-btn").prop("disabled", "disabled")
-        $.ajax({
-            dataType: "json",
-            type: "post",
-            data: {
-                inputForm: {
-                    eventId: eventId,
-                    agentId: 0,
-                    title: eventTitle,
-                    color: color,
-                    startDate: startDate,
-                    endDate: endDate,
-                    fullDay: fullDay,
-                    startTime: startTime,
-                    endTime: endTime,
-                    notes: notes,
-                    eventType: eventType,
-                    repeatType: repeatType,
-                    repeatEveryNumber: repeatEveryNumber,
-                    repeatOnDays: repeatOnDays,
-                    repeatEndType: repeatEndType,
-                    repeatEndDate: repeatEndDate,
-                    repeatEndAfterNumber: repeatEndAfterNumber,
-                    repeatingEvent: repeatingEvent,
-                    repeatSummary: repeatSummary
-                }
-            },
-            url: toUrl("Home/SubmitEventForm"),
-            success: function (data) {
-                $("#save-event-modal-btn").removeAttr("disabled");
-                stopLoading();
-                if (!data.success) {
-                    console.log("error -- " + data.msg);
-                    showSmallError(data.msg);
-                }
-                else {
-                    ReloadTeamInfo();
-                    $("#event-calendar").fullCalendar('refetchEvents')
-                    $("#edit-calendar-event-modal").modal("toggle")
-                    $("#repeatingCheckbox-modal").removeAttr("checked")
-                    showSmallAlert(data.msg);
-                }
-            }
-        });
+    function AddNotificationModal() {
+        $(".notification-area-modal").append(NotificationRow());
+        $(".no-notifications-modal").hide();
     }
-
-    //Create Event Form
-
-    $(document).on("click", ".event-color", function () {
+    function RemoveNotificationRow(){
+        $(this).parents(".notification-row").remove();
+        if ($(".notification-row").length < 1) {
+            $(".no-notifications-modal").show();
+        }
+    }
+    function AddEventNotification() {
+        $(".notification-area").append(NotificationRow());
+        $(".no-notifications").hide();
+    }
+    function RemoveNotificationRow() {
+        $(this).parents(".notification-row").remove();
+        if ($(".notification-row").length < 1) {
+            $(".no-notifications").show();
+        }
+    }
+    function ChangeEventColor() {
         $(".event-color.chosen").removeClass("chosen");
         $(this).addClass("chosen");
-    })
+    }
+    
+    //============ Create Event Form ================
 
-    //TODO: Click event for repeating checkbox
-    $(document).on("click", "#repeatingCheckbox", function () {
+    function ClickRepeatingCheckbox() {
         if ($(this).is(":checked")) {
             SetUpRepeatForm("0", "1", null, null, null, null)
             $("#save-repeat-modal-btn").attr("origin", "create")
@@ -427,17 +480,19 @@
             let start_date = $("#event-start-date").val();
             $("#repeat-start-date").val(start_date);
         }
-    });
-
-    $("#pto-section").on("click", "#new-event-btn", function () {
+    }
+    function ClickNewEventButton() {
         $(".event-form").slideToggle("fast");
         editedEventTitle = false;
         $("#event-type").val("PTO (Unplanned)");
         $('#event-start-date').val($.datepicker.formatDate('mm/dd/yy', new Date()));
         $('#event-end-date').val($.datepicker.formatDate('mm/dd/yy', new Date()));
-    });
-
-    $("#pto-section").on("change", "#fullDayCheckbox", function () {
+        $('#event-start-time').val(moment().format("hh:mma"));
+        $('#event-end-time').val(moment().add(1, "hour").format("hh:mma"));
+        $(".notification-area").empty();
+        $(".notification-area").append(NotificationRow());
+    }
+    function ClickFullDay() {
         if (this.checked) {
             $("#event-start-time, #event-end-time").attr("disabled", "disabled")
             //$("#start-end-event-section").hide();
@@ -446,13 +501,11 @@
             $("#event-start-time, #event-end-time").removeAttr("disabled", "disabled")
             //$("#start-end-event-section").show();
         }
-    });
-
-    $("#pto-section").on("keyup", "#event-title", function () {
+    }
+    function ChangeEventTitle() {
         editedEventTitle = true;
-    });
-
-    $("#pto-section").on("change", "#event-type", function () {
+    }
+    function ChangeEventType() {
         if (!editedEventTitle) {
             let selectedStaffLastName = $("#select-name-staff option:selected").attr("lastName");
             let teamName = $("#select-name-staff option:selected").attr("teamName");
@@ -484,26 +537,28 @@
                 $(".event-color.color-11").addClass("chosen");
                 break;
         }
-    })
+    }
 
-    $("#pto-section").on("click", "#close-event-form-btn", function () {
+    function CloseEventForm() {
         $(".event-form").slideUp("fast");
-        $(".event-form input, textarea").val("")
-    });
+        $(".event-form input, textarea").val("");
+    }
 
-    $("#pto-section").on("click", "#submit-event-form-btn", function () {
-
-        submitEventForm();
-    });
-
-    $(document).on("click", "#refresh-calendar", function () {
+    function RefreshCalendar() {
         $(this).find(".glyphicon").addClass("spinning")
         ReloadTeamInfo();
         $("#event-calendar").fullCalendar('refetchEvents')
-    })
+    }
 
-    //TODO: Make sure if they selected "number" as end type, they have actually put in a number > 0
-    function submitEventForm() {
+    function RemoveInvitee() {
+        $(this).parents(".invitee-row").remove();
+    }
+
+    
+
+
+    //This is the CREATE event method. 
+    function SubmitEventForm() {
         let startDate = $("#event-start-date").val();
         let endDate = $("#event-end-date").val();
         let startTime = $("#event-start-time").val();
@@ -513,8 +568,8 @@
         let eventType = $("#event-type").val();
         let eventTitle = $("#event-title").val();
         let agentId = $("#select-name-staff").val();
-        let checkbox = $("#repeatingCheckbox")
-        let repeatingEvent = checkbox.is(":checked")
+        let checkbox = $("#repeatingCheckbox");
+        let repeatingEvent = checkbox.is(":checked");
         let color = $(".event-color.chosen").attr("colorId");
         let repeatType = checkbox.attr("repeat-type");
         let repeatEveryNumber = checkbox.attr("repeat-every-number");
@@ -522,7 +577,32 @@
         let repeatEndType = checkbox.attr("end-type");
         let repeatEndDate = checkbox.attr("end-date");
         let repeatEndAfterNumber = checkbox.attr("end-after-number");
-        let repeatSummary = checkbox.attr("summary")
+        let repeatSummary = checkbox.attr("summary");
+        let notifications = [];
+        let notificationsPresent = $(".notification-area .notification-row").length > 0;
+        let invitees = [];
+        let hasInvitees = $(".invitee-area .invitee-row").length > 0;
+
+        if(notificationsPresent)
+        {
+            $.each($(".notification-area .notification-row"), function (index, item) {
+                let notificationType = $(item).find(".notification-type").val();
+                let notificationTime = $(item).find(".notification-time").val();
+                notifications.push({ notificationType: notificationType, notificationTime: notificationTime });
+            });
+        }
+
+        if (hasInvitees)
+        {
+            $.each($(".invitee-area .invitee-row"), function (index, item) {
+                let agentNo = $(item).attr("agentNo");
+                let email = $(item).attr("email");
+                let firstName = $(item).attr("firstName");
+                let lastName = $(item).attr("lastName");
+
+                invitees.push({ firstName: firstName, lastName: lastName, agentNo: agentNo, email: email });
+            });
+        }
 
 
         if (eventTitle.length < 1) {
@@ -579,7 +659,11 @@
                         repeatEndDate: repeatEndDate,
                         repeatEndAfterNumber: repeatEndAfterNumber,
                         repeatingEvent: repeatingEvent,
-                        repeatSummary: repeatSummary
+                        repeatSummary: repeatSummary,
+                        notifications: notifications,
+                        notificationsPresent: notificationsPresent,
+                        hasInvitees: hasInvitees,
+                        invitees: invitees
                     }
 
                 },
@@ -735,7 +819,7 @@
                     error: function () {
                         showSmallAlert("There was an error getting the calendar events!");
                     },
-                    success: function(){
+                    success: function (data) {
                         $("#refresh-calendar").find(".glyphicon").removeClass("spinning");
                     }
                 }
@@ -753,8 +837,12 @@
                 $("#event-start-time").val(strTime);
                 $("#event-end-time").val(strTimeEnd);
                 $("#create-event-form")[0].scrollIntoView({ behavior: "smooth" });
+                $(".notification-area").empty();
+                $(".notification-area").append(NotificationRow());
             },
             eventClick: function (calEvent, jsEvent, view) {
+                let notifications = calEvent.Notifications
+                let invitees = calEvent.Invitees
                 let calendarId = calEvent._id;
                 let eventId = calEvent.Id
                 let notes = calEvent.Notes;
@@ -819,6 +907,21 @@
                     $("#event-start-date-modal").removeAttr("disabled");
                     $("#event-end-date-modal").removeAttr("disabled");
                 }
+                $(".notification-area-modal").empty();
+                if (notifications.length > 0)
+                {
+                    $.each(notifications, function (index, item) {
+                        $(".notification-area-modal").append(EditNotificationRow(item.Id, item.notificationType, item.notificationTime));
+                    })
+                }
+                $(".invitee-area-modal").empty();
+                if (invitees.length > 0) {
+                    $.each(invitees, function (index, item) {
+                        $(".invitee-area-modal").append(InviteeRow(item.Id, item.email, item.agentNo, item.firstName, item.lastName));
+                        //TODO: this
+                        //$(".notification-area-modal").append(EditNotificationRow(item.Id, item.notificationType, item.notificationTime));
+                    })
+                }
             }
         })
     }
@@ -837,6 +940,102 @@
         //Set up calendar
         SetUpCalendar();
 
+        $("#add-invitee").autocomplete({
+            source: function(request, response) {
+                var matcher = new RegExp($.ui.autocomplete.escapeRegex(request.term), "i");
+                response($.grep(Emails.Emails(), function(value) {
+                    return matcher.test(value.name) || matcher.test(value.email);
+                }));
+            },
+            select: function(event, ui) {
+                AddInvitee(ui.item, false);
+                this.value = "";
+                return false; // This will prevent the box from filling in with the selected item
+            }
+        });
+        $("#add-invitee-modal").autocomplete({
+            source: function (request, response) {
+                var matcher = new RegExp($.ui.autocomplete.escapeRegex(request.term), "i");
+                response($.grep(Emails.Emails(), function (value) {
+                    return matcher.test(value.name) || matcher.test(value.email);
+                }));
+            },
+            select: function (event, ui) {
+                AddInvitee(ui.item, true);
+                this.value = "";
+                return false; // This will prevent the box from filling in with the selected item
+            }
+        });
+    }
+
+    function AddInvitee(invitee, modal)
+    {
+        let appendArea = $(".invitee-area");
+        if (modal)
+        {
+            appendArea = $(".invitee-area-modal");
+        }
+        let existingRow = $(".invitee-row[agentNo='" + invitee.agentNo + "']");
+        if (existingRow.length < 1)
+        {
+            appendArea.append(InviteeRow(0, invitee.email, invitee.agentNo, invitee.FirstName, invitee.LastName));
+        }
+        
+        if (invitee.reportToEmail !== "")
+        {
+            let existingRowReport = $(".invitee-row[agentNo='" + invitee.reportTo + "']")
+            if (existingRowReport.length < 1)
+            {
+                appendArea.append(InviteeRow(0, invitee.reportToEmail, invitee.reportTo, invitee.reportToFirstName, invitee.reportToLastName))
+                    
+            }
+            
+        }
+    }
+
+
+    function NotificationRow() {
+        return `<div class="notification-row">
+                    <select style="height:22px;" class="notification-type"> 
+                        <option value="email"> Email </option>
+                        <option value="popup" selected="selected"> Notification </option>
+                    </select>
+                    <span>
+                        <input type="number" style="height:22px; width: 50px;" class="notification-time" value="10" />
+                        <span> minutes </span>
+                    </span>
+                    <button class="btn btn-xs btn-default remove-notification-row"><span class="glyphicon glyphicon-remove"></span></button>
+                </div>`;
+    }
+
+    function InviteeRow(Id, email, agentNo, firstName, lastName)
+    {
+        return `
+                <div class="invitee-row" firstName="` + firstName + `" lastName="` + lastName + `" editId="` + Id + `" agentNo="` + agentNo + `" email="` + email + `" title="` + email + `">
+                    <span class="invitee-name"> ` + firstName + " " + lastName + ` </span>
+                    <button class="btn btn-default btn-xs remove-invitee-row pull-right">
+                        <span class="glyphicon small glyphicon-remove"></span>
+                    </button>
+                </div>`;
+    }
+
+    function EditNotificationRow(Id, Type, Time) {
+        return `<div class="notification-row">
+                    <input style="display:none" class="notification-id" value=` + Id + ` />
+                    <select style="height:22px;" class="notification-type"> 
+                        <option value="email" ` + (Type == "email" ? `selected="selected"` : ``) + `> Email </option>
+                        <option value="popup" ` + (Type == "popup" ? `selected="selected"` : ``) +  `> Notification </option>
+                    </select>
+                    <span>
+                        <input type="number" style="height:22px; width: 50px;" class="notification-time" value="` + Time + `" />
+                        <span> minutes </span>
+                    </span>
+                    <button class="btn btn-xs btn-default remove-notification-row"><span class="glyphicon glyphicon-remove"></span></button>
+                </div>`;
+    }
+
+    function ParticipantRow(email, name, agentNo)
+    {
 
     }
 

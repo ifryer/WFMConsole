@@ -58,7 +58,8 @@ namespace WFMDashboard.Controllers
             var msg = "";
             string downByDate, mowDate;
             WFMHelper.GetReportDates(out downByDate, out mowDate);
-            var agentList = WFMHelper.GetStaffList(out msg);
+            var allAgents = WFMHelper.GetAllAgents();
+            var agentList = WFMHelper.GetStaffList(allAgents, out msg);
             //var eventList = WFMHelper.GetEventList(DateTime.Now.ToString("yyyy-MM-dd"), DateTime.Now.AddDays(2).ToString("yyyy-MM-dd"));
             var managerList = WFMHelper.GetManagerList(agentList); //TODO: Remove this?
             var mowList = WFMHelper.GetMowList(agentList);
@@ -66,8 +67,9 @@ namespace WFMDashboard.Controllers
             var icmSchedule = WFMHelper.GetIcmSchedule();
             var mowSchedule = WFMHelper.GetMowSchedule(DateTimeExtensions.StartOfWeek(DateTime.Now, DayOfWeek.Monday));
             var latestIcmInfo = WFMHelper.GetLatestIcmInfo(icmSchedule.Last().Value.Last());
+            var invitees = WFMHelper.GetInvitees(allAgents);
             //var latestMowInfo = WFMHelper.GetLatestMowInfo();
-            return JsonConvert.SerializeObject(new { success = msg.ToLower().Contains("success"), msg = msg, downByDate = downByDate, mowDate = mowDate, agentList = agentList, mowList = mowList, managerList = managerList, lateShift = lateShift, icmSchedule = icmSchedule, mowSchedule = mowSchedule, latestIcmInfo = latestIcmInfo });
+            return JsonConvert.SerializeObject(new { success = msg.ToLower().Contains("success"), msg = msg, downByDate = downByDate, mowDate = mowDate, agentList = agentList, mowList = mowList, managerList = managerList, lateShift = lateShift, icmSchedule = icmSchedule, mowSchedule = mowSchedule, latestIcmInfo = latestIcmInfo, invitees = invitees });
             //return JsonConvert.SerializeObject(new { success = msg.ToLower().Contains("success"), msg = msg, downByDate = downByDate, mowDate = mowDate, eventList = eventList, agentList = agentList, mowList = mowList, managerList = managerList, lateShift = lateShift, icmSchedule = icmSchedule, mowSchedule = mowSchedule, latestIcmInfo = latestIcmInfo });
         }
 
@@ -117,8 +119,10 @@ namespace WFMDashboard.Controllers
             }
             else
             {
-                List<ViewEvent> eventObject = WFMHelper.SubmitEventForm(googleAuth, inputForm, user.LdapUserId, out msg);
-                return JsonConvert.SerializeObject(new { success = eventObject != null, msg = msg, eventObject = eventObject });
+                //List<ViewEvent> eventObject = WFMHelper.SubmitEventForm(googleAuth, inputForm, user.LdapUserId, out msg);
+                var success = WFMHelper.SubmitEventForm(googleAuth, inputForm, user.LdapUserId, out msg);
+
+                return JsonConvert.SerializeObject(new { success = success, msg = msg });
             }
         }
 

@@ -164,10 +164,10 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>08/22/2017 08:50:59</publishTime>
     </File>
     <File Include="bin/WFMConsole.dll">
-      <publishTime>11/27/2017 11:43:19</publishTime>
+      <publishTime>11/28/2017 09:11:26</publishTime>
     </File>
     <File Include="bin/WFMConsole.pdb">
-      <publishTime>11/27/2017 11:43:19</publishTime>
+      <publishTime>11/28/2017 09:11:26</publishTime>
     </File>
     <File Include="client_secret.json">
       <publishTime>09/21/2017 15:07:38</publishTime>
@@ -794,7 +794,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>08/22/2017 08:51:02</publishTime>
     </File>
     <File Include="Scripts/MowTab.js">
-      <publishTime>11/16/2017 10:12:23</publishTime>
+      <publishTime>11/28/2017 08:48:30</publishTime>
     </File>
     <File Include="Scripts/report.js">
       <publishTime>11/20/2017 16:36:45</publishTime>
@@ -1304,7 +1304,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>08/22/2017 08:51:02</publishTime>
     </File>
     <File Include="Views/Home/Index.cshtml">
-      <publishTime>11/27/2017 08:47:02</publishTime>
+      <publishTime>11/27/2017 12:49:39</publishTime>
     </File>
     <File Include="Views/Home/Report.cshtml">
       <publishTime>11/27/2017 11:36:56</publishTime>
@@ -1312,11 +1312,14 @@ by editing this MSBuild file. In order to learn more about this please visit htt
     <File Include="Views/Mailer/DownByReport.cshtml">
       <publishTime>11/22/2017 08:30:52</publishTime>
     </File>
+    <File Include="Views/Mailer/MowReport.cshtml">
+      <publishTime>10/31/2017 12:01:55</publishTime>
+    </File>
     <File Include="Views/Shared/Error.cshtml">
       <publishTime>11/01/2017 14:50:55</publishTime>
     </File>
     <File Include="Views/Shared/_Layout.cshtml">
-      <publishTime>11/27/2017 11:42:39</publishTime>
+      <publishTime>11/27/2017 14:43:06</publishTime>
     </File>
     <File Include="Views/Web.config">
       <publishTime>09/14/2017 14:10:38</publishTime>
@@ -1325,7 +1328,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>08/22/2017 08:51:02</publishTime>
     </File>
     <File Include="Web.config">
-      <publishTime>11/27/2017 11:02:53</publishTime>
+      <publishTime>11/28/2017 09:11:31</publishTime>
     </File>
   </ItemGroup>
 </Project>

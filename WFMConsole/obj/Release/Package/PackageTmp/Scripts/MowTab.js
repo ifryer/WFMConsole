@@ -141,7 +141,7 @@
     $(document).on("change", ".new-mow-row.clean input", function () {
         $(".new-mow-row.clean").removeClass("clean");
         let tbody = $(this).parents("tbody");
-        AppendNewMowRow(tbody)
+        AppendNewMowRow(tbody);
     });
 
     $(document).on("click", ".edit-mow-row-btn", function () {
@@ -159,35 +159,8 @@
         let agent_no = tr.find(".mow-display-name").attr("agent_no")
 
         //make sure the right option is selected
-        let replacement_tr =
-            `
-            <tr class="edit-mow-row" id="edit-mow-row-` + rowId + `" row_id="` + rowId + `" task="` + task + `" first_name="` + first_name + `" last_name="` + last_name + `" shift_start="` + shift_start + `" shift_end="` + shift_end + `" agent_no="` + agent_no + `" >
-                <td>
-                    <select class="form-control input-xs mow-event-task" placeholder=""> 
-                        <option> AD Escalations </option>
-                        <option> Early Shift </option>
-                        <option> MOW </option>
-                        <option> WFO </option>
-                    </select>
-                </td>
-                <td>
-                    <select class="form-control input-xs mow-event-manager" placeholder="">
-                        ` + newMowRowOptionString + `
-                    </select>
-                </td>
-                <td>
-                    <div style="max-width: 130px" class="form-inline">
-                        <input class="form-control input-xs mow-event-shift-start" style="width: calc(50% - 10px);" placeholder="" value="` + shift_start + `">
-                        <span style="width: 9px">to</span>
-                        <input class="form-control input-xs mow-event-shift-end" style="width: calc(50% - 10px);" placeholder="" value="` + shift_end + `">
-                    </div>
-                </td>
-                <td>
-                    <button tabindex="-1" class="btn btn-xs btn-success mow-event-save-edit-row"> <span class="glyphicon glyphicon-ok"></span> </button>
-                    <button tabindex="-1" class="btn btn-xs btn-danger mow-event-cancel-edit-row"> <span class="glyphicon glyphicon-remove"></span> </button>
-                </td>
-            </tr>
-        `;
+        let replacement_tr = MowScheduleRow(rowId, task, first_name, last_name, shift_start, shift_end, agent_no, newMowRowOptionString);
+
         tr.replaceWith(replacement_tr)
         $(".mow-event-shift-start").timepicker({
             'scrollDefault': '7:00am',
@@ -200,6 +173,8 @@
             'maxTime': '8:30pm',
             'showDuration': true,
         });
+        $("#mow-event-shift-time-area").datepair();
+        //$(".mow-event-shift-time-area").datepair();
         let new_tr = $("#edit-mow-row-" + rowId);
         new_tr.find(".mow-event-task").val(task)
         new_tr.find(".mow-event-manager").val(agent_no)
@@ -285,41 +260,49 @@
         });
     });
 
+    function MowScheduleRow(rowId, task, first_name, last_name, shift_start, shift_end, agent_no, newMowRowOptionString)
+    {
+        return `
+            <tr class="edit-mow-row" id="edit-mow-row-` + rowId + `" row_id="` + rowId + `" task="` + task + `" first_name="` + first_name + `" last_name="` + last_name + `" shift_start="` + shift_start + `" shift_end="` + shift_end + `" agent_no="` + agent_no + `" >
+                <td>
+                    <select class="form-control input-xs mow-event-task" placeholder=""> 
+                        <option> AD Escalations </option>
+                        <option> Early Shift </option>
+                        <option> MOW </option>
+                        <option> WFO </option>
+                    </select>
+                </td>
+                <td>
+                    <select class="form-control input-xs mow-event-manager" placeholder="">
+                        ` + newMowRowOptionString + `
+                    </select>
+                </td>
+                <td>
+                    <div style="max-width: 130px" class="form-inline" id="mow-event-shift-time-area">
+                        <input class="form-control input-xs mow-event-shift-start time start" style="width: calc(50% - 10px);" placeholder="" value="` + shift_start + `">
+                        <span style="width: 9px">to</span>
+                        <input class="form-control input-xs mow-event-shift-end time end" style="width: calc(50% - 10px);" placeholder="" value="` + shift_end + `">
+                    </div>
+                </td>
+                <td>
+                    <button tabindex="-1" class="btn btn-xs btn-success mow-event-save-edit-row"> <span class="glyphicon glyphicon-ok"></span> </button>
+                    <button tabindex="-1" class="btn btn-xs btn-default mow-event-cancel-edit-row"> <span class="glyphicon glyphicon-remove"></span> </button>
+                </td>
+            </tr>
+        `;
+    }
+
     function ResetMowFormToTemplate() {
         $(".mow-schedule-edit-table tbody tr").remove();
         var itemList = [{ task: "Early Shift", start: "7:00am", end: "8:00am" }, { task: "MOW", start: "8:00am", end: "12:00pm" }, { task: "WFO", start: "8:00am", end: "12:00pm" }, { task: "AD Escalations", start: "8:00am", end: "12:00pm" }, { task: "MOW", start: "12:00pm", end: "3:30pm" }, { task: "MOW", start: "3:30pm", end: "4:30pm" }, { task: "WFO", start: "12:00pm", end: "4:30pm" }, { task: "AD Escalations", start: "12:00pm", end: "4:30pm" }]
         $.each(itemList, function (index, item) {
             $(".mow-schedule-edit-table tbody").append(
-                `
-                <tr class="clean new-mow-row">
-                    <td>
-                        <select class="form-control input-xs mow-event-task" placeholder=""> 
-                            <option> AD Escalations </option>
-                            <option> Early Shift </option>
-                            <option> MOW </option>
-                            <option> WFO </option>
-                        </select>
-                    </td>
-                    <td>
-                        <select class="form-control input-xs mow-event-manager" placeholder="">
-                            ` + newMowRowOptionString + `
-                        </select>
-                    </td>
-                    <td>
-                        <div class="form-inline">
-                            <input class="form-control input-xs mow-event-shift-start" style="width: calc(50% - 10px);" placeholder="" value="` + item.start + `">
-                            <span style="width: 9px">to</span>
-                            <input class="form-control input-xs mow-event-shift-end" style="width: calc(50% - 10px);" placeholder="" value="` + item.end + `">
-                        </div>
-                    </td>
-                    <td>
-                        <button tabindex="-1" class="btn btn-xs btn-danger mow-event-remove-row"> <span class="glyphicon glyphicon-remove"></span> </button>
-                    </td>
-                </tr>
-            `);
+                MowScheduleRow("", "", "", "", item.start, item.end, "", newMowRowOptionString)
+            );
             $(".mow-event-task:last").val(item.task)
 
         })
+        $("#mow-event-shift-time-area").datepair();
         $(".mow-event-shift-start").timepicker({
             'scrollDefault': '7:00am',
             'minTime': '7:00am',
@@ -348,6 +331,7 @@
             'maxTime': '8:30pm',
             'showDuration': true,
         });
+        $("#mow-event-shift-time-area").datepair();
     }
 
     function SubmitMowForm() {
@@ -621,6 +605,8 @@
                     </td>
                 </tr>
             `;
+            $("#mow-event-shift-time-area").datepair();
+                
         }
     }
 

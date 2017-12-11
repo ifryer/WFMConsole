@@ -36,7 +36,7 @@
         var keycode = (event.keyCode ? event.keyCode : event.which);
         if (keycode == '13') {
             let tbody = $(this).parents("tbody");
-            AppendNewMowRow(tbody);
+            AppendNewMowRow(tbody, false);
             $(this).blur();
 
         }
@@ -44,14 +44,19 @@
 
     $(document).on("click", ".mow-event-add-row", function () {
         let tbody = $(this).parents(".edit-mow-schedule-date-area").find("tbody");
-        AppendNewMowRow(tbody)
-
+        AppendNewMowRow(tbody, false)
     });
+
+    $(document).on("click", ".mow-event-add-unavailable-row", function () {
+        let tbody = $(this).parents(".edit-mow-schedule-date-area").find("tbody");
+        AppendNewMowRow(tbody, true)
+    });
+
 
     $(document).on("click", "#add-new-mow-schedule", function () {
         if ($("#new-mow-event-form").css("display") == "none") {
             let tbody = $(".mow-schedule-edit-table").find("tbody");
-            AppendNewMowRow(tbody)
+            AppendNewMowRow(tbody, false)
             $("#new-mow-event-form").slideDown("fast");
         }
     });
@@ -141,7 +146,7 @@
     $(document).on("change", ".new-mow-row.clean input", function () {
         $(".new-mow-row.clean").removeClass("clean");
         let tbody = $(this).parents("tbody");
-        AppendNewMowRow(tbody)
+        AppendNewMowRow(tbody, false);
     });
 
     $(document).on("click", ".edit-mow-row-btn", function () {
@@ -159,35 +164,8 @@
         let agent_no = tr.find(".mow-display-name").attr("agent_no")
 
         //make sure the right option is selected
-        let replacement_tr =
-            `
-            <tr class="edit-mow-row" id="edit-mow-row-` + rowId + `" row_id="` + rowId + `" task="` + task + `" first_name="` + first_name + `" last_name="` + last_name + `" shift_start="` + shift_start + `" shift_end="` + shift_end + `" agent_no="` + agent_no + `" >
-                <td>
-                    <select class="form-control input-xs mow-event-task" placeholder=""> 
-                        <option> AD Escalations </option>
-                        <option> Early Shift </option>
-                        <option> MOW </option>
-                        <option> WFO </option>
-                    </select>
-                </td>
-                <td>
-                    <select class="form-control input-xs mow-event-manager" placeholder="">
-                        ` + newMowRowOptionString + `
-                    </select>
-                </td>
-                <td>
-                    <div style="max-width: 130px" class="form-inline">
-                        <input class="form-control input-xs mow-event-shift-start" style="width: calc(50% - 10px);" placeholder="" value="` + shift_start + `">
-                        <span style="width: 9px">to</span>
-                        <input class="form-control input-xs mow-event-shift-end" style="width: calc(50% - 10px);" placeholder="" value="` + shift_end + `">
-                    </div>
-                </td>
-                <td>
-                    <button tabindex="-1" class="btn btn-xs btn-success mow-event-save-edit-row"> <span class="glyphicon glyphicon-ok"></span> </button>
-                    <button tabindex="-1" class="btn btn-xs btn-danger mow-event-cancel-edit-row"> <span class="glyphicon glyphicon-remove"></span> </button>
-                </td>
-            </tr>
-        `;
+        let replacement_tr = MowScheduleRow(rowId, task, first_name, last_name, shift_start, shift_end, agent_no, newMowRowOptionString, true);
+
         tr.replaceWith(replacement_tr)
         $(".mow-event-shift-start").timepicker({
             'scrollDefault': '7:00am',
@@ -200,6 +178,8 @@
             'maxTime': '8:30pm',
             'showDuration': true,
         });
+        $("#mow-event-shift-time-area").datepair();
+        //$(".mow-event-shift-time-area").datepair();
         let new_tr = $("#edit-mow-row-" + rowId);
         new_tr.find(".mow-event-task").val(task)
         new_tr.find(".mow-event-manager").val(agent_no)
@@ -285,41 +265,63 @@
         });
     });
 
-    function ResetMowFormToTemplate() {
-        $(".mow-schedule-edit-table tbody tr").remove();
-        var itemList = [{ task: "Early Shift", start: "7:00am", end: "8:00am" }, { task: "MOW", start: "8:00am", end: "12:00pm" }, { task: "WFO", start: "8:00am", end: "12:00pm" }, { task: "AD Escalations", start: "8:00am", end: "12:00pm" }, { task: "MOW", start: "12:00pm", end: "3:30pm" }, { task: "MOW", start: "3:30pm", end: "4:30pm" }, { task: "WFO", start: "12:00pm", end: "4:30pm" }, { task: "AD Escalations", start: "12:00pm", end: "4:30pm" }]
-        $.each(itemList, function (index, item) {
-            $(".mow-schedule-edit-table tbody").append(
-                `
-                <tr class="clean new-mow-row">
+    function MowScheduleRow(rowId, task, first_name, last_name, shift_start, shift_end, agent_no, newMowRowOptionString, buttons)
+    {
+        let returnString = `
+            <tr class="edit-mow-row" id="edit-mow-row-` + rowId + `" row_id="` + rowId + `" task="` + task + `" first_name="` + first_name + `" last_name="` + last_name + `" shift_start="` + shift_start + `" shift_end="` + shift_end + `" agent_no="` + agent_no + `" >
+                <td>
+                    <select class="form-control input-xs mow-event-task" placeholder=""> 
+                        <option> AD Escalations </option>
+                        <option> Early Shift </option>
+                        <option> MOW </option>
+                        <option> WFO </option>
+                        <option> Unavailable </option>
+                    </select>
+                </td>
+                <td>
+                    <select class="form-control input-xs mow-event-manager" placeholder="">
+                        ` + newMowRowOptionString + `
+                    </select>
+                </td>
+                <td>
+                    <div style="max-width: 130px" class="form-inline" id="mow-event-shift-time-area">
+                        <input class="form-control input-xs mow-event-shift-start time start" style="width: calc(50% - 10px);" placeholder="" value="` + shift_start + `">
+                        <span style="width: 9px">to</span>
+                        <input class="form-control input-xs mow-event-shift-end time end" style="width: calc(50% - 10px);" placeholder="" value="` + shift_end + `">
+                    </div>
+                </td>`
+        if (buttons){
+            returnString += `
                     <td>
-                        <select class="form-control input-xs mow-event-task" placeholder=""> 
-                            <option> AD Escalations </option>
-                            <option> Early Shift </option>
-                            <option> MOW </option>
-                            <option> WFO </option>
-                        </select>
+                        <button tabindex="-1" class="btn btn-xs btn-success mow-event-save-edit-row"> <span class="glyphicon glyphicon-ok"></span> </button>
+                        <button tabindex="-1" class="btn btn-xs btn-default mow-event-cancel-edit-row"> <span class="glyphicon glyphicon-remove"></span> </button>
                     </td>
-                    <td>
-                        <select class="form-control input-xs mow-event-manager" placeholder="">
-                            ` + newMowRowOptionString + `
-                        </select>
-                    </td>
-                    <td>
-                        <div class="form-inline">
-                            <input class="form-control input-xs mow-event-shift-start" style="width: calc(50% - 10px);" placeholder="" value="` + item.start + `">
-                            <span style="width: 9px">to</span>
-                            <input class="form-control input-xs mow-event-shift-end" style="width: calc(50% - 10px);" placeholder="" value="` + item.end + `">
-                        </div>
-                    </td>
+                </tr>
+            `;
+        }
+        else {
+            returnString += `
                     <td>
                         <button tabindex="-1" class="btn btn-xs btn-danger mow-event-remove-row"> <span class="glyphicon glyphicon-remove"></span> </button>
                     </td>
                 </tr>
-            `);
+            `;
+        }
+        
+        return returnString;
+    }
+
+    function ResetMowFormToTemplate() {
+        $(".mow-schedule-edit-table tbody tr").remove();
+        var itemList = [{ task: "Unavailable", start: "", end: "" }, { task: "Early Shift", start: "7:00am", end: "8:00am" }, { task: "MOW", start: "8:00am", end: "12:00pm" }, { task: "WFO", start: "8:00am", end: "12:00pm" }, { task: "AD Escalations", start: "8:00am", end: "12:00pm" }, { task: "MOW", start: "12:00pm", end: "3:30pm" }, { task: "MOW", start: "3:30pm", end: "4:30pm" }, { task: "WFO", start: "12:00pm", end: "4:30pm" }, { task: "AD Escalations", start: "12:00pm", end: "4:30pm" }]
+        $.each(itemList, function (index, item) {
+            $(".mow-schedule-edit-table tbody").append(
+                MowScheduleRow("", "", "", "", item.start, item.end, "", newMowRowOptionString, false)
+            );
             $(".mow-event-task:last").val(item.task)
 
         })
+        $("#mow-event-shift-time-area").datepair();
         $(".mow-event-shift-start").timepicker({
             'scrollDefault': '7:00am',
             'minTime': '7:00am',
@@ -335,8 +337,15 @@
 
     }
 
-    function AppendNewMowRow(tbody) {
-        tbody.append(newMowRowString);
+    function AppendNewMowRow(tbody, unavailable) {
+        if (unavailable) {
+            tbody.prepend(newMowRowString);
+            tbody.find("tr:first").find(".mow-event-task").val("Unavailable")
+        }
+        else
+        {
+            tbody.append(newMowRowString);
+        }
         $(".mow-event-shift-start").timepicker({
             'scrollDefault': '7:00am',
             'minTime': '7:00am',
@@ -348,6 +357,7 @@
             'maxTime': '8:30pm',
             'showDuration': true,
         });
+        $("#mow-event-shift-time-area").datepair();
     }
 
     function SubmitMowForm() {
@@ -591,36 +601,13 @@
 
         //Set up the new MOW row form
         if (mowList != null) {
+            newMowRowOptionString += `<option value=''></option>`
             $.each(mowList, function (index, item) {
                 newMowRowOptionString += `<option value=` + item.AgentNo + `> ` + item.LastName + ` </option>`
             });
-            newMowRowString = `
-                <tr class="clean new-mow-row">
-                    <td>
-                        <select class="form-control input-xs mow-event-task" placeholder=""> 
-                            <option> AD Escalations </option>
-                            <option> Early Shift </option>
-                            <option> MOW </option>
-                            <option> WFO </option>
-                        </select>
-                    </td>
-                    <td>
-                        <select class="form-control input-xs mow-event-manager" placeholder="">
-                            ` + newMowRowOptionString + `
-                        </select>
-                    </td>
-                    <td>
-                        <div class="form-inline">
-                            <input class="form-control input-xs mow-event-shift-start" style="width: calc(50% - 10px);" placeholder="">
-                            <span style="width: 9px">to</span>
-                            <input class="form-control input-xs mow-event-shift-end" style="width: calc(50% - 10px);" placeholder="">
-                        </div>
-                    </td>
-                    <td>
-                        <button tabindex="-1" class="btn btn-xs btn-danger mow-event-remove-row"> <span class="glyphicon glyphicon-remove"></span> </button>
-                    </td>
-                </tr>
-            `;
+            newMowRowString = MowScheduleRow("", "", "", "", "", "", "", newMowRowOptionString, false);
+            $("#mow-event-shift-time-area").datepair();
+                
         }
     }
 

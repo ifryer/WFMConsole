@@ -20,6 +20,7 @@ using WFMConsole.ViewModels;
 using System.Globalization;
 using FluentDateTime;
 using System.Net.Mail;
+using static Google.Apis.Calendar.v3.Data.Event;
 
 namespace WFMDashboard.Classes
 {
@@ -31,44 +32,44 @@ namespace WFMDashboard.Classes
         static string ApplicationName = "Google Calendar API .NET Quickstart";
 
         #region Get Methods
-        public static List<ViewEvent> GetEventList()
-        {
-            using (var db = new OnyxEntities())
-            {
-                var eventList = new List<ViewEvent>();
-                //var dbList = db.BUS_WFMDashboard_Event.Where(t => t.StartTime <= DateTime.Today.Date && t.EndTime > DateTime.Today.Date).ToList();
-                var events = db.BUS_WFMDashboard_Event.Where(t => t.EndTime >= DateTime.Now || (t.FullDay && t.EndTime >= DateTime.Today.Date)).ToList();
-                var pastEvents = db.BUS_WFMDashboard_Event.Where(t => (t.EndTime < DateTime.Now && !t.FullDay) || (t.EndTime < DateTime.Today.Date && t.FullDay)).ToList();
-                foreach (var item in events)
-                {
-                    var newEvent = new ViewEvent(item, false, false);
-                    eventList.Add(newEvent);
-                }
-                foreach (var item in pastEvents)
-                {
-                    var newEvent = new ViewEvent(item, true, false);
-                    eventList.Add(newEvent);
-                }
+        //public static List<ViewEvent> GetEventList()
+        //{
+        //    using (var db = new OnyxEntities())
+        //    {
+        //        var eventList = new List<ViewEvent>();
+        //        //var dbList = db.BUS_WFMDashboard_Event.Where(t => t.StartTime <= DateTime.Today.Date && t.EndTime > DateTime.Today.Date).ToList();
+        //        var events = db.BUS_WFMDashboard_Event.Where(t => t.EndTime >= DateTime.Now || (t.FullDay && t.EndTime >= DateTime.Today.Date)).ToList();
+        //        var pastEvents = db.BUS_WFMDashboard_Event.Where(t => (t.EndTime < DateTime.Now && !t.FullDay) || (t.EndTime < DateTime.Today.Date && t.FullDay)).ToList();
+        //        foreach (var item in events)
+        //        {
+        //            var newEvent = new ViewEvent(item, false, false);
+        //            eventList.Add(newEvent);
+        //        }
+        //        foreach (var item in pastEvents)
+        //        {
+        //            var newEvent = new ViewEvent(item, true, false);
+        //            eventList.Add(newEvent);
+        //        }
 
-                var repeatingEvents = db.BUS_WFMDashboard_Repeating_Event.Where(t => t.CalculatedEndDate >= DateTime.Today.Date || t.CalculatedEndDate == null).ToList();
-                foreach (var item in repeatingEvents)
-                {
-                    var addRepeat = eventList.Where(t => t.Id == item.EventId).FirstOrDefault();
-                    if (addRepeat != null)
-                        addRepeat.repeating = true;
-                    var eventItem = db.BUS_WFMDashboard_Event.Where(t => t.Id == item.EventId).FirstOrDefault();
-                    var dateList = GetRepeatingEventDateList(item, DateTime.Now.Date, DateTime.Now.Date.AddMonths(1));
-                    foreach (var dateItem in dateList)
-                    {
-                        var newEvent = new ViewEvent(eventItem, dateItem);
-                        eventList.Add(newEvent);
-                    }
-                }
+        //        var repeatingEvents = db.BUS_WFMDashboard_Repeating_Event.Where(t => t.CalculatedEndDate >= DateTime.Today.Date || t.CalculatedEndDate == null).ToList();
+        //        foreach (var item in repeatingEvents)
+        //        {
+        //            var addRepeat = eventList.Where(t => t.Id == item.EventId).FirstOrDefault();
+        //            if (addRepeat != null)
+        //                addRepeat.repeating = true;
+        //            var eventItem = db.BUS_WFMDashboard_Event.Where(t => t.Id == item.EventId).FirstOrDefault();
+        //            var dateList = GetRepeatingEventDateList(item, DateTime.Now.Date, DateTime.Now.Date.AddMonths(1));
+        //            foreach (var dateItem in dateList)
+        //            {
+        //                var newEvent = new ViewEvent(eventItem, dateItem);
+        //                eventList.Add(newEvent);
+        //            }
+        //        }
 
                 
-                return eventList;
-            }
-        }
+        //        return eventList;
+        //    }
+        //}
 
         public static List<ViewEvent> GetEventList(string start, string end)
         {
@@ -81,15 +82,23 @@ namespace WFMDashboard.Classes
                 var events = db.BUS_WFMDashboard_Event.Where(t => (t.StartTime >= startDateInput && t.StartTime <= endDateInput) || (t.FullDay && t.EndTime >= DateTime.Today.Date)).ToList();
                 var pastEvents = events.Where(t => (t.EndTime < DateTime.Now && !t.FullDay) || (t.EndTime < DateTime.Today.Date && t.FullDay)).ToList();
                 events = events.Except(pastEvents).ToList();
+                var eventIdList = events.Select(t => t.Id).ToList();
+                eventIdList.AddRange(pastEvents.Select(t => t.Id).ToList());
+                var eventNotifications = db.BUS_WFMDashboard_Event_Notification.Where(t => eventIdList.Contains(t.EventId)).ToList();
+                var eventInvitees = db.BUS_WFMDashboard_Event_Invitee.Where(t => eventIdList.Contains(t.EventId)).ToList();
                 //var pastEvents = db.BUS_WFMDashboard_Event.Where(t => ((t.StartTime >= startDateInput && t.StartTime <= endDateInput) && (t.EndTime < DateTime.Now && !t.FullDay)) || (t.EndTime < DateTime.Today.Date && t.FullDay && (t.StartTime >= startDateInput && t.StartTime <= endDateInput))).ToList();
                 foreach (var item in events)
                 {
-                    var newEvent = new ViewEvent(item, false, false);
+                    var notifications = eventNotifications.Where(t => t.EventId == item.Id).ToList();
+                    var invitees = eventInvitees.Where(t => t.EventId == item.Id).ToList();
+                    var newEvent = new ViewEvent(item, false, false, notifications, invitees); 
                     eventList.Add(newEvent);
                 }
                 foreach (var item in pastEvents)
                 {
-                    var newEvent = new ViewEvent(item, true, false);
+                    var notifications = eventNotifications.Where(t => t.EventId == item.Id).ToList();
+                    var invitees = eventInvitees.Where(t => t.EventId == item.Id).ToList();
+                    var newEvent = new ViewEvent(item, true, false, notifications, invitees);
                     eventList.Add(newEvent);
                 }
 
@@ -107,25 +116,25 @@ namespace WFMDashboard.Classes
                         eventList.Add(newEvent);
                     }
                 }
-
-
                 return eventList;
             }
         }
 
-        public static List<ViewAgent> GetStaffList(out string msg)
+        public static List<Agent> GetAllAgents()
         {
-            var staffList = new List<ViewAgent>();
+            var staffList = new List<Agent>();
             using (var db = new inContact_NGEntities())
             {
-                
-                var staffListDb = db.Agents.Where(t => t.Status == "Active").OrderBy(t => t.LastName);
-                foreach (var item in staffListDb)
-                {
-                    staffList.Add(new ViewAgent(item));
-                }
-                //staffList = staffListDb.Select(t => new WFMConsole.ViewModels.ViewAgent(t)).ToList();
+                return db.Agents.Where(t => t.Status == "Active").OrderBy(t => t.LastName).ToList();
+            }
+        }
 
+        public static List<ViewAgent> GetStaffList(List<Agent> allAgents, out string msg)
+        {
+            var staffList = new List<ViewAgent>();
+            foreach (var item in allAgents)
+            {
+                staffList.Add(new ViewAgent(item));
             }
             msg = "Successfully retreived list of staff members";
             return staffList;
@@ -161,7 +170,36 @@ namespace WFMDashboard.Classes
             }
         }
 
-        
+        public static List<ViewInvitee> GetInvitees(List<Agent> allAgents)
+        {
+            try
+            {
+                var inviteeList = new List<ViewInvitee>();
+                foreach (var item in allAgents)
+                {
+                    var reportTo = allAgents.Where(t => t.AgentNo == item.ReportTo).FirstOrDefault();
+                    var reportToEmail = "";
+                    var reportToFirstName = "";
+                    var reportToLastName = "";
+                    if (reportTo != null)
+                    {
+                        reportToEmail = reportTo.Email;
+                        reportToFirstName = reportTo.FirstName;
+                        reportToLastName = reportTo.LastName;
+
+                    }
+                    inviteeList.Add(new ViewInvitee(item, reportToEmail, reportToFirstName, reportToLastName));
+                }
+                return inviteeList;
+            }
+            catch(Exception ex)
+            {
+                //TODO: log
+                return null;
+            }
+        }
+
+
         public static Dictionary<int, List<ViewIcmSchedule>> GetIcmSchedule()
         {
             using (var db = new OnyxEntities())
@@ -357,13 +395,12 @@ namespace WFMDashboard.Classes
         }
 
         //Color IDs : 4 = Scheduled Event = Pink ----- 7 = Teal = Training ----- 9 = Blue = Unplanned PTO ----- 10 = Green = Planned PTO ----- 11 = Red = Scheduled Event
-        public static List<ViewEvent> SubmitEventForm(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, EventForm inputForm, string user, out string msg)
+        public static bool SubmitEventForm(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, EventForm inputForm, string user, out string msg)
         {
             try
             {
-                List<ViewEvent> eventItemList = new List<ViewEvent>();
+                //List<ViewEvent> eventItemList = new List<ViewEvent>();
                 ViewEvent eventItem = new ViewEvent();
-
                 var startDate = $"{inputForm.startDate} {inputForm.startTime}";
                 var endDate = $"{inputForm.endDate} {inputForm.endTime}";
                 var startDateTime = DateTime.Parse(startDate);
@@ -376,7 +413,6 @@ namespace WFMDashboard.Classes
                     endDateTime = DateTime.Parse(endDate).AddDays(1);
                 }
 
-                
 
                 if (endDateTime <= startDateTime)
                 {
@@ -389,7 +425,7 @@ namespace WFMDashboard.Classes
                         if (endDateTime < startDateTime)
                         {
                             msg = "Start time must be before end time";
-                            return null;
+                            return false;
                         }
                     }
                 }
@@ -411,8 +447,12 @@ namespace WFMDashboard.Classes
 
                     var googleEventId = SubmitTimeOff_GoogleCalendar(googleAuth, inputForm, startDateTime, endDateTime);
 
-                    eventItem = CreateEvent(googleEventId, inputForm, startDateTime, endDateTime, staffMember, user);
-                    eventItemList.Add(eventItem);
+                    eventItem = CreateEvent(googleEventId, inputForm, startDateTime, endDateTime, staffMember, user, out msg);
+                    if(eventItem == null)
+                    {
+                        return false;
+                    }
+                    //eventItemList.Add(eventItem);
                     //SubmitTimeOff_Nice();
 
                     //return new List<ViewEvent>eventItem;
@@ -420,8 +460,12 @@ namespace WFMDashboard.Classes
                 else
                 {
                     msg = "Successfully updated event";
-                    eventItem = UpdateEvent(inputForm, startDateTime, endDateTime, user);
-                    eventItemList.Add(eventItem);
+                    eventItem = UpdateEvent(inputForm, startDateTime, endDateTime, user, out msg);
+                    if (eventItem == null)
+                    {
+                        return false;
+                    }
+                    //eventItemList.Add(eventItem);
                     //TODO: Make sure recurring events edited work properly.
                     //If its an issue, just delete the event, make a new one with the recurring thing, and save that ID to the object again.
 
@@ -429,7 +473,7 @@ namespace WFMDashboard.Classes
                     if(!(message.ToLower().Contains("success")))
                     {
                         msg = message;
-                        return null;
+                        return false;
                     }
                 }
                 if(inputForm.repeatingEvent)
@@ -443,17 +487,17 @@ namespace WFMDashboard.Classes
                         foreach (var dateItem in dateList)
                         {
                             var newEvent = new ViewEvent(editingEvent, dateItem);
-                            eventItemList.Add(newEvent);
+                            //eventItemList.Add(newEvent);
                         }
                     }
                 }
-                return eventItemList;
+                return true;
             }
             catch(Exception ex)
             {
                 //Log error
                 msg = ex.ToString();
-                return null;
+                return false;
             }
         }
 
@@ -465,6 +509,7 @@ namespace WFMDashboard.Classes
                 {
                     var eventItem = db.BUS_WFMDashboard_Event.Where(t => t.Id == id).FirstOrDefault();
                     var repeatingItem = db.BUS_WFMDashboard_Repeating_Event.Where(t => t.EventId == eventItem.Id).FirstOrDefault();
+                    var notificationItems = db.BUS_WFMDashboard_Event_Notification.Where(t => t.EventId == eventItem.Id).ToList();
                     
                     var googleCalId = eventItem.CalendarEventId;
                     
@@ -474,6 +519,8 @@ namespace WFMDashboard.Classes
 
                     if (repeatingItem != null)
                         db.BUS_WFMDashboard_Repeating_Event.Remove(repeatingItem);
+                    if (notificationItems.Count > 0)
+                        db.BUS_WFMDashboard_Event_Notification.RemoveRange(notificationItems);
                     db.BUS_WFMDashboard_Event.Remove(eventItem);
                     db.SaveChanges();
 
@@ -1053,13 +1100,14 @@ namespace WFMDashboard.Classes
                 var calendarId = ConfigurationManager.AppSettings["CalendarId"];
 
                 var service = CreateCalendarService(googleAuth);
-
                 // Define parameters of request.
                 EventsResource.ListRequest request = service.Events.List(calendarId);
 
                 request.TimeMin = DateTime.Today.Date; //Start of day
                 request.TimeMax = DateTime.Today.Date.AddHours(23).AddMinutes(59); //End of day
-                                                                                   //request.TimeMax = DateTime.Today.AddDays(30);
+
+                //request.TimeMin = DateTime.Today.Date.AddDays(340); //Start of day
+                //request.TimeMax = DateTime.Today.Date.AddDays(360); //End of day
 
                 request.ShowDeleted = false;
                 request.SingleEvents = true;
@@ -1091,23 +1139,20 @@ namespace WFMDashboard.Classes
         }
 
         //Events
-        private static ViewEvent CreateEvent(string googleEventId, EventForm inputForm, DateTime startDateTime, DateTime endDateTime, Agent agent, string user)
+        private static ViewEvent CreateEvent(string googleEventId, EventForm inputForm, DateTime startDateTime, DateTime endDateTime, Agent agent, string user, out string msg)
         {
             try
             {
+                msg = "";
+                //Create the event
                 BUS_WFMDashboard_Event busEvent = new BUS_WFMDashboard_Event()
                 {
-                    //AgentNo = agent.AgentNo,
-                    //TeamName = agent.TeamName,
-                    //TeamId = agent.TeamNo,
                     FullDay = inputForm.fullDay,
                     EventType = inputForm.eventType,
                     StartTime = startDateTime,
                     EndTime = endDateTime,
                     Description = inputForm.title,
                     Notes = inputForm.notes,
-                    //LastName = agent.LastName,
-                    //FirstName = agent.FirstName,
                     CalendarEventId = googleEventId,
                     Color = inputForm.color,
                     CreatedAt = DateTime.Now,
@@ -1131,20 +1176,57 @@ namespace WFMDashboard.Classes
                     busEvent.LastName = "N/A";
                     busEvent.FirstName = "N/A";
                 }
+                var inviteeList = new List<BUS_WFMDashboard_Event_Invitee>();
+                var notificationList = new List<BUS_WFMDashboard_Event_Notification>();
                 using (var db = new OnyxEntities())
                 {
                     db.BUS_WFMDashboard_Event.Add(busEvent);
                     db.SaveChanges();
+
+                    //Handle if its a repeating event
                     if(inputForm.repeatingEvent)
                     {
                         inputForm.eventId = busEvent.Id; //TODO: make sure we actually have the Id here.
                         CalculateRepeatingEvents(inputForm, db);
                     }
+
+                    //Handle the notifications
+                    if (inputForm.notificationsPresent)
+                    {
+                        foreach (var item in inputForm.notifications)
+                        {
+                            var newItem = new BUS_WFMDashboard_Event_Notification();
+                            newItem.EventId = busEvent.Id;
+                            newItem.NotificationTime = item.notificationTime;
+                            newItem.NotificationType = item.notificationType;
+                            db.BUS_WFMDashboard_Event_Notification.Add(newItem);
+                            notificationList.Add(newItem);
+                        }
+                        db.SaveChanges();
+                    }
+                    //Handle the invitees
+                    if(inputForm.hasInvitees)
+                    {
+                        foreach (var item in inputForm.invitees)
+                        {
+                            var newItem = new BUS_WFMDashboard_Event_Invitee();
+                            newItem.EventId = busEvent.Id;
+                            newItem.AgentNo = item.agentNo;
+                            newItem.Email = item.email;
+                            newItem.FirstName = item.firstName;
+                            newItem.LastName = item.lastName;
+                            db.BUS_WFMDashboard_Event_Invitee.Add(newItem);
+                            inviteeList.Add(newItem);
+                        }
+                        db.SaveChanges();
+                    }
                 }
-                return new ViewEvent(busEvent, false, inputForm.repeatingEvent);
+                return new ViewEvent(busEvent, false, inputForm.repeatingEvent, notificationList, inviteeList);
             }
             catch (Exception ex)
             {
+                log.Error("Error creating event", ex);
+                msg = "Error creating event - " + ex.ToString();
                 return null;
             }
         }
@@ -1260,10 +1342,11 @@ namespace WFMDashboard.Classes
             }
         }
 
-        private static ViewEvent UpdateEvent(EventForm inputForm, DateTime startDateTime, DateTime endDateTime, string user)
+        private static ViewEvent UpdateEvent(EventForm inputForm, DateTime startDateTime, DateTime endDateTime, string user, out string msg)
         {
             try
             {
+                msg = "";
                 using (var db = new OnyxEntities())
                 {
                     BUS_WFMDashboard_Event busEvent = db.BUS_WFMDashboard_Event.Where(t => t.Id == inputForm.eventId).FirstOrDefault();
@@ -1291,19 +1374,61 @@ namespace WFMDashboard.Classes
                             db.BUS_WFMDashboard_Repeating_Event.Remove(eventRepeatItem);
                             db.SaveChanges();
                         }
-                        
                     }
+                    var notificationList = new List<BUS_WFMDashboard_Event_Notification>();
+                    if (inputForm.notificationsPresent)
+                    {
+                        foreach (var item in inputForm.notifications)
+                        {
+                            var notification = db.BUS_WFMDashboard_Event_Notification.Where(t => t.Id == item.Id).FirstOrDefault();
+                            notification.NotificationTime = item.notificationTime;
+                            notification.NotificationType = item.notificationType;
+                            notificationList.Add(notification);
+                        }
+                        db.SaveChanges();
+                    }
+
+                    var inviteeIdList = new List<int>();
+                    var inviteeList = new List<BUS_WFMDashboard_Event_Invitee>();
+                    if(inputForm.hasInvitees)
+                    {
+                        foreach(var item in inputForm.invitees)
+                        {
+                            if(item.Id == 0)
+                            {
+                                var invitee = new BUS_WFMDashboard_Event_Invitee();
+                                invitee.AgentNo = item.agentNo;
+                                invitee.Email = item.email;
+                                invitee.LastName = item.lastName;
+                                invitee.FirstName = item.firstName;
+                                invitee.EventId = busEvent.Id;
+                                db.BUS_WFMDashboard_Event_Invitee.Add(invitee);
+                                inviteeList.Add(invitee);
+                            }
+                            else
+                            {
+                                inviteeList.Add(db.BUS_WFMDashboard_Event_Invitee.Where(t => t.Id == item.Id).FirstOrDefault());
+                                inviteeIdList.Add(item.Id);
+                            }
+                        }
+                        //Get the invitees that are no longer on the form so we can delete them.
+                        var deleteInvitees = db.BUS_WFMDashboard_Event_Invitee.Where(t => t.EventId == busEvent.Id && !inviteeIdList.Contains(t.Id));
+                        db.BUS_WFMDashboard_Event_Invitee.RemoveRange(deleteInvitees);
+                        db.SaveChanges();
+                    }
+                    //TODO: fill invitee list here
                     
                     var after = ObjectPrintHelper.PrintEvent(busEvent, eventRepeatItem);
 
                     //TODO: Show repeating stuff in action history here...
                     CreateActionHistory(busEvent.Id, 0, null, "delete", $"Event deleted by {user}", before, after, user);
-                    return new ViewEvent(busEvent, false, inputForm.repeatingEvent);
-
+                    return new ViewEvent(busEvent, false, inputForm.repeatingEvent, notificationList, inviteeList);
                 }
             }
             catch (Exception ex)
             {
+                msg = "Error updating event - " + ex.ToString();
+                log.Error("Error updating event", ex);
                 return null;
             }
         }
@@ -1445,6 +1570,25 @@ namespace WFMDashboard.Classes
                           rRule
                     };
                 }
+                var overrides = new RemindersData();
+                newEvent.Reminders = overrides;
+                if (inputForm.notificationsPresent)
+                {
+                    
+                    overrides.Overrides = new List<EventReminder>();
+                    foreach (var item in inputForm.notifications)
+                    {
+                        newEvent.Reminders.Overrides.Add(new EventReminder() { Method = item.notificationType, Minutes = item.notificationTime });
+                    }
+                    
+                    newEvent.Reminders.UseDefault = false;
+                }
+                else
+                {
+                    newEvent.Reminders.UseDefault = true;
+                }
+
+                //TODO: invitees
 
                 EventsResource.InsertRequest request = service.Events.Insert(newEvent, calendarId);
                 Event createdEvent = request.Execute();
@@ -1563,7 +1707,21 @@ namespace WFMDashboard.Classes
                         null
                     };
                 }
-                
+                var overrides = new RemindersData();
+                newEvent.Reminders = overrides;
+                if (inputForm.notificationsPresent)
+                {
+                    overrides.Overrides = new List<EventReminder>();
+                    foreach (var item in inputForm.notifications)
+                    {
+                        newEvent.Reminders.Overrides.Add(new EventReminder() { Method = item.notificationType, Minutes = item.notificationTime });
+                    }
+                }
+                else
+                {
+                    newEvent.Reminders.UseDefault = true;
+                }
+
                 EventsResource.PatchRequest request = service.Events.Patch(newEvent, calendarId, eventItem.CalendarEventId);
                 Event updatedEvent = request.Execute();
                 if (updatedEvent != null)

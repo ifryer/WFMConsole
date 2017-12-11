@@ -5,6 +5,7 @@ using System.Web;
 
 namespace WFMConsole.ViewModels
 {
+    //This item is for getting the info from the create/edit form for events.
     public class EventForm
     {
         public int eventId { get; set; }
@@ -26,6 +27,10 @@ namespace WFMConsole.ViewModels
         public int repeatEndAfterNumber { get; set; }
         public bool repeatingEvent { get; set; }
         public string repeatSummary { get; set; }
+        public ViewNotificationItem [] notifications { get; set; }
+        public bool notificationsPresent { get; set; }
+        public ViewInviteeItem [] invitees { get; set; }
+        public bool hasInvitees { get; set; }
 
         public override string ToString()
         {

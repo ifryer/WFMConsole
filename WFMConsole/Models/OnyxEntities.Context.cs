@@ -34,5 +34,7 @@ namespace WFMConsole.Models
         public virtual DbSet<BUS_WFMDashboard_Action_History> BUS_WFMDashboard_Action_History { get; set; }
         public virtual DbSet<BUS_WFMDashboard_Event> BUS_WFMDashboard_Event { get; set; }
         public virtual DbSet<BUS_WFMDashboard_Repeating_Event> BUS_WFMDashboard_Repeating_Event { get; set; }
+        public virtual DbSet<BUS_WFMDashboard_Event_Notification> BUS_WFMDashboard_Event_Notification { get; set; }
+        public virtual DbSet<BUS_WFMDashboard_Event_Invitee> BUS_WFMDashboard_Event_Invitee { get; set; }
     }
 }

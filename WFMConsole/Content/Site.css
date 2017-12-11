@@ -113,6 +113,9 @@ textarea {
     z-index: 1049;
 }
 
+.notification-row{
+    margin-bottom: 4px;
+}
 
 .success-msg {
     background-color: #d9edf7;
@@ -269,6 +272,24 @@ textarea {
     font-weight: normal;
 }
 
+.invitee-row {
+    border: 1px solid #0076bc;
+    height: 22px;
+    padding: 1px;
+    margin-bottom: 2px;
+}
+.remove-invitee-row{
+    height: 18px;
+    width: 18px;
+    padding: 0;
+}
+.remove-invitee-row .glyphicon{
+
+}
+
+.ui-front {
+    z-index: 2000 !important;
+}
 
 /*MOW TAB*/
 

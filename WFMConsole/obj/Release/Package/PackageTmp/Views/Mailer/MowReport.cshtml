@@ -1,0 +1,45 @@
+﻿<font face="trebuchet ms, sans-serif">
+    <p><span style="font-size:24pt;background:rgb(255,204,51); font-weight: bold; text-decoration: underline">@ViewBag.report.ReportDate</span>
+    </p>
+    <br>
+    <p><b><u><span style="font-size:14pt">Late Shift Manager:</span></u></b><b><span style="font-size:14pt"> @ViewBag.report.LateShiftManager<span></span></span></b></p>
+    <br />
+
+    <p><b><u><span style="font-size:14pt;color:black">Inventory Control Manager:</span></u></b><b><span style="font-size:14pt;color:black"> @ViewBag.report.ICM</span></b><span style="font-size:14pt"><span></span></span></p>
+    <br />
+    <p style="margin-bottom: 0px;"><b><span style="font-size:14pt;color:black;">8:00 ~ 4:30:  WFO at  </span></b><a href="mailto:mow_ssd@kmbs.konicaminolta.us" target="_blank"><b><span style="font-size:14pt;">mow_ssd@kmbs.<wbr>konicaminolta.us</span></b></a></p>
+    <br />
+    <div style="margin-left: 30px; margin-bottom: 20px;">
+        @foreach (var eventItem in ViewBag.report.WfoList)
+        {
+            <p style="margin-bottom: 0px;">
+                <span style="font-size:14pt; font-weight: bold">
+                    @eventItem
+                </span>
+            </p>
+        }
+    </div>
+
+    <table border="0" cellpadding="0" >
+        <tbody>
+            <tr>
+                <td style="padding:0.75pt">
+                    <p>
+                        <b>
+                            <span style="font-size:11pt">
+                                Jim Cezus: 860-593-3508 <br />
+                                Bob Felch: 860-805-2136<br>
+                                Fran Hill: 860-709-3320<br>
+                                Joe McGee: 860-597-2881<br />
+                                Brendan Kinney: 973-271-6593 <br />
+                                <span style="text-decoration: underline">Advisor Call Out Hotline: 860-258-9072</span>
+                            </span>
+                        </b>
+                    </p>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p><span style="font-size:9.5pt;line-height:115%;font-family:Arial,sans-serif"><span> </span></span></p>
+</font>

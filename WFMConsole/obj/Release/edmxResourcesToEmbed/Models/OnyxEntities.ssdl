@@ -39,6 +39,26 @@
     <Property Name="UpdatedBy" Type="nvarchar" MaxLength="45" Nullable="false" />
     <Property Name="Cancelled" Type="bit" Nullable="false" />
   </EntityType>
+  <EntityType Name="BUS_WFMDashboard_Event_Invitee">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="EventId" Type="int" Nullable="false" />
+    <Property Name="Email" Type="nvarchar" MaxLength="255" Nullable="false" />
+    <Property Name="AgentNo" Type="int" Nullable="false" />
+    <Property Name="FirstName" Type="nvarchar" MaxLength="100" Nullable="false" />
+    <Property Name="LastName" Type="nvarchar" MaxLength="100" Nullable="false" />
+  </EntityType>
+  <EntityType Name="BUS_WFMDashboard_Event_Notification">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="NotificationType" Type="nvarchar" MaxLength="25" Nullable="false" />
+    <Property Name="NotificationTime" Type="int" Nullable="false" />
+    <Property Name="EventId" Type="int" Nullable="false" />
+  </EntityType>
   <EntityType Name="BUS_WFMDashboard_Google_Credentials">
     <Key>
       <PropertyRef Name="Id" />
@@ -116,6 +136,8 @@
   <EntityContainer Name="OnyxModelStoreContainer">
     <EntitySet Name="BUS_WFMDashboard_Action_History" EntityType="Self.BUS_WFMDashboard_Action_History" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="BUS_WFMDashboard_Event" EntityType="Self.BUS_WFMDashboard_Event" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="BUS_WFMDashboard_Event_Invitee" EntityType="Self.BUS_WFMDashboard_Event_Invitee" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="BUS_WFMDashboard_Event_Notification" EntityType="Self.BUS_WFMDashboard_Event_Notification" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="BUS_WFMDashboard_Google_Credentials" EntityType="Self.BUS_WFMDashboard_Google_Credentials" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="BUS_WFMDashboard_ICM" EntityType="Self.BUS_WFMDashboard_ICM" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="BUS_WFMDashboard_ICM_Order" EntityType="Self.BUS_WFMDashboard_ICM_Order" Schema="dbo" store:Type="Tables" />

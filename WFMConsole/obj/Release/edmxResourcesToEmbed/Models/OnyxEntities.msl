@@ -123,5 +123,27 @@
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
+    <EntitySetMapping Name="BUS_WFMDashboard_Event_Notification">
+      <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_Event_Notification">
+        <MappingFragment StoreEntitySet="BUS_WFMDashboard_Event_Notification">
+          <ScalarProperty Name="EventId" ColumnName="EventId" />
+          <ScalarProperty Name="NotificationTime" ColumnName="NotificationTime" />
+          <ScalarProperty Name="NotificationType" ColumnName="NotificationType" />
+          <ScalarProperty Name="Id" ColumnName="Id" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="BUS_WFMDashboard_Event_Invitee">
+      <EntityTypeMapping TypeName="OnyxModel.BUS_WFMDashboard_Event_Invitee">
+        <MappingFragment StoreEntitySet="BUS_WFMDashboard_Event_Invitee">
+          <ScalarProperty Name="LastName" ColumnName="LastName" />
+          <ScalarProperty Name="FirstName" ColumnName="FirstName" />
+          <ScalarProperty Name="AgentNo" ColumnName="AgentNo" />
+          <ScalarProperty Name="Email" ColumnName="Email" />
+          <ScalarProperty Name="EventId" ColumnName="EventId" />
+          <ScalarProperty Name="Id" ColumnName="Id" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
   </EntityContainerMapping>
 </Mapping>
