@@ -46,7 +46,7 @@ namespace WFMConsole.Classes
             }
         }
 
-        public static async Task ClearAsyncStatic()
+        public static async Task ClearAsyncStatic(string ldapId)
         {
             using (var context = new OnyxEntities())
             {

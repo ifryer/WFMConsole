@@ -21,11 +21,14 @@ using System.Globalization;
 using FluentDateTime;
 using System.Net.Mail;
 using static Google.Apis.Calendar.v3.Data.Event;
+using WFMConsole.Configuration;
 
 namespace WFMDashboard.Classes
 {
     public static class WFMHelper
     {
+
+        //TODO: organize the functions in this file
         static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
         static string[] Scopes = { CalendarService.Scope.CalendarReadonly };
@@ -242,7 +245,7 @@ namespace WFMDashboard.Classes
                         LastName = t.LastName
                     })
                     .GroupBy(x => x.Date)
-                    .ToDictionary(gdc => gdc.Key, gdc => gdc.ToList());
+                    .ToDictionary(x => x.Key, x => x.ToList());
 
                 return results;
                 //return mowScheduleList.Select(t => new ViewMowSchedule(t)).ToList();
@@ -289,22 +292,35 @@ namespace WFMDashboard.Classes
                     var tomorrow = DateTime.Today.Date.AddDays(1);
                     var events = db.BUS_WFMDashboard_Event.Where(t => t.TeamId == team && t.FullDay && !t.Cancelled && t.StartTime <= tomorrow && t.EndTime > DateTime.Today.Date).ToList();
                     var ptoCount = events.Where(t => t.EventType.Contains("PTO")).ToList();
+                    var unplannedCount = ptoCount.Where(t => t.EventType == "PTO (Unplanned)");
+                    var plannedCount = ptoCount.Where(t => t.EventType == "PTO (Planned)");
                     var trainingCount = events.Where(t => t.EventType == "Training").ToList();
+                    var unpaidCount = events.Where(t => t.EventType == "Unpaid Time Off").ToList();
+                    var otherCount = events.Where(t => t.EventType == "Other").ToList();
                     var loaCount = events.Where(t => t.EventType == "LOA").ToList();
-                    var otherCount = events.Where(t => t.EventType == "Other" || t.EventType == "Unpaid Time Off").ToList();
+
+                    teamInfo.HiddenTeamInfo.UnplannedString = String.Join(", ", unplannedCount.Select(t => t.FirstName + " " + t.LastName));
+                    teamInfo.HiddenTeamInfo.PlannedString = String.Join(", ", plannedCount.Select(t => t.FirstName + " " + t.LastName));
+                    teamInfo.HiddenTeamInfo.TrainingString = String.Join(", ", trainingCount.Select(t => t.FirstName + " " + t.LastName));
+                    teamInfo.HiddenTeamInfo.UnpaidString = String.Join(", ", unpaidCount.Select(t => t.FirstName + " " + t.LastName));
+                    teamInfo.HiddenTeamInfo.OtherString = String.Join(", ", otherCount.Select(t => t.FirstName + " " + t.LastName));
+                    teamInfo.HiddenTeamInfo.LOAString = String.Join(", ", loaCount.Select(t => t.FirstName + " " + t.LastName));
 
 
                     totalDown += ptoCount.Count;
                     teamInfo.PTO = ptoCount.Count.ToString();
 
+                    teamInfo.Unplanned = unplannedCount.Count().ToString();
+                    teamInfo.Planned = plannedCount.Count().ToString();
+
                     totalDown += trainingCount.Count;
                     teamInfo.Training = trainingCount.Count.ToString();
 
-                    totalDown += loaCount.Count;
-                    teamInfo.LOA = loaCount.Count.ToString();
+                    totalDown += unpaidCount.Count;
+                    teamInfo.Unpaid = unpaidCount.Count.ToString();
 
-                    totalDown += otherCount.Count;
-                    teamInfo.Other = otherCount.Count.ToString();
+                    totalDown += otherCount.Count + loaCount.Count;
+                    teamInfo.Other = (otherCount.Count + loaCount.Count).ToString();
 
                     teamInfo.TotalDown = totalDown.ToString();
                     return teamInfo;
@@ -442,20 +458,15 @@ namespace WFMDashboard.Classes
                     {
                         staffMember = db.Agents.Where(t => t.AgentNo == inputForm.agentId).FirstOrDefault();
                     }
-                    //string lastName = staffMember.LastName;
-                    //string firstName = staffMember.FirstName;
 
-                    var googleEventId = SubmitTimeOff_GoogleCalendar(googleAuth, inputForm, startDateTime, endDateTime);
+                    var googleEventId = CreateEvent_GoogleCalendar(googleAuth, inputForm, startDateTime, endDateTime);
 
                     eventItem = CreateEvent(googleEventId, inputForm, startDateTime, endDateTime, staffMember, user, out msg);
                     if(eventItem == null)
                     {
                         return false;
                     }
-                    //eventItemList.Add(eventItem);
-                    //SubmitTimeOff_Nice();
 
-                    //return new List<ViewEvent>eventItem;
                 }
                 else
                 {
@@ -487,7 +498,6 @@ namespace WFMDashboard.Classes
                         foreach (var dateItem in dateList)
                         {
                             var newEvent = new ViewEvent(editingEvent, dateItem);
-                            //eventItemList.Add(newEvent);
                         }
                     }
                 }
@@ -1416,6 +1426,12 @@ namespace WFMDashboard.Classes
                         db.BUS_WFMDashboard_Event_Invitee.RemoveRange(deleteInvitees);
                         db.SaveChanges();
                     }
+                    else
+                    {
+                        var deleteInvitees = db.BUS_WFMDashboard_Event_Invitee.Where(t => t.EventId == busEvent.Id);
+                        db.BUS_WFMDashboard_Event_Invitee.RemoveRange(deleteInvitees);
+                        db.SaveChanges();
+                    }
                     //TODO: fill invitee list here
                     
                     var after = ObjectPrintHelper.PrintEvent(busEvent, eventRepeatItem);
@@ -1513,7 +1529,7 @@ namespace WFMDashboard.Classes
 
 
         //Google Calendar
-        private static string SubmitTimeOff_GoogleCalendar(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, EventForm inputForm, DateTime startDateTime, DateTime endDateTime)
+        private static string CreateEvent_GoogleCalendar(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, EventForm inputForm, DateTime startDateTime, DateTime endDateTime)
         {
             try
             {
@@ -1588,6 +1604,15 @@ namespace WFMDashboard.Classes
                     newEvent.Reminders.UseDefault = true;
                 }
 
+                if(inputForm.hasInvitees)
+                {
+                    newEvent.Attendees = new List<EventAttendee>();
+                    foreach (var item in inputForm.invitees)
+                    {
+                        newEvent.Attendees.Add(new EventAttendee() { Email = "rtyszka@kmbs.konicaminolta.us" });
+                    }
+                }
+
                 //TODO: invitees
 
                 EventsResource.InsertRequest request = service.Events.Insert(newEvent, calendarId);
@@ -1597,7 +1622,7 @@ namespace WFMDashboard.Classes
             }
             catch (Exception ex)
             {
-                log.Error("Error in SubmitTimeOff_GoogleCalendar", ex);
+                log.Error("Error in CreateEvent_GoogleCalendar", ex);
                 throw ex;
             }
         }
@@ -1721,6 +1746,15 @@ namespace WFMDashboard.Classes
                 {
                     newEvent.Reminders.UseDefault = true;
                 }
+                newEvent.Attendees = new List<EventAttendee>();
+                if (inputForm.hasInvitees)
+                {
+                    //newEvent.Attendees = new List<EventAttendee>();
+                    foreach (var item in inputForm.invitees)
+                    {
+                        newEvent.Attendees.Add(new EventAttendee() { Email = "rtyszka@kmbs.konicaminolta.us" });
+                    }
+                }
 
                 EventsResource.PatchRequest request = service.Events.Patch(newEvent, calendarId, eventItem.CalendarEventId);
                 Event updatedEvent = request.Execute();
@@ -1737,7 +1771,7 @@ namespace WFMDashboard.Classes
             }
             catch (Exception ex)
             {
-                log.Error("Error in SubmitTimeOff_GoogleCalendar", ex);
+                log.Error("Error in UpdateEvent_GoogleCalendar", ex);
                 //throw ex;
                 return ex.ToString();
             }
@@ -1759,7 +1793,7 @@ namespace WFMDashboard.Classes
             }
             catch (Exception ex)
             {
-                log.Error("Error in SubmitTimeOff_GoogleCalendar", ex);
+                log.Error("Error in DeleteEvent_GoogleCalendar", ex);
                 return ex.ToString();
             }
         }
@@ -1800,9 +1834,15 @@ namespace WFMDashboard.Classes
             return team;
         }
 
-        
+        public static WFMConfig.WFMUser getWFMUser(string ldapUserId)
+        {
+            var wfmUser = WFM.Config.GetUser(ldapUserId);
+            if (wfmUser != null) return wfmUser;
+            log.Warn($"User {ldapUserId} attempted to use WFM Dashboard");
+            return null;
+        }
 
-        
+
 
         private static bool CreateActionHistory(int eventId, int scheduleId, string scheduleType, string action, string description, string before, string after, string performedBy)
         {

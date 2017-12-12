@@ -1,6 +1,7 @@
 ﻿using Google.Apis.Auth.OAuth2.Mvc;
 using Google.Apis.Calendar.v3;
 using Google.Apis.Services;
+using KonicaMinolta.Authentication.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +17,11 @@ namespace WFMConsole.Controllers
     {
         protected override Google.Apis.Auth.OAuth2.Mvc.FlowMetadata FlowData
         {
-            get { return new AppFlowMetadata(); }
+            get {
+                var user = HttpContext.KmIdentity();
+                var WFMUser = WFMHelper.getWFMUser(user.LdapUserId);
+                return new AppFlowMetadata(user.LdapUserId); }
+
         }
 
         //public async Task<ActionResult> IndexAsync(CancellationToken cancellationToken)

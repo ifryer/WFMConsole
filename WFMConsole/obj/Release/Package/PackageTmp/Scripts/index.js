@@ -1,9 +1,5 @@
-﻿// ================================ Events ================================
+﻿indexScript = (function () {
 
-
-indexScript = (function () {
-   
-    
     function initialize() {
         mowTab.initialize();
         scheduleTab.initialize();
@@ -14,17 +10,19 @@ indexScript = (function () {
             success: function (data) {
                 if (data.success)
                 {
-                    scheduleTab.AddPageInfo(data)
-                    mowTab.AddPageInfo(data)
+                    Emails.LoadInvitees(data.invitees);
+                    scheduleTab.AddPageInfo(data);
+                    mowTab.AddPageInfo(data);
+                    
 
                     //Close loading dialog, all done
                     stopLoading();
                 }
             }
         });
-        
     }
 
+    //Should redurect to the login screen
     $(document).on("click", ".log-off-google", function () {
         $.ajax({
             dataType: "json",

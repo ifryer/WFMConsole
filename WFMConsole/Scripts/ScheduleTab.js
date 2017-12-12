@@ -46,6 +46,13 @@
     $("#pto-section").on("change", "#select-name-staff", ChangeStaffName);
 
 
+    $(".teamInfo, .mouseover-team-info").hover(function () {
+        $(".mouseover-team-info").css({ "display": "block" });
+    }, function () {
+        $(".mouseover-team-info").css({ "display": "none" });
+    });
+
+
     //Repeating event modal
 
     $(document).on("change", "#repeat-type", ChangeRepeatType);
@@ -489,6 +496,7 @@
         $('#event-end-date').val($.datepicker.formatDate('mm/dd/yy', new Date()));
         $('#event-start-time').val(moment().format("hh:mma"));
         $('#event-end-time').val(moment().add(1, "hour").format("hh:mma"));
+        $(".invitee-area").empty();
         $(".notification-area").empty();
         $(".notification-area").append(NotificationRow());
     }
@@ -542,6 +550,8 @@
     function CloseEventForm() {
         $(".event-form").slideUp("fast");
         $(".event-form input, textarea").val("");
+        $(".invitee-area").empty();
+        $(".notification-area").empty();
     }
 
     function RefreshCalendar() {
@@ -708,12 +718,30 @@
                         showSmallError(data.msg);
                     }
                     else {
+                        console.log(data.teamInfo)
                         $("#team-info-name").html(" - " + data.teamInfo.TeamName);
+                        $(".mouseover-team-name").html(data.teamInfo.TeamName);
                         $("#team-info-down-pto").html(data.teamInfo.PTO);
+                        $("#team-info-down-unpaid").html(data.teamInfo.Unpaid);
                         $("#team-info-down-training").html(data.teamInfo.Training);
-                        $("#team-info-down-loa").html(data.teamInfo.LOA);
                         $("#team-info-down-other").html(data.teamInfo.Other);
                         $("#team-info-down-total").html(data.teamInfo.TotalDown);
+
+                        //-----
+                        $("#planned-number").html(data.teamInfo.Planned);
+                        $("#planned-details").html(data.teamInfo.HiddenTeamInfo.PlannedString);
+                        $("#unplanned-number").html(data.teamInfo.Unplanned);
+                        $("#unplanned-details").html(data.teamInfo.HiddenTeamInfo.UnplannedString);
+                        $("#training-number").html(data.teamInfo.Training);
+                        $("#training-details").html(data.teamInfo.HiddenTeamInfo.TrainingString);
+                        $("#unpaid-number").html(data.teamInfo.Unpaid);
+                        $("#unpaid-details").html(data.teamInfo.HiddenTeamInfo.UnpaidString);
+                        $("#loa-number").html(data.teamInfo.LOA);
+                        $("#loa-details").html(data.teamInfo.HiddenTeamInfo.LOAString);
+                        $("#other-number").html(data.teamInfo.Other);
+                        $("#other-details").html(data.teamInfo.HiddenTeamInfo.OtherString);
+
+
                         $("#team-info-list").slideDown("fast");
                         $("#loading-team-info").hide();
                     }
@@ -808,7 +836,12 @@
             header: {
                 left: 'prev,next today',
                 center: 'title',
-                right: 'agendaWeek,agendaDay,listWeek'
+                right: 'month,agendaWeek,agendaDay,listWeek'
+            },
+            views: {
+                month: {
+                    eventLimit: 6 // adjust to 6 only for agendaWeek/agendaDay
+                }
             },
             height: 965,
             //events: eventList,
@@ -824,6 +857,14 @@
                     }
                 }
             ],
+            loading: function (isLoading, view) {
+                if (isLoading){
+                    startLoading();
+                }
+                else {
+                    stopLoading();
+                }
+            },
             navLinks: true,
             resources: [
                 // resources go here
@@ -947,7 +988,8 @@
                     return matcher.test(value.name) || matcher.test(value.email);
                 }));
             },
-            select: function(event, ui) {
+            select: function (event, ui) {
+                console.log(ui.item)
                 AddInvitee(ui.item, false);
                 this.value = "";
                 return false; // This will prevent the box from filling in with the selected item
@@ -975,7 +1017,7 @@
         {
             appendArea = $(".invitee-area-modal");
         }
-        let existingRow = $(".invitee-row[agentNo='" + invitee.agentNo + "']");
+        let existingRow = $(appendArea).find(".invitee-row[agentNo='" + invitee.agentNo + "']");
         if (existingRow.length < 1)
         {
             appendArea.append(InviteeRow(0, invitee.email, invitee.agentNo, invitee.FirstName, invitee.LastName));
@@ -983,7 +1025,7 @@
         
         if (invitee.reportToEmail !== "")
         {
-            let existingRowReport = $(".invitee-row[agentNo='" + invitee.reportTo + "']")
+            let existingRowReport = $(appendArea).find(".invitee-row[agentNo='" + invitee.reportTo + "']")
             if (existingRowReport.length < 1)
             {
                 appendArea.append(InviteeRow(0, invitee.reportToEmail, invitee.reportTo, invitee.reportToFirstName, invitee.reportToLastName))

@@ -14,6 +14,11 @@ namespace WFMDashboard.Classes
 {
     public class AppFlowMetadata : FlowMetadata
     {
+        string ldapId { get; set; }
+        public AppFlowMetadata(string inputLdapId)
+        {
+            ldapId = inputLdapId;
+        }
         private static readonly IAuthorizationCodeFlow flow =
             new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer
             {
@@ -37,7 +42,13 @@ namespace WFMDashboard.Classes
             // You can read more about the protocol in the following link:
             // https://developers.google.com/accounts/docs/OAuth2Login.
 
-            var user = "User";
+            //var user = "User";
+            //var user = controller.ViewBag.LdapId;
+            var user = ldapId;
+            if(user == null)
+            {
+                user = "User";
+            }
             //var user = controller.Session["user"];
             //if (user == null)
             //{

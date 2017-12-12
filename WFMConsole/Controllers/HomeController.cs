@@ -30,8 +30,9 @@ namespace WFMDashboard.Controllers
             var WFMUser = getWFMUser(user.LdapUserId);
             if (WFMUser == null) return RedirectToAction("Error", new { msg = "You are not authorized to use WFM Dashboard" });
             ViewBag.Title = "WFM Dashboard";
+            ViewBag.LdapId = WFMUser.LdapId;
             //GCal login stuff no longer needed (probably)
-            var result = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata()).AuthorizeAsync(cancellationToken);
+            var result = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata(user.LdapUserId)).AuthorizeAsync(cancellationToken);
             if (result.Credential != null)
             {
                 var service = new CalendarService(new BaseClientService.Initializer
@@ -112,7 +113,7 @@ namespace WFMDashboard.Controllers
             if (WFMUser == null) return JsonConvert.SerializeObject(new { success = false, msg = "You are not authorized to access WFM Dashboard" });
             log.Info($"User {user.LdapUserId} called SubmitEventForm \r\n Params: InputForm: {inputForm.ToString()}");
             string msg = "";
-            var googleAuth = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata()).AuthorizeAsync(cancellationToken);
+            var googleAuth = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata(user.LdapUserId)).AuthorizeAsync(cancellationToken);
             if (googleAuth.Credential == null)
             {
                 return JsonConvert.SerializeObject(new { success = false, msg = "Error - please refresh page and log back into Google Calendar" });
@@ -133,7 +134,7 @@ namespace WFMDashboard.Controllers
             if (WFMUser == null) return JsonConvert.SerializeObject(new { success = false, msg = "You are not authorized to access WFM Dashboard" });
             string msg = "";
             log.Info($"User {user.LdapUserId} called DeleteEvent /r/n id: {id}");
-            var googleAuth = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata()).AuthorizeAsync(cancellationToken);
+            var googleAuth = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata(user.LdapUserId)).AuthorizeAsync(cancellationToken);
             if (googleAuth.Credential == null)
             {
                 return JsonConvert.SerializeObject(new { success = false, msg = "Error - please refresh page and log back into Google Calendar" });
@@ -158,7 +159,7 @@ namespace WFMDashboard.Controllers
             //bool success = false;
             ViewBag.Title = "WFM Dashboard - Confirm Report";
             ViewBag.ReportType = "Down";
-            var googleAuth = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata()).AuthorizeAsync(cancellationToken);
+            var googleAuth = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata(user.LdapUserId)).AuthorizeAsync(cancellationToken);
             if (googleAuth.Credential != null)
             {
 
@@ -235,6 +236,15 @@ namespace WFMDashboard.Controllers
             return JsonConvert.SerializeObject(new { mowSchedule = mowSchedule, success = mowSchedule != null });
         }
 
+
+        //public string DownloadMowScheduleSpreadsheet(string mondayString)
+        //{
+        //    var monday = DateTime.Parse(mondayString);
+        //    var mowSchedule = WFMHelper.GetMowSchedule(monday);
+        //    return JsonConvert.SerializeObject(new { mowSchedule = mowSchedule, success = mowSchedule != null });
+        //}
+
+
         public string SubmitIcmForm(int month, int year, int agentNo)
         {
             var user = HttpContext.KmIdentity();
@@ -295,7 +305,7 @@ namespace WFMDashboard.Controllers
         {
             var user = HttpContext.KmIdentity();
             log.Info($"User {user.LdapUserId} logged out of google calendar");
-            await EFDataStore.ClearAsyncStatic();
+            await EFDataStore.ClearAsyncStatic(user.LdapUserId);
             return Redirect(ConfigurationManager.AppSettings["LogOutRedirect"]);
         }
 

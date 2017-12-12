@@ -57,8 +57,7 @@
                                     <select class="form-control" id="event-type-modal" placeholder="">
                                         <option value="PTO (Unplanned)"> Unplanned PTO </option>
                                         <option value="PTO (Planned)"> Planned PTO </option>
-                                        <option value="Unpaid Time Off (Unplanned)"> Unpaid Time Off (Unplanned) </option>
-                                        <option value="Unpaid Time Off (Planned)"> Unpaid Time Off (Planned)</option>
+                                        <option value="Unpaid Time Off"> Unpaid Time Off (Unplanned) </option>
                                         <option value="Training"> Training </option>
                                         <option value="LOA"> LOA </option>
                                         <option value="Other"> Other </option>
@@ -393,9 +392,6 @@
                     </div>
                     <div class="col-md-1"></div>
                     <div class="col-md-3 team-info-box">
-                        @*<div class="row">
-                    <div style="height: 300px; width: 100%; border: 1px solid #0076bc;" class="fake-calendar"> Google Calendar </div>
-                </div>*@
                         <div class="row">
                             <div class="teamInfo">
                                 <div class="center-text box-header">
@@ -412,12 +408,12 @@
                                     </div>
                                     <div class="box-content-row">
                                         <span>
-                                            Training:  <span id="team-info-down-training" style="float: right"> - </span>
+                                            Unpaid Time Off:  <span id="team-info-down-unpaid" style="float: right"> - </span>
                                         </span>
                                     </div>
                                     <div class="box-content-row">
                                         <span>
-                                            LOA:  <span id="team-info-down-loa" style="float: right"> - </span>
+                                            Training:  <span id="team-info-down-training" style="float: right"> - </span>
                                         </span>
                                     </div>
                                     <div class="box-content-row">
@@ -433,7 +429,23 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="mouseover-team-info row" style="display:none">
+                            <h4 class="mouseover-team-name center-text"> Team </h4>
+                            <table class="table">
+                                <thead><tr><th>Type</th><th> # </th><th>Details</th></tr></thead>
+                                <tbody>
+                                    <tr><td>PTO (Planned)</td><td id="planned-number"> - </td><td id="planned-details"></td></tr>
+                                    <tr><td>PTO (Unplanned)</td><td id="unplanned-number"> - </td><td id="unplanned-details"></td></tr>
+                                    <tr><td>Training</td><td id="training-number"> - </td><td id="training-details"></td></tr>
+                                    <tr><td>Unpaid Time Off</td><td id="unpaid-number"> - </td><td id="unpaid-details"></td></tr>
+                                    <tr><td>LOA</td><td id="loa-number"> - </td><td id="loa-details"></td></tr>
+                                    <tr><td>Other</td><td id="other-number"> - </td><td id="other-details"></td></tr>
+
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
+                    
                 </div>
                 @*<div class="row" style="margin-left: 0;">
                     
@@ -564,7 +576,12 @@
                 <div class="col-md-6">
                     <div style="border: 1px solid #dddddd">
                         <h4 class="center-text mow-table-title"> MOW & WFO Schedule </h4>
-                        <h5 class="center-text"><button class="btn btn-xs btn-default mow-week-left"> <span class="glyphicon glyphicon-chevron-left"></span> </button> <span id="mow-wfo-schedule-date-span"></span> <button class="btn btn-xs btn-default mow-week-right"> <span class="glyphicon glyphicon-chevron-right"></span> </button></h5>
+                        <h5 class="center-text">
+                            <button class="btn btn-xs btn-default mow-week-today" id="mow-week-today"> View Today </button>
+                            <button class="btn btn-xs btn-default mow-week-left"><span class="glyphicon glyphicon-chevron-left"></span></button> 
+                            <span id="mow-wfo-schedule-date-span"></span> 
+                            <button class="btn btn-xs btn-default mow-week-right"> <span class="glyphicon glyphicon-chevron-right"></span> </button>
+                        </h5>
                         <div class="mow-schedule-list">
                         </div>
                     </div>

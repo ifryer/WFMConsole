@@ -5,6 +5,7 @@
     var newMowRowString = ``;
     var MonthList = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     var mowList;
+    var thisWeekMonday = moment().startOf('isoweek');
 
     function initialize() {
         $(".late-shift-date").datepicker();
@@ -213,12 +214,35 @@
                 }
             });
         }
-    })
+    });
+
+    $(document).on("click", "#mow-week-today", function () {
+        $(this).attr("disabled")
+        $(".mow-week-right, .mow-week-left").attr("disabled", "disabled");
+        $.ajax({
+            dataType: "json",
+            type: "post",
+            data: {
+                mondayString: thisWeekMonday.format("MM/DD/YYYY")
+            },
+            url: toUrl("Home/GetMowScheduleWeek"),
+            success: function (data) {
+                $(".mow-week-right, .mow-week-left").removeAttr("disabled")
+                if (!data.success) {
+                    console.log("error -- " + data.msg);
+                    showSmallError(data.msg);
+                }
+                else {
+                    SetUpMowTable(data.mowSchedule, null, thisWeekMonday.format("MM/DD/YYYY"))
+                }
+            }
+        });
+    });
 
     $(document).on("click", ".mow-week-left", function () {
         let currentMonday = $("#mow-wfo-schedule-date-span").attr("current-monday")
         let day = moment(currentMonday).subtract(7, "days");//Get last week monday
-        $(".mow-week-right, .mow-week-left").attr("disabled", "disabled")
+        $(".mow-week-right, .mow-week-left, #mow-week-today").attr("disabled", "disabled")
         $.ajax({
             dataType: "json",
             type: "post",
@@ -244,7 +268,7 @@
     $(document).on("click", ".mow-week-right", function () {
         let currentMonday = $("#mow-wfo-schedule-date-span").attr("current-monday")
         let day = moment(currentMonday).add(7, "days");//Get last week monday
-        $(".mow-week-right, .mow-week-left").attr("disabled", "disabled")
+        $(".mow-week-right, .mow-week-left, #mow-week-today").attr("disabled", "disabled")
         $.ajax({
             dataType: "json",
             type: "post",
@@ -569,15 +593,23 @@
         //Set the date range
         if (mondayMomentString != null && mondayMomentString != "") {
             let mondayMoment = moment(mondayMomentString)
+            //Disable the today button if we're on this week
+            if (thisWeekMonday.format("MM/DD/YYYY") === mondayMoment.format("MM/DD/YYYY")) {
+                $("#mow-week-today").attr("disabled", "disabled")
+            }
+            else {
+                $("#mow-week-today").removeAttr("disabled")
+            }
             let day = (mondayMoment).startOf('isoweek'); //Get this week's monday
-            let mondayString = day.format("MM/DD")
-            fullMondayString = day.format("MM/DD/YYYY")
-            $(".mow-schedule-event-date").val(fullMondayString)
-            $("#mow-wfo-schedule-date-span").attr("current-monday", fullMondayString);
+            let mondayString = day.format("MM/DD/YYYY")
+            //fullMondayString = day.format("MM/DD/YYYY")
+            $(".mow-schedule-event-date").val(mondayString)
+            $("#mow-wfo-schedule-date-span").attr("current-monday", mondayString);
             day.day(5) //Add 5 days to get friday
-            let fridayString = day.format("MM/DD")
+            let fridayString = day.format("MM/DD/YYYY")
             let dateRange = mondayString + " - " + fridayString;
             $("#mow-wfo-schedule-date-span").html(dateRange)
+            
         }
 
         //Set up the table of events

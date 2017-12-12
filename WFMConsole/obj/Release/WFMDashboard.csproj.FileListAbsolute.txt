@@ -79,3 +79,5 @@ C:\Projects\WFMConsole\WFMConsole\bin\Mvc.Mailer.dll
 C:\Projects\WFMConsole\WFMConsole\bin\FluentDateTime.dll
 C:\Projects\WFMConsole\WFMConsole\bin\FluentDateTime.pdb
 C:\Projects\WFMConsole\WFMConsole\bin\FluentDateTime.xml
+C:\Projects\WFMConsole\WFMConsole\bin\EPPlus.dll
+C:\Projects\WFMConsole\WFMConsole\bin\EPPlus.xml

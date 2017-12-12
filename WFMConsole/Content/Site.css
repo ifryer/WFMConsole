@@ -372,6 +372,37 @@ h4.box-header{
     background: rgba(255, 202, 122, 0.72);
 }
 
+.mow-week-today {
+    float: left;
+    margin-left: 5px;
+    margin-right: -15px;
+}
+
+.mouseover-team-info {
+    position: absolute;
+    z-index: 999;
+    background: white;
+    border: 1px solid #0076bc;
+    border-radius: 5px;
+    top: 10vh;
+    width: 80vw;
+    left: 5vw;
+}
+
+@media screen and (min-width: 1000px) {
+    .mouseover-team-info {
+        top: 10vh;
+        left: -550px;
+        width: 600px;
+    }
+}
+
+.mouseover-team-name {
+    background: #c2deef;
+    margin-top: 0;
+    border-radius: 4px 4px 0px 0px;
+}
+
 .color-selector{
     display: inline-block;
     margin-right: 1px;
