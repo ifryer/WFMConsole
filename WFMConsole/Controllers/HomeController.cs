@@ -31,6 +31,7 @@ namespace WFMDashboard.Controllers
             if (WFMUser == null) return RedirectToAction("Error", new { msg = "You are not authorized to use WFM Dashboard" });
             ViewBag.Title = "WFM Dashboard";
             ViewBag.LdapId = WFMUser.LdapId;
+            ViewBag.Username = user.FirstName + " " + user.LastName;
             //GCal login stuff no longer needed (probably)
             var result = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata(user.LdapUserId)).AuthorizeAsync(cancellationToken);
             if (result.Credential != null)
@@ -158,6 +159,7 @@ namespace WFMDashboard.Controllers
             string msg = "";
             //bool success = false;
             ViewBag.Title = "WFM Dashboard - Confirm Report";
+            ViewBag.Username = user.FirstName + " " + user.LastName;
             ViewBag.ReportType = "Down";
             var googleAuth = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata(user.LdapUserId)).AuthorizeAsync(cancellationToken);
             if (googleAuth.Credential != null)

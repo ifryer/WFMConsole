@@ -48,5 +48,13 @@ namespace WFMConsole.ViewModels
             ReportToLastName = reportToLastName;
             ReportToName = reportToFirstName + " " + reportToLastName;
         }
+        public ViewInvitee(string email)
+        {
+            Email = email;
+            AgentNo = 0;
+            FullName = email;
+            FirstName = email;
+            LastName = "";
+        }
     }
 }

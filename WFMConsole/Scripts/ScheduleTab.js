@@ -1,6 +1,7 @@
 ﻿scheduleTab = (function () {
 
     var editedEventTitle = false;
+    var filteredText = "";
 
     function initialize() {
         $("#event-start-time").timepicker({
@@ -52,6 +53,39 @@
         $(".mouseover-team-info").css({ "display": "none" });
     });
 
+    $(document).on("keydown", ".filter-calendar", function (e) {
+        if (e.which == 13)
+        {
+            filteredText = $(this).val().toLowerCase();
+            if (filteredText != "") {
+                $(".filtered-text-display").html("Filter applied - \"" + filteredText + "\"");
+                RefreshCalendar();
+                $(".filter-calendar-clear-btn").show();
+            }
+        }
+        if ($(this).val() == "")
+        {
+            $(".filter-calendar-clear-btn").hide();
+            $(".filtered-text-display").html("");
+        }
+    });
+
+    $(document).on("click", ".filter-calendar-submit-btn", function () {
+        filteredText = $(".filter-calendar").val().toLowerCase();
+        if (filteredText != "") {
+            $(".filtered-text-display").html("Filter applied -  \"" + filteredText + "\"");
+            RefreshCalendar();
+            $(".filter-calendar-clear-btn").show();
+        }
+    });
+
+    $(document).on("click", ".filter-calendar-clear-btn", function () {
+        filteredText = "";
+        $(".filter-calendar").val("");
+        $(".filtered-text-display").html("");
+        $(this).hide();
+        RefreshCalendar();
+    });
 
     //Repeating event modal
 
@@ -718,7 +752,7 @@
                         showSmallError(data.msg);
                     }
                     else {
-                        console.log(data.teamInfo)
+                        //TODO: only show rows that don't have a 0?
                         $("#team-info-name").html(" - " + data.teamInfo.TeamName);
                         $(".mouseover-team-name").html(data.teamInfo.TeamName);
                         $("#team-info-down-pto").html(data.teamInfo.PTO);
@@ -727,7 +761,7 @@
                         $("#team-info-down-other").html(data.teamInfo.Other);
                         $("#team-info-down-total").html(data.teamInfo.TotalDown);
 
-                        //-----
+                        //Fill out the hover form
                         $("#planned-number").html(data.teamInfo.Planned);
                         $("#planned-details").html(data.teamInfo.HiddenTeamInfo.PlannedString);
                         $("#unplanned-number").html(data.teamInfo.Unplanned);
@@ -853,10 +887,19 @@
                         showSmallAlert("There was an error getting the calendar events!");
                     },
                     success: function (data) {
+                        data.forEach(function (element) {
+                            element.SearchField = element.EventType + " " + element.FirstName + " " + element.LastName + " " + element.Notes + " " + element.title + " " + element.TeamName;
+                        });
                         $("#refresh-calendar").find(".glyphicon").removeClass("spinning");
                     }
                 }
             ],
+            eventRender: function eventRender(event, element, view) {
+                if (filteredText == "") return true;
+                else {
+                    return event.SearchField.toLowerCase().indexOf(filteredText) != -1;
+                }
+            },
             loading: function (isLoading, view) {
                 if (isLoading){
                     startLoading();
@@ -958,7 +1001,7 @@
                 $(".invitee-area-modal").empty();
                 if (invitees.length > 0) {
                     $.each(invitees, function (index, item) {
-                        $(".invitee-area-modal").append(InviteeRow(item.Id, item.email, item.agentNo, item.firstName, item.lastName));
+                        $(".invitee-area-modal").append(InviteeRow(item.Id, item.email, item.agentNo, item.firstName, item.lastName, item.firstName + " " + item.lastName));
                         //TODO: this
                         //$(".notification-area-modal").append(EditNotificationRow(item.Id, item.notificationType, item.notificationTime));
                     })
@@ -1012,6 +1055,7 @@
 
     function AddInvitee(invitee, modal)
     {
+        console.log(invitee)
         let appendArea = $(".invitee-area");
         if (modal)
         {
@@ -1020,7 +1064,7 @@
         let existingRow = $(appendArea).find(".invitee-row[agentNo='" + invitee.agentNo + "']");
         if (existingRow.length < 1)
         {
-            appendArea.append(InviteeRow(0, invitee.email, invitee.agentNo, invitee.FirstName, invitee.LastName));
+            appendArea.append(InviteeRow(0, invitee.email, invitee.agentNo, invitee.FirstName, invitee.LastName, invitee.name));
         }
         
         if (invitee.reportToEmail !== "")
@@ -1028,7 +1072,7 @@
             let existingRowReport = $(appendArea).find(".invitee-row[agentNo='" + invitee.reportTo + "']")
             if (existingRowReport.length < 1)
             {
-                appendArea.append(InviteeRow(0, invitee.reportToEmail, invitee.reportTo, invitee.reportToFirstName, invitee.reportToLastName))
+                appendArea.append(InviteeRow(0, invitee.reportToEmail, invitee.reportTo, invitee.reportToFirstName, invitee.reportToLastName, invitee.reportToName))
                     
             }
             
@@ -1050,11 +1094,11 @@
                 </div>`;
     }
 
-    function InviteeRow(Id, email, agentNo, firstName, lastName)
+    function InviteeRow(Id, email, agentNo, firstName, lastName, displayName)
     {
         return `
                 <div class="invitee-row" firstName="` + firstName + `" lastName="` + lastName + `" editId="` + Id + `" agentNo="` + agentNo + `" email="` + email + `" title="` + email + `">
-                    <span class="invitee-name"> ` + firstName + " " + lastName + ` </span>
+                    <span class="invitee-name"> ` + displayName + ` </span>
                     <button class="btn btn-default btn-xs remove-invitee-row pull-right">
                         <span class="glyphicon small glyphicon-remove"></span>
                     </button>

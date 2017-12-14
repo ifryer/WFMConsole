@@ -193,6 +193,11 @@ namespace WFMDashboard.Classes
                     }
                     inviteeList.Add(new ViewInvitee(item, reportToEmail, reportToFirstName, reportToLastName));
                 }
+                var addedInvitees = ConfigurationManager.AppSettings["AddedInviteeEmails"];
+                foreach (var item in addedInvitees.Split(','))
+                {
+                    inviteeList.Add(new ViewInvitee(item));
+                }
                 return inviteeList;
             }
             catch(Exception ex)
@@ -398,7 +403,7 @@ namespace WFMDashboard.Classes
                     {
                         editEvent.Description = editEvent.Description.TrimStart("Cancelled ");
                     }
-                    //TODO: cancel the event on GCal here
+                    //TODO: cancel the event on GCal here (maybe? or just change name to cancelled?)
                     db.SaveChanges();
                 }
                 return true;
@@ -682,7 +687,7 @@ namespace WFMDashboard.Classes
         {
             try
             {
-                ScanGoogleCalendar(googleAuth);
+                ImportFromGoogleCalendar(googleAuth);
                 var report = GenerateDownByReport(googleAuth);
                 msg = "Success";
                 return report;
@@ -1006,7 +1011,7 @@ namespace WFMDashboard.Classes
                     {
                         eventType = "LOA";
                     }
-
+                    
                     var sections = item.Summary.Split('-');
                     if (sections.Length > 1)
                     {
@@ -1017,6 +1022,41 @@ namespace WFMDashboard.Classes
                         var staffMember = dbS.Agents.Where(t => staffName.Contains(t.LastName.ToLower()) && t.Status == "Active").FirstOrDefault();
                         if (staffMember != null)
                         {
+                            var invitees = item.Attendees;
+                            var inviteeList = new List<BUS_WFMDashboard_Event_Invitee>();
+
+                            var reminders = item.Reminders;
+                            var reminderList = new List<BUS_WFMDashboard_Event_Notification>();
+
+                            var repeatingInfo = item.Recurrence;
+
+                            foreach (var invitee in invitees)
+                            {
+                                var newInvitee = new BUS_WFMDashboard_Event_Invitee();
+                                newInvitee.Email = invitee.Email;
+                                var agentInvitee = dbS.Agents.Where(t => t.Email == invitee.Email).FirstOrDefault();
+                                if(agentInvitee != null)
+                                {
+                                    newInvitee.AgentNo = agentInvitee.AgentNo;
+                                    newInvitee.FirstName = agentInvitee.FirstName;
+                                    newInvitee.LastName = agentInvitee.LastName;
+                                    inviteeList.Add(newInvitee);
+                                }
+                            }
+                            if(reminders != null && (reminders.UseDefault != true))
+                            {
+                                foreach (var reminder in reminders.Overrides)
+                                {
+                                    var newNotification = new BUS_WFMDashboard_Event_Notification();
+                                    newNotification.NotificationTime = reminder.Minutes.Value;
+                                    newNotification.NotificationType = reminder.Method;
+                                    reminderList.Add(newNotification);
+                                }
+                            }
+                            
+
+                            //TODO make a way to parse that repeatingInfo variable
+
                             DateTime startTime = DateTime.Now;
                             DateTime endTime = DateTime.Now;
                             if (item.End.Date != null)
@@ -1058,7 +1098,17 @@ namespace WFMDashboard.Classes
                                     UpdatedBy = "Google Calendar"
                                 };
                                 db.BUS_WFMDashboard_Event.Add(newEvent);
-                                //db.SaveChanges();
+                                db.SaveChanges();
+                                foreach (var inv in inviteeList)
+                                {
+                                    inv.EventId = newEvent.Id;
+                                    db.BUS_WFMDashboard_Event_Invitee.Add(inv);
+                                }
+                                foreach (var rem in reminderList)
+                                {
+                                    rem.EventId = newEvent.Id;
+                                    db.BUS_WFMDashboard_Event_Notification.Add(rem);
+                                }
                             }
                             else
                             {
@@ -1080,6 +1130,31 @@ namespace WFMDashboard.Classes
                                 prevEvent.Color = item.ColorId;
                                 prevEvent.UpdatedAt = DateTime.Now;
                                 prevEvent.UpdatedBy = "Google Calendar";
+                                if(inviteeList.Count > 0)
+                                {
+                                    var existingInvitees = db.BUS_WFMDashboard_Event_Invitee.Where(t => t.EventId == prevEvent.Id).ToList();
+                                    foreach (var inv in inviteeList)
+                                    {
+                                        if(!(existingInvitees.Where(t => t.Email == inv.Email).Count() > 0))
+                                        {
+                                            inv.EventId = prevEvent.Id;
+                                            db.BUS_WFMDashboard_Event_Invitee.Add(inv);
+                                        }
+                                    }
+                                }
+                                if(reminderList.Count > 0)
+                                {
+                                    var existingReminders = db.BUS_WFMDashboard_Event_Notification.Where(t => t.EventId == prevEvent.Id).ToList();
+                                    foreach (var rem in reminderList)
+                                    {
+                                        if(!(existingReminders.Where(t => t.NotificationTime == rem.NotificationTime && t.NotificationType == rem.NotificationType).Count() > 0))
+                                        {
+                                            rem.EventId = prevEvent.Id;
+                                            db.BUS_WFMDashboard_Event_Notification.Add(rem);
+                                        }
+                                    }
+                                }
+                                
                             }
                         }
                     }
@@ -1102,7 +1177,7 @@ namespace WFMDashboard.Classes
             }
         }
 
-        private static void ScanGoogleCalendar(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth)
+        private static void ImportFromGoogleCalendar(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth)
         {
             try
             {
@@ -1574,9 +1649,7 @@ namespace WFMDashboard.Classes
                     Start = start,
                     ColorId = colorId,
                     End = end,
-                    Attendees = new EventAttendee[] {
-                        new EventAttendee() { Email = "rtyszka@kmbs.konicaminolta.us" },
-                    },
+                    Attendees = new EventAttendee[] { },
                 };
 
                 if(inputForm.repeatingEvent)
@@ -1752,7 +1825,7 @@ namespace WFMDashboard.Classes
                     //newEvent.Attendees = new List<EventAttendee>();
                     foreach (var item in inputForm.invitees)
                     {
-                        newEvent.Attendees.Add(new EventAttendee() { Email = "rtyszka@kmbs.konicaminolta.us" });
+                        newEvent.Attendees.Add(new EventAttendee() { Email = item.email });
                     }
                 }
 

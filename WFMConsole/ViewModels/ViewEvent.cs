@@ -30,6 +30,7 @@ namespace WFMConsole.ViewModels
         public string EndTime { get; set; }
         public string TeamName { get; set; }
         public string EventType { get; set; }
+        public string FirstName { get; set; }
         public string LastName { get; set; }
         public string CalendarEventId { get; set; }
         public string ColorId { get; set; }
@@ -50,6 +51,7 @@ namespace WFMConsole.ViewModels
             title = item.Description;
             TeamName = item.TeamName;
             LastName = item.LastName;
+            FirstName = item.FirstName;
             allDay = item.FullDay;
             EventType = item.EventType;
             Notes = item.Notes;
@@ -96,7 +98,16 @@ namespace WFMConsole.ViewModels
             Invitees = new List<ViewInviteeItem>();
             foreach(var invitee in invitees)
             {
-                Invitees.Add(new ViewInviteeItem() { Id = invitee.Id, agentNo = invitee.AgentNo, email = invitee.Email, firstName = invitee.FirstName, lastName = invitee.LastName });
+                if(invitee.AgentNo == 0)
+                {
+                    Invitees.Add(new ViewInviteeItem() { Id = invitee.Id, agentNo = invitee.AgentNo.Value, email = invitee.Email, firstName = invitee.FirstName, lastName = "" });
+
+                }
+                else
+                {
+                    Invitees.Add(new ViewInviteeItem() { Id = invitee.Id, agentNo = invitee.AgentNo.Value, email = invitee.Email, firstName = invitee.FirstName, lastName = invitee.LastName });
+
+                }
             }
 
         }
@@ -111,6 +122,7 @@ namespace WFMConsole.ViewModels
             title = item.Description;
             TeamName = item.TeamName;
             LastName = item.LastName;
+            FirstName = item.FirstName;
             allDay = item.FullDay;
             EventType = item.EventType;
             Notes = item.Notes;

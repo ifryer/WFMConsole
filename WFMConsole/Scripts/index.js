@@ -1,6 +1,7 @@
 ﻿indexScript = (function () {
 
     function initialize() {
+        startLoading();
         mowTab.initialize();
         scheduleTab.initialize();
         $.ajax({
