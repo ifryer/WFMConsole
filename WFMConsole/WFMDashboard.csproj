@@ -224,6 +224,11 @@
     <Compile Include="Models\BUS_WFMDashboard_WFO_Schedule.cs">
       <DependentUpon>OnyxEntities.tt</DependentUpon>
     </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="ViewModels\FormViewModels.cs" />
     <Compile Include="ViewModels\ViewEvent.cs" />
     <Compile Include="ViewModels\Reports.cs" />
@@ -344,6 +349,7 @@
     <Content Include="Models\OnyxEntities.edmx.diagram">
       <DependentUpon>OnyxEntities.edmx</DependentUpon>
     </Content>
+    <EmbeddedResource Include="Content\templates\MowTemplate.xlsx" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Properties\PublishProfiles\WFMDashboard To Production.pubxml" />
     <Content Include="Scripts\chosen_v1.8.2\bower.json" />
@@ -722,6 +728,12 @@
     <Content Include="packages.config" />
     <None Include="Project_Readme.html" />
     <Content Include="Scripts\jquery-1.10.2.min.map" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

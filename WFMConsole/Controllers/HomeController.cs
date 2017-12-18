@@ -189,6 +189,25 @@ namespace WFMDashboard.Controllers
             }
         }
 
+        //public void DownloadMowSpreadsheet(DateTime week)
+        public void DownloadMowSpreadsheet(string monday)
+        {
+            var week = DateTime.Parse(monday);
+            var byteArray = WFMHelper.CreateMowSpreadsheet(week);
+            //Write it back to the client
+            if(byteArray == null)
+            {
+                log.Warn("Something went wrong creating MOW spreadsheet");
+                RedirectToAction("Error", new { msg = "Error creating spreadsheet" });
+            }
+            else
+            {
+                Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                Response.AddHeader("content-disposition", "attachment;  filename=ExcelDemo.xlsx");
+                Response.BinaryWrite(byteArray);
+            }
+        }
+
         public ActionResult CreateMOWReport()
         {
             var user = HttpContext.KmIdentity();
@@ -226,6 +245,7 @@ namespace WFMDashboard.Controllers
             var success =  WFMHelper.SendReport(reportContent, reportType);
             return JsonConvert.SerializeObject(new { success = success, msg = "Successfully sent report" });
         }
+
 
         #endregion
 

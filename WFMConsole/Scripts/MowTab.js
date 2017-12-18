@@ -6,8 +6,10 @@
     var MonthList = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     var mowList;
     var thisWeekMonday = moment().startOf('isoweek');
+    var mowSpreadsheetUrl = "";
 
     function initialize() {
+        mowSpreadsheetUrl = $("#download-mow-spreadsheet").attr("href");
         $(".late-shift-date").datepicker();
         $('.mow-schedule-event-date').val($.datepicker.formatDate('mm/dd/yy', new Date()));
         $(".mow-schedule-event-date").datepicker();
@@ -258,6 +260,7 @@
                 }
                 else {
                     SetUpMowTable(data.mowSchedule, null, day.format("MM/DD/YYYY"))
+                    $("#download-mow-spreadsheet").attr("href", mowSpreadsheetUrl + "?monday=" + day.format("MM/DD/YYYY"))
                 }
             }
         });
@@ -284,6 +287,7 @@
                 }
                 else {
                     SetUpMowTable(data.mowSchedule, null, day.format("MM/DD/YYYY"))
+                    $("#download-mow-spreadsheet").attr("href", mowSpreadsheetUrl + "?monday=" + day.format("MM/DD/YYYY"))
                 }
             }
         });
@@ -605,6 +609,7 @@
             //fullMondayString = day.format("MM/DD/YYYY")
             $(".mow-schedule-event-date").val(mondayString)
             $("#mow-wfo-schedule-date-span").attr("current-monday", mondayString);
+            $("#download-mow-spreadsheet").attr("href", mowSpreadsheetUrl + "?monday=" + mondayString)
             day.day(5) //Add 5 days to get friday
             let fridayString = day.format("MM/DD/YYYY")
             let dateRange = mondayString + " - " + fridayString;

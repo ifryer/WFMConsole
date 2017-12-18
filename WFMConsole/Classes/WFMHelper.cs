@@ -22,6 +22,9 @@ using FluentDateTime;
 using System.Net.Mail;
 using static Google.Apis.Calendar.v3.Data.Event;
 using WFMConsole.Configuration;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
+using System.Drawing;
 
 namespace WFMDashboard.Classes
 {
@@ -82,7 +85,7 @@ namespace WFMDashboard.Classes
                 var endDateInput = DateTime.Parse(end);
                 var eventList = new List<ViewEvent>();
                 //var dbList = db.BUS_WFMDashboard_Event.Where(t => t.StartTime <= DateTime.Today.Date && t.EndTime > DateTime.Today.Date).ToList();
-                var events = db.BUS_WFMDashboard_Event.Where(t => (t.StartTime >= startDateInput && t.StartTime <= endDateInput) || (t.FullDay && t.EndTime >= DateTime.Today.Date)).ToList();
+                var events = db.BUS_WFMDashboard_Event.Where(t => (t.StartTime >= startDateInput && t.StartTime <= endDateInput) || (t.FullDay && t.EndTime >= startDateInput && t.StartTime <= endDateInput)).ToList();
                 var pastEvents = events.Where(t => (t.EndTime < DateTime.Now && !t.FullDay) || (t.EndTime < DateTime.Today.Date && t.FullDay)).ToList();
                 events = events.Except(pastEvents).ToList();
                 var eventIdList = events.Select(t => t.Id).ToList();
@@ -610,43 +613,45 @@ namespace WFMDashboard.Classes
                 {
                     foreach (var inputItem in Item.InputItems)
                     {
-                        string agentName = "";
+                        //string agentName = "";
 
-                        var agent = dbN.Agents.Where(t => t.AgentNo == inputItem.agentNo).FirstOrDefault();
-                        agentName = agent.FirstName + " " + agent.LastName;
-                        
+                        //agentName = agent.FirstName + " " + agent.LastName;
+                        if(inputItem.agentNo > 0)
+                        {
 
-                        if(inputItem.rowId != 0)
-                        {
-                            var oldRow = db.BUS_WFMDashboard_WFO_Schedule.Where(t => t.Id == inputItem.rowId).FirstOrDefault();
-                            var startDate = oldRow.StartTime.Date.ToShortDateString();
-                            var endDate = oldRow.EndTime.Date.ToShortDateString();
-                            var startTime = DateTime.Parse(startDate + " " + inputItem.shiftStart);
-                            var endTime = DateTime.Parse(endDate + " " + inputItem.shiftEnd);
-                            oldRow.AgentNo = agent.AgentNo;
-                            oldRow.Task = inputItem.task;
-                            oldRow.FirstName = agent.FirstName;
-                            oldRow.LastName = agent.LastName;
-                            oldRow.StartTime = startTime;
-                            oldRow.EndTime = endTime;
-                        }
-                        else
-                        {
-                            var startTime = DateTime.Parse(Item.Date + " " + inputItem.shiftStart);
-                            var endTime = DateTime.Parse(Item.Date + " " + inputItem.shiftEnd);
-                            var newRow = new BUS_WFMDashboard_WFO_Schedule()
+                            var agent = dbN.Agents.Where(t => t.AgentNo == inputItem.agentNo).FirstOrDefault();
+
+                            if (inputItem.rowId != 0)
                             {
-                                AgentNo = agent.AgentNo,
-                                Task = inputItem.task,
-                                FirstName = agent.FirstName,
-                                LastName = agent.LastName,
-                                StartTime = startTime,
-                                EndTime = endTime
-                            };
-                            db.BUS_WFMDashboard_WFO_Schedule.Add(newRow);
+                                var oldRow = db.BUS_WFMDashboard_WFO_Schedule.Where(t => t.Id == inputItem.rowId).FirstOrDefault();
+                                var startDate = oldRow.StartTime.Date.ToShortDateString();
+                                var endDate = oldRow.EndTime.Date.ToShortDateString();
+                                var startTime = DateTime.Parse(startDate + " " + inputItem.shiftStart);
+                                var endTime = DateTime.Parse(endDate + " " + inputItem.shiftEnd);
+                                oldRow.AgentNo = agent.AgentNo;
+                                oldRow.Task = inputItem.task;
+                                oldRow.FirstName = agent.FirstName;
+                                oldRow.LastName = agent.LastName;
+                                oldRow.StartTime = startTime;
+                                oldRow.EndTime = endTime;
+                            }
+                            else
+                            {
+                                var startTime = DateTime.Parse(Item.Date + " " + inputItem.shiftStart);
+                                var endTime = DateTime.Parse(Item.Date + " " + inputItem.shiftEnd);
+                                var newRow = new BUS_WFMDashboard_WFO_Schedule()
+                                {
+                                    AgentNo = agent.AgentNo,
+                                    Task = inputItem.task,
+                                    FirstName = agent.FirstName,
+                                    LastName = agent.LastName,
+                                    StartTime = startTime,
+                                    EndTime = endTime
+                                };
+                                db.BUS_WFMDashboard_WFO_Schedule.Add(newRow);
+                            }
                         }
 
-                        
                     }
                     db.SaveChanges();
                 }
@@ -784,7 +789,105 @@ namespace WFMDashboard.Classes
         #endregion
 
         
-        
+        public static byte[] CreateMowSpreadsheet(DateTime monday)
+        {
+            try
+            {
+                //Get list of days of week
+                //Get list of MOW schedule rows in that week
+                Dictionary<DateTime, List<ViewMowSchedule>> mowScheduleList;
+                using (var db = new OnyxEntities())
+                {
+                    var weekStart = monday;
+                    var weekEnd = weekStart.AddDays(5);
+                    mowScheduleList = db.BUS_WFMDashboard_WFO_Schedule.Where(t => t.StartTime >= weekStart && t.StartTime <= weekEnd).ToList()
+                        .OrderBy(t => t.StartTime)
+                        .Select(t => new ViewMowSchedule()
+                        {
+                            Id = t.Id,
+                            AgentNo = t.AgentNo,
+                            Task = t.Task,
+                            Date = t.StartTime.Date,
+                            StartTime = t.StartTime.ToShortTimeString(),
+                            EndTime = t.EndTime.ToShortTimeString(),
+                            FirstName = t.FirstName,
+                            LastName = t.LastName
+                        })
+                        .GroupBy(x => x.Date)
+                        .ToDictionary(x => x.Key, x => x.ToList());
+                }
+                
+
+
+                Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("WFMConsole.Content.templates.MowTemplate.xlsx");
+                string[] usableRowNames = { "A", "B", "C", "D" };
+                using (ExcelPackage pck = new OfficeOpenXml.ExcelPackage(stream))
+                {
+                    //Create the worksheet
+                    ExcelWorksheet ws = pck.Workbook.Worksheets.First();
+
+                    //Set Title
+                    ws.Cells["A1"].Value = "MOW and WFO Schedule - 12/11 - 12/15 2017";
+
+                    //We start at cell A3 because the top 2 rows are headers
+                    int currentCell = 3;
+
+                    foreach (var item in mowScheduleList)
+                    {
+                        var date = item.Key;
+                        var list = item.Value;
+                        var topRows = list.Where(t => t.Task == "Unavailable").ToList();
+                        list.RemoveAll(t => t.Task == "Unavailable");
+                        list.InsertRange(0, topRows);
+
+                        ws.Cells["A" + currentCell].Value = date.ToShortDateString();
+                        for (int i = 0; i < list.Count; i++)
+                        {
+                            if (i > 1)
+                            {
+                                ws.InsertRow(currentCell, 1);
+                                foreach (var rowName in usableRowNames)
+                                {
+                                    ws.Cells[rowName + currentCell.ToString()].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                                    ws.Cells[rowName + currentCell.ToString()].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                                    ws.Cells[rowName + currentCell.ToString()].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                                    ws.Cells[rowName + currentCell.ToString()].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                                    ws.Cells[rowName + currentCell.ToString()].StyleID = ws.Cells[rowName + (currentCell - 1).ToString()].StyleID;
+                                }
+                            }
+                            var currentItem = list[i];
+                            ws.Cells["B" + (currentCell).ToString()].Value = currentItem.Task;
+                            ws.Cells["C" + (currentCell).ToString()].Value = currentItem.StartTime + " - " + currentItem.EndTime;
+                            ws.Cells["D" + (currentCell).ToString()].Value = currentItem.LastName;
+                            currentCell++;
+                        }
+                        currentCell++; //Skip over the header for the next date
+                    }
+
+
+                    //for (int i = 4; i < 10; i++)
+                    //{
+                    //    ws.InsertRow(i, 1);
+
+                    //    foreach (var item in usableRowNames)
+                    //    {
+                    //        ws.Cells[item + i.ToString()].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                    //        ws.Cells[item + i.ToString()].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                    //        ws.Cells[item + i.ToString()].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                    //        ws.Cells[item + i.ToString()].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                    //    }
+                    //}
+
+
+                    return pck.GetAsByteArray();
+                }
+            }
+            catch (Exception ex)
+            {
+                return null;
+                log.Error("Error in CreateMowSpreadsheet", ex);
+            }
+        }
         
 
         //Private support methods
@@ -1029,20 +1132,23 @@ namespace WFMDashboard.Classes
                             var reminderList = new List<BUS_WFMDashboard_Event_Notification>();
 
                             var repeatingInfo = item.Recurrence;
-
-                            foreach (var invitee in invitees)
+                            if(invitees != null)
                             {
-                                var newInvitee = new BUS_WFMDashboard_Event_Invitee();
-                                newInvitee.Email = invitee.Email;
-                                var agentInvitee = dbS.Agents.Where(t => t.Email == invitee.Email).FirstOrDefault();
-                                if(agentInvitee != null)
+                                foreach (var invitee in invitees)
                                 {
-                                    newInvitee.AgentNo = agentInvitee.AgentNo;
-                                    newInvitee.FirstName = agentInvitee.FirstName;
-                                    newInvitee.LastName = agentInvitee.LastName;
-                                    inviteeList.Add(newInvitee);
+                                    var newInvitee = new BUS_WFMDashboard_Event_Invitee();
+                                    newInvitee.Email = invitee.Email;
+                                    var agentInvitee = dbS.Agents.Where(t => t.Email == invitee.Email).FirstOrDefault();
+                                    if (agentInvitee != null)
+                                    {
+                                        newInvitee.AgentNo = agentInvitee.AgentNo;
+                                        newInvitee.FirstName = agentInvitee.FirstName;
+                                        newInvitee.LastName = agentInvitee.LastName;
+                                        inviteeList.Add(newInvitee);
+                                    }
                                 }
                             }
+                            
                             if(reminders != null && (reminders.UseDefault != true))
                             {
                                 foreach (var reminder in reminders.Overrides)
@@ -1210,8 +1316,8 @@ namespace WFMDashboard.Classes
             }
             catch (Exception ex)
             {
-                return;
                 log.Error("Error scanning google calendar for new events", ex);
+                return;
             }
 
         }
