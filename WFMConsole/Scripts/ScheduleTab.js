@@ -155,9 +155,9 @@
                     }
                     else {
                         ReloadTeamInfo();
-                        $("#event-calendar").fullCalendar('refetchEvents')
-                        $("#edit-calendar-event-modal").modal("toggle")
-                        $("#repeatingCheckbox-modal").removeAttr("checked")
+                        $("#event-calendar").fullCalendar('refetchEvents');
+                        $("#edit-calendar-event-modal").modal("toggle");
+                        $("#repeatingCheckbox-modal").removeAttr("checked");
                     }
                 }
             });
@@ -867,6 +867,7 @@
             defaultView: 'agendaDay',
             minTime: "07:00:00",
             maxTime: "21:00:00",
+            nowIndicator: true,
             header: {
                 left: 'prev,next today',
                 center: 'title',
@@ -887,7 +888,6 @@
                         showSmallAlert("There was an error getting the calendar events!");
                     },
                     success: function (data) {
-                        console.log(data)
                         data.forEach(function (element) {
                             element.SearchField = element.EventType + " " + element.FirstName + " " + element.LastName + " " + element.Notes + " " + element.title + " " + element.TeamName;
                         });
@@ -925,6 +925,10 @@
                 $(".notification-area").empty();
                 $(".notification-area").append(NotificationRow());
             },
+            navLinkDayClick: function (date, jsEvent) {
+                $('#event-calendar').fullCalendar('changeView', 'agendaDay');
+                $('#event-calendar').fullCalendar('gotoDate', date);
+            },
             eventClick: function (calEvent, jsEvent, view) {
                 let notifications = calEvent.Notifications
                 let invitees = calEvent.Invitees
@@ -940,9 +944,9 @@
                 let eventType = calEvent.EventType;
                 let repeating = calEvent.repeating;
                 let colorId = calEvent.ColorId;
-                let repeatedEvent = calEvent.repeatedEvent
-                let sameStartEnd = startDate == endDate
-                let cancelled = calEvent.Cancelled
+                let repeatedEvent = calEvent.repeatedEvent;
+                let sameStartEnd = startDate == endDate;
+                let cancelled = calEvent.Cancelled;
                 //TODO: Save the repeating event info to the cal event and pull it up here so we can edit it...
                 $("#event-title-modal").val(title);
                 $("#event-notes-modal").val(notes);
@@ -951,41 +955,41 @@
                 $("#event-start-time-modal").val(startTime);
                 $("#event-end-time-modal").val(endTime);
                 $("#event-type-modal").val(eventType);
-                $("#editing-event-id").val(eventId)
-                $("#editing-event-calendar-id").val(calendarId)
+                $("#editing-event-id").val(eventId);
+                $("#editing-event-calendar-id").val(calendarId);
                 $("#edit-calendar-event-modal").modal();
                 $(".event-color-modal").removeClass("chosen");
                 if (sameStartEnd)
-                    $("#editing-event-same-date").attr("same", "1")
+                    $("#editing-event-same-date").attr("same", "1");
                 else
-                    $("#editing-event-same-date").attr("same", "0")
+                    $("#editing-event-same-date").attr("same", "0");
                 if (cancelled)
-                    $("#cancel-event-modal-btn").html("Un-Cancel Event")
+                    $("#cancel-event-modal-btn").html("Un-Cancel Event");
                 else
-                    $("#cancel-event-modal-btn").html("Cancel Event")
-                $(".event-color-modal.color-" + colorId).addClass("chosen")
+                    $("#cancel-event-modal-btn").html("Cancel Event");
+                $(".event-color-modal.color-" + colorId).addClass("chosen");
                 if (allDay) {
-                    $("#event-start-time-modal, #event-end-time-modal").attr("disabled", "disabled")
-                    $("#fullDayCheckbox-modal").prop("checked", "checked")
+                    $("#event-start-time-modal, #event-end-time-modal").attr("disabled", "disabled");
+                    $("#fullDayCheckbox-modal").prop("checked", "checked");
                 }
                 else {
-                    $("#event-start-time-modal, #event-end-time-modal").removeAttr("disabled", "disabled")
-                    $("#fullDayCheckbox-modal").removeAttr("checked")
+                    $("#event-start-time-modal, #event-end-time-modal").removeAttr("disabled", "disabled");
+                    $("#fullDayCheckbox-modal").removeAttr("checked");
                 }
                 if (repeating) {
-                    $("#repeatingCheckbox-modal").prop("checked", "checked")
+                    $("#repeatingCheckbox-modal").prop("checked", "checked");
                     $("#repeatingCheckbox-modal-edit").show();
                 }
                 else {
-                    $("#repeatingCheckbox-modal").removeAttr("checked")
+                    $("#repeatingCheckbox-modal").removeAttr("checked");
                     $("#repeatingCheckbox-modal-edit").hide();
                 }
                 if (repeatedEvent) {
-                    $("#event-start-date-modal").val(calEvent.OriginalStartDate)
-                    $("#event-end-date-modal").val(calEvent.OriginalEndDate)
+                    $("#event-start-date-modal").val(calEvent.OriginalStartDate);
+                    $("#event-end-date-modal").val(calEvent.OriginalEndDate);
                     $("#event-start-date-modal").prop("disabled", "disabled");
                     $("#event-end-date-modal").prop("disabled", "disabled");
-                    $("#repeatingCheckbox-modal").prop("checked", "checked")
+                    $("#repeatingCheckbox-modal").prop("checked", "checked");
                     $("#repeatingCheckbox-modal-edit").show();
                 }
                 else {
@@ -1013,8 +1017,8 @@
 
     function AddPageInfo(data) {
         //TODO: when we break out the reports tab to new JS file, move these 2 lines there
-        $("#mow-last-sent-date").html(data.mowDate)
-        $("#down-by-last-sent-date").html(data.downByDate)
+        $("#mow-last-sent-date").html(data.mowDate);
+        $("#down-by-last-sent-date").html(data.downByDate);
 
         //Set up agent dropdown
         $.each(data.agentList, function (index, item) {
@@ -1033,7 +1037,6 @@
                 }));
             },
             select: function (event, ui) {
-                console.log(ui.item)
                 AddInvitee(ui.item, false);
                 this.value = "";
                 return false; // This will prevent the box from filling in with the selected item
@@ -1056,7 +1059,6 @@
 
     function AddInvitee(invitee, modal)
     {
-        console.log(invitee)
         let appendArea = $(".invitee-area");
         if (modal)
         {
@@ -1070,13 +1072,11 @@
         
         if (invitee.reportToEmail !== "")
         {
-            let existingRowReport = $(appendArea).find(".invitee-row[agentNo='" + invitee.reportTo + "']")
+            let existingRowReport = $(appendArea).find(".invitee-row[agentNo='" + invitee.reportTo + "']");
             if (existingRowReport.length < 1)
             {
-                appendArea.append(InviteeRow(0, invitee.reportToEmail, invitee.reportTo, invitee.reportToFirstName, invitee.reportToLastName, invitee.reportToName))
-                    
+                appendArea.append(InviteeRow(0, invitee.reportToEmail, invitee.reportTo, invitee.reportToFirstName, invitee.reportToLastName, invitee.reportToName));
             }
-            
         }
     }
 

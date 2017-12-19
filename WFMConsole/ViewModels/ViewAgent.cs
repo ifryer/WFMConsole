@@ -12,12 +12,14 @@ namespace WFMConsole.ViewModels
         public string FirstName { get; set; }
         public int AgentNo { get; set; }
         public string TeamName { get; set; }
+        public string Email { get; set; }
 
         public ViewAgent(Agent agent)
         {
             LastName = agent.LastName;
             FirstName = agent.FirstName;
             AgentNo = agent.AgentNo;
+            Email = agent.Email;
             TeamName = agent.TeamName.Replace("Team", "").Replace(" ", "");
         }
     }

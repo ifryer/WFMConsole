@@ -887,6 +887,7 @@
                         showSmallAlert("There was an error getting the calendar events!");
                     },
                     success: function (data) {
+                        console.log(data)
                         data.forEach(function (element) {
                             element.SearchField = element.EventType + " " + element.FirstName + " " + element.LastName + " " + element.Notes + " " + element.title + " " + element.TeamName;
                         });
