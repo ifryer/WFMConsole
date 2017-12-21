@@ -390,7 +390,7 @@ namespace WFMDashboard.Classes
             }
         }
 
-        public static bool CancelEvent(CancellationToken cancellationToken, int eventId)
+        public static bool CancelEvent(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, int eventId)
         {
             try
             {
@@ -406,6 +406,14 @@ namespace WFMDashboard.Classes
                     {
                         editEvent.Description = editEvent.Description.TrimStart("Cancelled ");
                     }
+
+                    var message = CancelEvent_GoogleCalendar(googleAuth, editEvent);
+                    if (!(message.ToLower().Contains("success")))
+                    {
+                        //msg = message;
+                        return false;
+                    }
+
                     //TODO: cancel the event on GCal here (maybe? or just change name to cancelled?)
                     db.SaveChanges();
                 }
@@ -754,11 +762,13 @@ namespace WFMDashboard.Classes
                 {
                     subject = $"MOW/Inventory Control Mgr./Late Shift Mgr. - " + String.Format("{0:dddd, MMMM dd, yyyy - hh:mm tt}", dateNow);
                     recipients = ConfigurationManager.AppSettings["MowReportDistributionList"];
+                    UpdateReportLog("mow");
                 }
                 if(reportType.ToLower() == "down")
                 {
                     subject = $"CSC Daily Staffing Report – " + String.Format("{0:dddd, MMMM dd, yyyy - hh:mm tt}", dateNow);
                     recipients = ConfigurationManager.AppSettings["DownReportDistributionList"];
+                    UpdateReportLog("down by");
                 }
 
                 string to = recipients;
@@ -1183,6 +1193,9 @@ namespace WFMDashboard.Classes
                                 var description = item.Description;
                                 if (description == null)
                                     description = "";
+                                var summary = item.Summary;
+                                if (summary == null)
+                                    summary = "";
                                 var newEvent = new BUS_WFMDashboard_Event()
                                 {
                                     FirstName = staffMember.FirstName,
@@ -1196,7 +1209,7 @@ namespace WFMDashboard.Classes
                                     TeamId = staffMember.TeamNo,
                                     TeamName = staffMember.TeamName,
                                     LastName = staffName,
-                                    Description = item.Summary,
+                                    Description = summary,
                                     Color = item.ColorId,
                                     CreatedAt = DateTime.Now,
                                     CreatedBy = "Google Calendar",
@@ -1956,6 +1969,39 @@ namespace WFMDashboard.Classes
             }
         }
 
+        private static string CancelEvent_GoogleCalendar(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, BUS_WFMDashboard_Event eventItem)
+        {
+            try
+            {
+                String calendarId = ConfigurationManager.AppSettings["CalendarId"];
+
+                var service = CreateCalendarService(googleAuth);
+
+                Event newEvent = new Event()
+                {
+                    Summary = eventItem.Description,
+                };
+                EventsResource.PatchRequest request = service.Events.Patch(newEvent, calendarId, eventItem.CalendarEventId);
+                Event updatedEvent = request.Execute();
+                if (updatedEvent != null)
+                {
+                    return "Successfully updated event";
+                }
+                else
+                {
+                    return "Error updating event on google calendar";
+                }
+                ////bool success = false;
+                //return createdEvent.Id;
+            }
+            catch (Exception ex)
+            {
+                log.Error("Error in UpdateEvent_GoogleCalendar", ex);
+                //throw ex;
+                return ex.ToString();
+            }
+        }
+
 
         private static string DeleteEvent_GoogleCalendar(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth, string eventId)
         {
@@ -1987,6 +2033,20 @@ namespace WFMDashboard.Classes
         }
 
         //Misc
+
+        private static void UpdateReportLog(string reportType)
+        {
+            using (var db = new OnyxEntities())
+            {
+                var existingLog = db.BUS_WFMDashboard_ReportLog.Where(t => t.ReportType == reportType).FirstOrDefault();
+                if(existingLog != null)
+                {
+                    existingLog.LastSent = DateTime.Now;
+                    db.SaveChanges();
+                }
+            }
+        }
+
         private static string ProcessTeamName(string team)
         {
             if (team.ToLower().Contains("management"))

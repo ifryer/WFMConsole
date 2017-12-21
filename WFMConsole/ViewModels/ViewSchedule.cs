@@ -48,7 +48,7 @@ namespace WFMConsole.ViewModels
                 ManagerOrder = db.BUS_WFMDashboard_ICM_Order.OrderBy(t => t.Order).Select(t => new ViewManagerListItem() {AgentNo = t.AgentNo, Name = t.ManagerName }).ToList();
             }
 
-            var indexOfLastManager = ManagerOrder.IndexOf(ManagerOrder.Where(t => t.Name == lastSchedule.ManagerName).FirstOrDefault());
+            var indexOfLastManager = ManagerOrder.IndexOf(ManagerOrder.Where(t => t.AgentNo == lastSchedule.AgentNo).FirstOrDefault());
             if((indexOfLastManager == ManagerOrder.Count - 1) || indexOfLastManager < 0)
             {
                 CurrentManager = ManagerOrder[0].AgentNo;

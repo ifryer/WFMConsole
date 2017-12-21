@@ -99,11 +99,20 @@ namespace WFMDashboard.Controllers
 
         public async Task<string> CancelEvent(CancellationToken cancellationToken, int eventId)
         {
+            var success = false;
             var user = HttpContext.KmIdentity();
             var WFMUser = getWFMUser(user.LdapUserId);
             if (WFMUser == null) return JsonConvert.SerializeObject(new { success = false, msg = "You are not authorized to access WFM Dashboard" });
             log.Info($"User {user.LdapUserId} cancelled event {eventId}");
-            var success = WFMHelper.CancelEvent(cancellationToken, eventId);
+            var googleAuth = await new AuthorizationCodeMvcAppOverride(this, new AppFlowMetadata(user.LdapUserId)).AuthorizeAsync(cancellationToken);
+            if (googleAuth.Credential == null)
+            {
+                return JsonConvert.SerializeObject(new { success = false, msg = "Error - please refresh page and log back into Google Calendar" });
+            }
+            else
+            {
+                success = WFMHelper.CancelEvent(googleAuth, eventId);
+            }
             return JsonConvert.SerializeObject(new { success = success });
         }
 

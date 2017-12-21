@@ -46,7 +46,6 @@
 
     $("#pto-section").on("change", "#select-name-staff", ChangeStaffName);
 
-
     $(".teamInfo, .mouseover-team-info").hover(function () {
         $(".mouseover-team-info").css({ "display": "block" });
     }, function () {
