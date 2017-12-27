@@ -618,7 +618,7 @@
     }
     function AddPageInfo(data) {
         //Set up MOW stuff
-        SetUpMowTable(data.mowSchedule, data.mowList, new moment().format("MM/DD/YYYY"))
+        SetUpMowTable(data.mowSchedule, data.mowList, new moment().startOf('isoweek').format("MM/DD/YYYY"))
         $(".mow-schedule-event-date").val(new moment().format("MM/DD/YYYY"))
         SetUpLateShiftTable(data.managerList, data.lateShift)
 
