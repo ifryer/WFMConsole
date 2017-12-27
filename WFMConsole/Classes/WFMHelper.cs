@@ -1585,10 +1585,35 @@ namespace WFMDashboard.Classes
                         foreach (var item in inputForm.notifications)
                         {
                             var notification = db.BUS_WFMDashboard_Event_Notification.Where(t => t.Id == item.Id).FirstOrDefault();
-                            notification.NotificationTime = item.notificationTime;
-                            notification.NotificationType = item.notificationType;
-                            notificationList.Add(notification);
+                            if(notification == null)
+                            {
+                                notification = new BUS_WFMDashboard_Event_Notification();
+                                notification.EventId = inputForm.eventId;
+                                notification.NotificationTime = item.notificationTime;
+                                notification.NotificationType = item.notificationType;
+                                db.BUS_WFMDashboard_Event_Notification.Add(notification);
+                                notificationList.Add(notification);
+                            }
+                            else
+                            {
+                                notification.NotificationTime = item.notificationTime;
+                                notification.NotificationType = item.notificationType;
+                                notificationList.Add(notification);
+                            }
+                            
                         }
+                        var notificationListIds = notificationList.Select(t => t.Id).ToList();
+                        var leftoverNotifications = db.BUS_WFMDashboard_Event_Notification.Where(t => t.EventId == inputForm.eventId && !notificationListIds.Contains(t.Id)).ToList();
+                        if(leftoverNotifications.Count > 0)
+                        {
+                            db.BUS_WFMDashboard_Event_Notification.RemoveRange(leftoverNotifications);
+                        }
+                        db.SaveChanges();
+                    }
+                    else
+                    {
+                        var notifications = db.BUS_WFMDashboard_Event_Notification.Where(t => t.EventId == inputForm.eventId).ToList();
+                        db.BUS_WFMDashboard_Event_Notification.RemoveRange(notifications);
                         db.SaveChanges();
                     }
 
@@ -1926,9 +1951,10 @@ namespace WFMDashboard.Classes
                 }
                 var overrides = new RemindersData();
                 newEvent.Reminders = overrides;
+                overrides.Overrides = new List<EventReminder>();
                 if (inputForm.notificationsPresent)
                 {
-                    overrides.Overrides = new List<EventReminder>();
+                    newEvent.Reminders.UseDefault = false;
                     foreach (var item in inputForm.notifications)
                     {
                         newEvent.Reminders.Overrides.Add(new EventReminder() { Method = item.notificationType, Minutes = item.notificationTime });
