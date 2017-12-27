@@ -9,31 +9,31 @@ namespace WFMDashboard
         public static void RegisterBundles(BundleCollection bundles)
         {
             bundles.Add(new ScriptBundle("~/bundles/jquery").Include(
-                        "~/Scripts/jquery-{version}.js",
-                        "~/Scripts/DataTables-1.10.13/js/jquery.dataTables.min.js",
-                        "~/Scripts/chosen_v1.8.2/chosen.jquery.js",
-                        "~/Scripts/fullcalendar-3.6.1/lib/moment.min.js",
-                        "~/Scripts/fullcalendar-3.6.1/fullcalendar.min.js",
-                        "~/Scripts/jquery.timepicker.min.js",
-                        "~/Scripts/jquery-ui-1.12.1.custom/jquery-ui.js",
-                        "~/Scripts/jquery.datepair.min.js"
+                        "~/Scripts/libraries/jquery-{version}.js",
+                        "~/Scripts/libraries/DataTables-1.10.13/js/jquery.dataTables.min.js",
+                        "~/Scripts/libraries/chosen_v1.8.2/chosen.jquery.js",
+                        "~/Scripts/libraries/fullcalendar-3.6.1/lib/moment.min.js",
+                        "~/Scripts/libraries/fullcalendar-3.6.1/fullcalendar.min.js",
+                        "~/Scripts/libraries/jquery.timepicker.min.js",
+                        "~/Scripts/libraries/jquery-ui-1.12.1.custom/jquery-ui.js",
+                        "~/Scripts/libraries/jquery.datepair.min.js"
                         ));
 
             // Use the development version of Modernizr to develop with and learn from. Then, when you're
             // ready for production, use the build tool at http://modernizr.com to pick only the tests you need.
             bundles.Add(new ScriptBundle("~/bundles/modernizr").Include(
-                        "~/Scripts/modernizr-*"));
+                        "~/Scripts/libraries/modernizr-*"));
 
             bundles.Add(new ScriptBundle("~/bundles/bootstrap").Include(
-                      "~/Scripts/bootstrap.js",
-                      "~/Scripts/respond.js"));
+                      "~/Scripts/libraries/bootstrap.js",
+                      "~/Scripts/libraries/respond.js"));
 
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/bootstrap.css",
                       "~/Content/jquery.timepicker.min.css",
-                      "~/Scripts/DataTables-1.10.13/css/jquery.dataTables.min.css",
-                      "~/Scripts/fullcalendar-3.6.1/fullcalendar.min.css",
-                      "~/Scripts/jquery-ui-1.12.1.custom/jquery-ui.css",
+                      "~/Scripts/libraries/DataTables-1.10.13/css/jquery.dataTables.min.css",
+                      "~/Scripts/libraries/fullcalendar-3.6.1/fullcalendar.min.css",
+                      "~/Scripts/libraries/jquery-ui-1.12.1.custom/jquery-ui.css",
                       "~/Content/site.css"));
         }
     }
