@@ -212,7 +212,7 @@ namespace WFMDashboard.Controllers
             else
             {
                 Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-                Response.AddHeader("content-disposition", "attachment;  filename=ExcelDemo.xlsx");
+                Response.AddHeader("content-disposition", "attachment;  filename=_______________ WFO and MOW Schedule.xlsx");
                 Response.BinaryWrite(byteArray);
             }
         }

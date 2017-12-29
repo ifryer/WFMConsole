@@ -64,8 +64,10 @@
         }
         if ($(this).val() == "")
         {
+            filteredText = "";
             $(".filter-calendar-clear-btn").hide();
             $(".filtered-text-display").html("");
+            RefreshCalendar();
         }
     });
 
@@ -106,7 +108,6 @@
     $(document).on("click", "#repeatingEvent-modal-edit", ClickEditRepeatingEvent);
     $(document).on("click", "#delete-event-modal-btn", DeleteEvent);
     $(document).on("click", "#add-event-notification-modal", AddNotificationModal);
-
     $(document).on("click", ".remove-notification-row", RemoveNotificationRow);
 
     //Create event modal
@@ -524,6 +525,7 @@
     function ClickNewEventButton() {
         $(".event-form").slideToggle("fast");
         editedEventTitle = false;
+        $("#event-title").focus();
         $("#event-type").val("PTO (Unplanned)");
         $('#event-start-date').val($.datepicker.formatDate('mm/dd/yy', new Date()));
         $('#event-end-date').val($.datepicker.formatDate('mm/dd/yy', new Date()));
@@ -917,6 +919,7 @@
                 let strTimeEnd = (date.add(1, "hours")).format("h:mma")
                 let dateString = date.format("MM/DD/YYYY")
                 $(".event-form").show();
+                $("#event-title").focus();
                 $("#event-start-date, #event-end-date").val(dateString);
                 $("#event-start-time").val(strTime);
                 $("#event-end-time").val(strTimeEnd);

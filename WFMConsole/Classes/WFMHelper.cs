@@ -38,91 +38,59 @@ namespace WFMDashboard.Classes
         static string ApplicationName = "Google Calendar API .NET Quickstart";
 
         #region Get Methods
-        //public static List<ViewEvent> GetEventList()
-        //{
-        //    using (var db = new OnyxEntities())
-        //    {
-        //        var eventList = new List<ViewEvent>();
-        //        //var dbList = db.BUS_WFMDashboard_Event.Where(t => t.StartTime <= DateTime.Today.Date && t.EndTime > DateTime.Today.Date).ToList();
-        //        var events = db.BUS_WFMDashboard_Event.Where(t => t.EndTime >= DateTime.Now || (t.FullDay && t.EndTime >= DateTime.Today.Date)).ToList();
-        //        var pastEvents = db.BUS_WFMDashboard_Event.Where(t => (t.EndTime < DateTime.Now && !t.FullDay) || (t.EndTime < DateTime.Today.Date && t.FullDay)).ToList();
-        //        foreach (var item in events)
-        //        {
-        //            var newEvent = new ViewEvent(item, false, false);
-        //            eventList.Add(newEvent);
-        //        }
-        //        foreach (var item in pastEvents)
-        //        {
-        //            var newEvent = new ViewEvent(item, true, false);
-        //            eventList.Add(newEvent);
-        //        }
-
-        //        var repeatingEvents = db.BUS_WFMDashboard_Repeating_Event.Where(t => t.CalculatedEndDate >= DateTime.Today.Date || t.CalculatedEndDate == null).ToList();
-        //        foreach (var item in repeatingEvents)
-        //        {
-        //            var addRepeat = eventList.Where(t => t.Id == item.EventId).FirstOrDefault();
-        //            if (addRepeat != null)
-        //                addRepeat.repeating = true;
-        //            var eventItem = db.BUS_WFMDashboard_Event.Where(t => t.Id == item.EventId).FirstOrDefault();
-        //            var dateList = GetRepeatingEventDateList(item, DateTime.Now.Date, DateTime.Now.Date.AddMonths(1));
-        //            foreach (var dateItem in dateList)
-        //            {
-        //                var newEvent = new ViewEvent(eventItem, dateItem);
-        //                eventList.Add(newEvent);
-        //            }
-        //        }
-
-                
-        //        return eventList;
-        //    }
-        //}
 
         public static List<ViewEvent> GetEventList(string start, string end)
         {
-            using (var db = new OnyxEntities())
+            try
             {
-                var startDateInput = DateTime.Parse(start);
-                var endDateInput = DateTime.Parse(end);
-                var eventList = new List<ViewEvent>();
-                //var dbList = db.BUS_WFMDashboard_Event.Where(t => t.StartTime <= DateTime.Today.Date && t.EndTime > DateTime.Today.Date).ToList();
-                var events = db.BUS_WFMDashboard_Event.Where(t => (t.StartTime >= startDateInput && t.StartTime <= endDateInput) || (t.FullDay && t.EndTime >= startDateInput && t.StartTime <= endDateInput)).ToList();
-                var pastEvents = events.Where(t => (t.EndTime < DateTime.Now && !t.FullDay) || (t.EndTime < DateTime.Today.Date && t.FullDay)).ToList();
-                events = events.Except(pastEvents).ToList();
-                var eventIdList = events.Select(t => t.Id).ToList();
-                eventIdList.AddRange(pastEvents.Select(t => t.Id).ToList());
-                var eventNotifications = db.BUS_WFMDashboard_Event_Notification.Where(t => eventIdList.Contains(t.EventId)).ToList();
-                var eventInvitees = db.BUS_WFMDashboard_Event_Invitee.Where(t => eventIdList.Contains(t.EventId)).ToList();
-                //var pastEvents = db.BUS_WFMDashboard_Event.Where(t => ((t.StartTime >= startDateInput && t.StartTime <= endDateInput) && (t.EndTime < DateTime.Now && !t.FullDay)) || (t.EndTime < DateTime.Today.Date && t.FullDay && (t.StartTime >= startDateInput && t.StartTime <= endDateInput))).ToList();
-                foreach (var item in events)
+                using (var db = new OnyxEntities())
                 {
-                    var notifications = eventNotifications.Where(t => t.EventId == item.Id).ToList();
-                    var invitees = eventInvitees.Where(t => t.EventId == item.Id).ToList();
-                    var newEvent = new ViewEvent(item, false, false, notifications, invitees); 
-                    eventList.Add(newEvent);
-                }
-                foreach (var item in pastEvents)
-                {
-                    var notifications = eventNotifications.Where(t => t.EventId == item.Id).ToList();
-                    var invitees = eventInvitees.Where(t => t.EventId == item.Id).ToList();
-                    var newEvent = new ViewEvent(item, true, false, notifications, invitees);
-                    eventList.Add(newEvent);
-                }
-
-                var repeatingEvents = db.BUS_WFMDashboard_Repeating_Event.Where(t => t.CalculatedEndDate >= startDateInput || t.CalculatedEndDate == null).ToList();
-                foreach (var item in repeatingEvents)
-                {
-                    var addRepeat = eventList.Where(t => t.Id == item.EventId).FirstOrDefault();
-                    if (addRepeat != null)
-                        addRepeat.repeating = true;
-                    var eventItem = db.BUS_WFMDashboard_Event.Where(t => t.Id == item.EventId).FirstOrDefault();
-                    var dateList = GetRepeatingEventDateList(item, startDateInput, endDateInput);
-                    foreach (var dateItem in dateList)
+                    var startDateInput = DateTime.Parse(start);
+                    var endDateInput = DateTime.Parse(end);
+                    var eventList = new List<ViewEvent>();
+                    var events = db.BUS_WFMDashboard_Event.Where(t => (t.StartTime >= startDateInput && t.StartTime <= endDateInput) || (t.FullDay && t.EndTime >= startDateInput && t.StartTime <= endDateInput)).ToList();
+                    var pastEvents = events.Where(t => (t.EndTime < DateTime.Now && !t.FullDay) || (t.EndTime < DateTime.Today.Date && t.FullDay)).ToList();
+                    events = events.Except(pastEvents).ToList();
+                    var eventIdList = events.Select(t => t.Id).ToList();
+                    eventIdList.AddRange(pastEvents.Select(t => t.Id).ToList());
+                    var eventNotifications = db.BUS_WFMDashboard_Event_Notification.Where(t => eventIdList.Contains(t.EventId)).ToList();
+                    var eventInvitees = db.BUS_WFMDashboard_Event_Invitee.Where(t => eventIdList.Contains(t.EventId)).ToList();
+                    foreach (var item in events)
                     {
-                        var newEvent = new ViewEvent(eventItem, dateItem);
+                        var notifications = eventNotifications.Where(t => t.EventId == item.Id).ToList();
+                        var invitees = eventInvitees.Where(t => t.EventId == item.Id).ToList();
+                        var newEvent = new ViewEvent(item, false, false, notifications, invitees); 
                         eventList.Add(newEvent);
                     }
+                    foreach (var item in pastEvents)
+                    {
+                        var notifications = eventNotifications.Where(t => t.EventId == item.Id).ToList();
+                        var invitees = eventInvitees.Where(t => t.EventId == item.Id).ToList();
+                        var newEvent = new ViewEvent(item, true, false, notifications, invitees);
+                        eventList.Add(newEvent);
+                    }
+
+                    var repeatingEvents = db.BUS_WFMDashboard_Repeating_Event.Where(t => t.CalculatedEndDate >= startDateInput || t.CalculatedEndDate == null).ToList();
+                    foreach (var item in repeatingEvents)
+                    {
+                        var addRepeat = eventList.Where(t => t.Id == item.EventId).FirstOrDefault();
+                        if (addRepeat != null)
+                            addRepeat.repeating = true;
+                        var eventItem = db.BUS_WFMDashboard_Event.Where(t => t.Id == item.EventId).FirstOrDefault();
+                        var dateList = GetRepeatingEventDateList(item, startDateInput, endDateInput);
+                        foreach (var dateItem in dateList)
+                        {
+                            var newEvent = new ViewEvent(eventItem, dateItem);
+                            eventList.Add(newEvent);
+                        }
+                    }
+                    return eventList;
                 }
-                return eventList;
+            }
+            catch (Exception ex)
+            {
+                log.Error("Error in GetEventList", ex);
+                return null;
             }
         }
 
@@ -205,7 +173,7 @@ namespace WFMDashboard.Classes
             }
             catch(Exception ex)
             {
-                //TODO: log
+                log.Error("Error  in GetInvitees", ex);
                 return null;
             }
         }
@@ -217,9 +185,7 @@ namespace WFMDashboard.Classes
             {
                 var monthNumber = DateTime.Now.Month;
                 var yearNumber = DateTime.Now.Year;
-                //var icmScheduleList = db.BUS_WFMDashboard_ICM.Where(t => t.Month >= monthNumber && t.Year >= yearNumber).ToList();
                 var icmScheduleList = db.BUS_WFMDashboard_ICM;
-
                 var results = icmScheduleList.Select(t => new ViewIcmSchedule()
                 {
                     AgentNo = t.AgentNo,
@@ -227,36 +193,42 @@ namespace WFMDashboard.Classes
                     Year = t.Year,
                     ManagerName = t.Manager
                 }).OrderBy(t => t.Month).GroupBy(x => x.Year).ToDictionary(gdc => gdc.Key, gdc => gdc.ToList());
-
                 return results;
             }
         }
         public static Dictionary<DateTime, List<ViewMowSchedule>> GetMowSchedule(DateTime monday)
         {
-            using (var db = new OnyxEntities())
+            try
             {
-                var weekStart = monday;
-                var weekEnd = weekStart.AddDays(5);
-                var mowScheduleList = db.BUS_WFMDashboard_WFO_Schedule.Where(t => t.StartTime >= weekStart && t.StartTime <= weekEnd).ToList();
+                using (var db = new OnyxEntities())
+                {
+                    var weekStart = monday;
+                    var weekEnd = weekStart.AddDays(5);
+                    var mowScheduleList = db.BUS_WFMDashboard_WFO_Schedule.Where(t => t.StartTime >= weekStart && t.StartTime <= weekEnd).ToList();
+                    var results = mowScheduleList
+                        .OrderBy(t => t.StartTime)
+                        .Select(t => new ViewMowSchedule()
+                        {
+                            Id = t.Id,
+                            AgentNo = t.AgentNo,
+                            Task = t.Task,
+                            Date = t.StartTime.Date,
+                            StartTime = t.StartTime.ToShortTimeString(),
+                            EndTime = t.EndTime.ToShortTimeString(),
+                            FirstName = t.FirstName,
+                            LastName = t.LastName
+                        })
+                        .GroupBy(x => x.Date)
+                        .ToDictionary(x => x.Key, x => x.ToList());
 
-                var results = mowScheduleList
-                    .OrderBy(t => t.StartTime)
-                    .Select(t => new ViewMowSchedule()
-                    {
-                        Id = t.Id,
-                        AgentNo = t.AgentNo,
-                        Task = t.Task,
-                        Date = t.StartTime.Date,
-                        StartTime = t.StartTime.ToShortTimeString(),
-                        EndTime = t.EndTime.ToShortTimeString(),
-                        FirstName = t.FirstName,
-                        LastName = t.LastName
-                    })
-                    .GroupBy(x => x.Date)
-                    .ToDictionary(x => x.Key, x => x.ToList());
-
-                return results;
-                //return mowScheduleList.Select(t => new ViewMowSchedule(t)).ToList();
+                    return results;
+                    //return mowScheduleList.Select(t => new ViewMowSchedule(t)).ToList();
+                }
+            }
+            catch(Exception ex)
+            {
+                log.Error("Error in GetMowSchedule", ex);
+                return null;
             }
         }
 
@@ -275,9 +247,7 @@ namespace WFMDashboard.Classes
                 downBy = dbDown.ToShortDateString() + " at " + dbDown.ToShortTimeString();
                 var dbMow = db.BUS_WFMDashboard_ReportLog.Where(t => t.ReportType == "mow").FirstOrDefault().LastSent;
                 mow = dbMow.ToShortDateString() + " at " + dbMow.ToShortTimeString();
-
             }
-
             return;
         }
 
@@ -292,7 +262,6 @@ namespace WFMDashboard.Classes
                     var agent = db.Agents.Where(t => t.AgentNo == agentNo).FirstOrDefault();
                     teamInfo.TeamName = agent.TeamName;
                     team = agent.TeamNo;
-                    //var teamMembers = db.Agents.Where(t => t.TeamNo == team).ToList();
                 }
                 using (var db = new OnyxEntities())
                 {
@@ -380,7 +349,6 @@ namespace WFMDashboard.Classes
                     db.SaveChanges();
                 }
                 return true;
-
             }
             catch (Exception ex)
             {
@@ -413,8 +381,6 @@ namespace WFMDashboard.Classes
                         //msg = message;
                         return false;
                     }
-
-                    //TODO: cancel the event on GCal here (maybe? or just change name to cancelled?)
                     db.SaveChanges();
                 }
                 return true;
@@ -792,6 +758,7 @@ namespace WFMDashboard.Classes
             }
             catch(Exception ex)
             {
+                log.Error("Error in SendReport", ex);
                 return false;
             }
         }
@@ -806,10 +773,10 @@ namespace WFMDashboard.Classes
                 //Get list of days of week
                 //Get list of MOW schedule rows in that week
                 Dictionary<DateTime, List<ViewMowSchedule>> mowScheduleList;
+                var weekStart = monday;
+                var weekEnd = weekStart.AddDays(5);
                 using (var db = new OnyxEntities())
                 {
-                    var weekStart = monday;
-                    var weekEnd = weekStart.AddDays(5);
                     mowScheduleList = db.BUS_WFMDashboard_WFO_Schedule.Where(t => t.StartTime >= weekStart && t.StartTime <= weekEnd).ToList()
                         .OrderBy(t => t.StartTime)
                         .Select(t => new ViewMowSchedule()
@@ -826,8 +793,6 @@ namespace WFMDashboard.Classes
                         .GroupBy(x => x.Date)
                         .ToDictionary(x => x.Key, x => x.ToList());
                 }
-                
-
 
                 Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("WFMConsole.Content.templates.MowTemplate.xlsx");
                 string[] usableRowNames = { "A", "B", "C", "D" };
@@ -835,9 +800,10 @@ namespace WFMDashboard.Classes
                 {
                     //Create the worksheet
                     ExcelWorksheet ws = pck.Workbook.Worksheets.First();
+                    ws.Name = "MOW Schedule";
 
                     //Set Title
-                    ws.Cells["A1"].Value = "MOW and WFO Schedule - 12/11 - 12/15 2017";
+                    ws.Cells["A1"].Value = "MOW and WFO Schedule - " + weekStart.ToShortDateString() + " - " + weekEnd.ToShortDateString();
 
                     //We start at cell A3 because the top 2 rows are headers
                     int currentCell = 3;
@@ -874,28 +840,13 @@ namespace WFMDashboard.Classes
                         currentCell++; //Skip over the header for the next date
                     }
 
-
-                    //for (int i = 4; i < 10; i++)
-                    //{
-                    //    ws.InsertRow(i, 1);
-
-                    //    foreach (var item in usableRowNames)
-                    //    {
-                    //        ws.Cells[item + i.ToString()].Style.Border.Top.Style = ExcelBorderStyle.Thin;
-                    //        ws.Cells[item + i.ToString()].Style.Border.Left.Style = ExcelBorderStyle.Thin;
-                    //        ws.Cells[item + i.ToString()].Style.Border.Right.Style = ExcelBorderStyle.Thin;
-                    //        ws.Cells[item + i.ToString()].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
-                    //    }
-                    //}
-
-
                     return pck.GetAsByteArray();
                 }
             }
             catch (Exception ex)
             {
-                return null;
                 log.Error("Error in CreateMowSpreadsheet", ex);
+                return null;
             }
         }
         
@@ -906,382 +857,412 @@ namespace WFMDashboard.Classes
         //Reports
         private static DownByReport FillDownByReport(List<BUS_WFMDashboard_Event> events)
         {
-            var report = new DownByReport();
-
-            var ptoDateEnd = DateTime.Now.AddDays(1).Date;
-            var partialTypeList = new string[] { "PTO (Unplanned)", "PTO (Planned)", "Unpaid Time Off" };
-            var partialEvents = events.Where(t => !t.FullDay && t.StartTime >= DateTime.Now.Date && t.EndTime <= ptoDateEnd && partialTypeList.Contains(t.EventType)).ToList();
-            //var partialEvents = events.Where(t => !t.FullDay && t.StartTime >= DateTime.Now.Date && t.EndTime <= ptoDateEnd).ToList();
-            var fullDayEvents = events.Where(t => t.FullDay && t.EndTime >= ptoDateEnd).ToList();
-            report = FillDownByReportSectionFullDay(report, fullDayEvents);
-            report = FillDownByReportSectionPartialDay(report, partialEvents);
-            var rangeEvents = events.Where(t => !t.FullDay).OrderBy(t => t.StartTime.TimeOfDay).ToList();
-            foreach (var item in rangeEvents)
+            try
             {
-                var downByEvent = new DownByEvent(item.Color);
-                var startString = item.StartTime.ToShortTimeString();
-                var endString = item.EndTime.ToShortTimeString();
-                downByEvent.DateRange = $"{startString} - {endString}";
-                downByEvent.StartTime = item.StartTime;
-                downByEvent.Title = item.Description;
-                report.Events.Add(downByEvent);
+                var report = new DownByReport();
+                var ptoDateEnd = DateTime.Now.AddDays(1).Date;
+                var partialTypeList = new string[] { "PTO (Unplanned)", "PTO (Planned)", "Unpaid Time Off" };
+                var partialEvents = events.Where(t => !t.FullDay && t.StartTime >= DateTime.Now.Date && t.EndTime <= ptoDateEnd && partialTypeList.Contains(t.EventType)).ToList();
+                //var partialEvents = events.Where(t => !t.FullDay && t.StartTime >= DateTime.Now.Date && t.EndTime <= ptoDateEnd).ToList();
+                var fullDayEvents = events.Where(t => t.FullDay && t.EndTime >= ptoDateEnd).ToList();
+                report = FillDownByReportSectionFullDay(report, fullDayEvents);
+                report = FillDownByReportSectionPartialDay(report, partialEvents);
+                var rangeEvents = events.Where(t => !t.FullDay).OrderBy(t => t.StartTime.TimeOfDay).ToList();
+                foreach (var item in rangeEvents)
+                {
+                    var downByEvent = new DownByEvent(item.Color);
+                    var startString = item.StartTime.ToShortTimeString();
+                    var endString = item.EndTime.ToShortTimeString();
+                    downByEvent.DateRange = $"{startString} - {endString}";
+                    downByEvent.StartTime = item.StartTime;
+                    downByEvent.Title = item.Description;
+                    report.Events.Add(downByEvent);
+                }
+                return report;
             }
-
-            return report;
+            catch(Exception ex)
+            {
+                log.Error("Error in FillDownByReport", ex);
+                return null;
+            }
         }
 
         private static DownByReport FillDownByReportSectionFullDay(DownByReport report, List<BUS_WFMDashboard_Event> events)
         {
-            List<BUS_WFMDashboard_Event> eventList = new List<BUS_WFMDashboard_Event>();
-            using (var db = new OnyxEntities())
-            using (var dbS = new inContact_NGEntities())
+            try
             {
-                foreach (var item in events)
+                List<BUS_WFMDashboard_Event> eventList = new List<BUS_WFMDashboard_Event>();
+                using (var db = new OnyxEntities())
+                using (var dbS = new inContact_NGEntities())
                 {
-                    var teamName = item.TeamName;
-                    var staffName = item.LastName;
-                    var eventType = "";
-                    switch (item.EventType)
+                    foreach (var item in events)
                     {
-                        case "PTO (Unplanned)":
-                        case "PTO (Planned)":
-                            eventType = "PTO";
-                            break;
-                        case "Training":
-                            eventType = "Training";
-                            break;
-                        case "LOA":
-                            eventType = "LOA";
-                            break;
-                        default:
-                            eventType = "Other";
-                            break;
-                    }
-                    bool foundTeam = false;
-                    if (teamName.Contains("RA"))
-                    {
-                        report.Sections[eventType].RA = report.Sections[eventType].RA.TrimStart('0');
-                        report.Sections[eventType].RA += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
-                        report.Sections[eventType].RA = report.Sections[eventType].RA.TrimStart(',').TrimStart(' ');
-                        foundTeam = true;
-                    }
-                    if (teamName.Contains("AD"))
-                    {
-                        report.Sections[eventType].AD = report.Sections[eventType].AD.TrimStart('0');
-                        report.Sections[eventType].AD += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
-                        report.Sections[eventType].AD = report.Sections[eventType].AD.TrimStart(',').TrimStart(' ');
-                        foundTeam = true;
-                    }
-                    if (teamName.Contains("IRC"))
-                    {
-                        report.Sections[eventType].IRC = report.Sections[eventType].IRC.TrimStart('0');
-                        report.Sections[eventType].IRC += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
-                        report.Sections[eventType].IRC = report.Sections[eventType].IRC.TrimStart(',').TrimStart(' ');
-                        foundTeam = true;
-                    }
-                    if (teamName.ToLower().Contains("printer"))
-                    {
-                        report.Sections[eventType].PrinterOps = report.Sections[eventType].PrinterOps.TrimStart('0');
-                        report.Sections[eventType].PrinterOps += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
-                        report.Sections[eventType].PrinterOps = report.Sections[eventType].PrinterOps.TrimStart(',').TrimStart(' ');
-                        foundTeam = true;
-                    }
-                    if (teamName.Contains("MGR") || teamName.ToLower().Contains("manage"))
-                    {
-                        report.Sections[eventType].MGR = report.Sections[eventType].MGR.TrimStart('0');
-                        report.Sections[eventType].MGR += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
-                        report.Sections[eventType].MGR = report.Sections[eventType].MGR.TrimStart(',').TrimStart(' ');
-                        foundTeam = true;
-                    }
-                    if (teamName.Contains("POA"))
-                    {
-                        report.Sections[eventType].POA = report.Sections[eventType].POA.TrimStart('0');
-                        report.Sections[eventType].POA += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
-                        report.Sections[eventType].POA = report.Sections[eventType].POA.TrimStart(',').TrimStart(' ');
-                        foundTeam = true;
-                    }
-                    if (foundTeam)
-                    {
-                        report.TotalDown++;
-                        report.Sections[eventType].TotalDown++;
+                        var teamName = item.TeamName;
+                        var staffName = item.LastName;
+                        var eventType = "";
+                        switch (item.EventType)
+                        {
+                            case "PTO (Unplanned)":
+                            case "PTO (Planned)":
+                                eventType = "PTO";
+                                break;
+                            case "Training":
+                                eventType = "Training";
+                                break;
+                            case "LOA":
+                                eventType = "LOA";
+                                break;
+                            default:
+                                eventType = "Other";
+                                break;
+                        }
+                        bool foundTeam = false;
+                        if (teamName.Contains("RA"))
+                        {
+                            report.Sections[eventType].RA = report.Sections[eventType].RA.TrimStart('0');
+                            report.Sections[eventType].RA += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
+                            report.Sections[eventType].RA = report.Sections[eventType].RA.TrimStart(',').TrimStart(' ');
+                            foundTeam = true;
+                        }
+                        if (teamName.Contains("AD"))
+                        {
+                            report.Sections[eventType].AD = report.Sections[eventType].AD.TrimStart('0');
+                            report.Sections[eventType].AD += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
+                            report.Sections[eventType].AD = report.Sections[eventType].AD.TrimStart(',').TrimStart(' ');
+                            foundTeam = true;
+                        }
+                        if (teamName.Contains("IRC"))
+                        {
+                            report.Sections[eventType].IRC = report.Sections[eventType].IRC.TrimStart('0');
+                            report.Sections[eventType].IRC += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
+                            report.Sections[eventType].IRC = report.Sections[eventType].IRC.TrimStart(',').TrimStart(' ');
+                            foundTeam = true;
+                        }
+                        if (teamName.ToLower().Contains("printer"))
+                        {
+                            report.Sections[eventType].PrinterOps = report.Sections[eventType].PrinterOps.TrimStart('0');
+                            report.Sections[eventType].PrinterOps += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
+                            report.Sections[eventType].PrinterOps = report.Sections[eventType].PrinterOps.TrimStart(',').TrimStart(' ');
+                            foundTeam = true;
+                        }
+                        if (teamName.Contains("MGR") || teamName.ToLower().Contains("manage"))
+                        {
+                            report.Sections[eventType].MGR = report.Sections[eventType].MGR.TrimStart('0');
+                            report.Sections[eventType].MGR += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
+                            report.Sections[eventType].MGR = report.Sections[eventType].MGR.TrimStart(',').TrimStart(' ');
+                            foundTeam = true;
+                        }
+                        if (teamName.Contains("POA"))
+                        {
+                            report.Sections[eventType].POA = report.Sections[eventType].POA.TrimStart('0');
+                            report.Sections[eventType].POA += $", {staffName.TrimStart(' ').TrimEnd(' ')}";
+                            report.Sections[eventType].POA = report.Sections[eventType].POA.TrimStart(',').TrimStart(' ');
+                            foundTeam = true;
+                        }
+                        if (foundTeam)
+                        {
+                            report.TotalDown++;
+                            report.Sections[eventType].TotalDown++;
+                        }
                     }
                 }
+                return report;
             }
-            return report;
+            catch(Exception ex)
+            {
+                log.Error("Error in FillDownByReportSectionFullDay", ex);
+                return null;
+            }
         }
 
         private static DownByReport FillDownByReportSectionPartialDay(DownByReport report, List<BUS_WFMDashboard_Event> events)
         {
-            List<BUS_WFMDashboard_Event> eventList = new List<BUS_WFMDashboard_Event>();
-            using (var db = new OnyxEntities())
-            using (var dbS = new inContact_NGEntities())
+            try
             {
-                foreach (var item in events)
+                List<BUS_WFMDashboard_Event> eventList = new List<BUS_WFMDashboard_Event>();
+                using (var db = new OnyxEntities())
+                using (var dbS = new inContact_NGEntities())
                 {
-                    var eventType = "";
-                    var teamName = item.TeamName;
-                    var staffName = item.LastName;
-                    switch (item.EventType)
+                    foreach (var item in events)
                     {
-                        case "PTO (Unplanned)":
-                        case "PTO (Planned)":
-                            eventType = "PTO";
-                            break;
-                        case "Training":
-                            eventType = "Training";
-                            break;
-                        case "LOA":
-                            eventType = "LOA";
-                            break;
-                        default:
-                            eventType = "Other";
-                            break;
-                    }
+                        var eventType = "";
+                        var teamName = item.TeamName;
+                        var staffName = item.LastName;
+                        switch (item.EventType)
+                        {
+                            case "PTO (Unplanned)":
+                            case "PTO (Planned)":
+                                eventType = "PTO";
+                                break;
+                            case "Training":
+                                eventType = "Training";
+                                break;
+                            case "LOA":
+                                eventType = "LOA";
+                                break;
+                            default:
+                                eventType = "Other";
+                                break;
+                        }
 
-                    TimeSpan diff = item.EndTime - item.StartTime;
-                    double hours = diff.TotalHours;
-                    var fraction = Math.Round((hours / 8.0), 1);
-                    bool foundTeam = false;
-                    if (teamName.Contains("RA"))
-                    {
-                        foundTeam = true;
-                        report.Sections[eventType].RA = report.Sections[eventType].RA.TrimStart('0');
-                        report.Sections[eventType].RA += $", {staffName.TrimStart(' ').TrimEnd(' ')} ({item.StartTime.ToShortTimeString()}-{item.EndTime.ToShortTimeString()})";
-                        report.Sections[eventType].RA = report.Sections[eventType].RA.TrimStart(',').TrimStart(' ');
-                    }
-                    if (teamName.Contains("AD"))
-                    {
-                        foundTeam = true;
-                        report.Sections[eventType].AD = report.Sections[eventType].AD.TrimStart('0');
-                        report.Sections[eventType].AD += $", {staffName.TrimStart(' ').TrimEnd(' ')} ({item.StartTime.ToShortTimeString()}-{item.EndTime.ToShortTimeString()})";
-                        report.Sections[eventType].AD = report.Sections[eventType].AD.TrimStart(',').TrimStart(' ');
-                    }
-                    if (teamName.Contains("IRC"))
-                    {
-                        foundTeam = true;
-                        report.Sections[eventType].IRC = report.Sections[eventType].IRC.TrimStart('0');
-                        report.Sections[eventType].IRC += $", {staffName.TrimStart(' ').TrimEnd(' ')} ({item.StartTime.ToShortTimeString()}-{item.EndTime.ToShortTimeString()})";
-                        report.Sections[eventType].IRC = report.Sections[eventType].IRC.TrimStart(',').TrimStart(' ');
-                    }
-                    if (teamName.ToLower().Contains("printer"))
-                    {
-                        foundTeam = true;
-                        report.Sections[eventType].PrinterOps = report.Sections[eventType].PrinterOps.TrimStart('0');
-                        report.Sections[eventType].PrinterOps += $", {staffName.TrimStart(' ').TrimEnd(' ')} ({item.StartTime.ToShortTimeString()}-{item.EndTime.ToShortTimeString()})";
-                        report.Sections[eventType].PrinterOps = report.Sections[eventType].PrinterOps.TrimStart(',').TrimStart(' ');
-                    }
-                    if (teamName.Contains("MGR"))
-                    {
-                        foundTeam = true;
-                        report.Sections[eventType].MGR = report.Sections[eventType].MGR.TrimStart('0');
-                        report.Sections[eventType].MGR += $", {staffName.TrimStart(' ').TrimEnd(' ')} ({item.StartTime.ToShortTimeString()}-{item.EndTime.ToShortTimeString()})";
-                        report.Sections[eventType].MGR = report.Sections[eventType].MGR.TrimStart(',').TrimStart(' ');
-                    }
-                    if (teamName.Contains("POA"))
-                    {
-                        foundTeam = true;
-                        report.Sections[eventType].POA = report.Sections[eventType].POA.TrimStart('0');
-                        report.Sections[eventType].POA += $", {staffName.TrimStart(' ').TrimEnd(' ')} ({item.StartTime.ToShortTimeString()}-{item.EndTime.ToShortTimeString()})";
-                        report.Sections[eventType].POA = report.Sections[eventType].POA.TrimStart(',').TrimStart(' ');
-                    }
-                    if (foundTeam)
-                    {
-                        report.TotalDown += fraction;
-                        report.Sections[eventType].TotalDown += fraction;
+                        TimeSpan diff = item.EndTime - item.StartTime;
+                        double hours = diff.TotalHours;
+                        var fraction = Math.Round((hours / 8.0), 1);
+                        bool foundTeam = false;
+                        if (teamName.Contains("RA"))
+                        {
+                            foundTeam = true;
+                            report.Sections[eventType].RA = report.Sections[eventType].RA.TrimStart('0');
+                            report.Sections[eventType].RA += $", {staffName.TrimStart(' ').TrimEnd(' ')} ({item.StartTime.ToShortTimeString()}-{item.EndTime.ToShortTimeString()})";
+                            report.Sections[eventType].RA = report.Sections[eventType].RA.TrimStart(',').TrimStart(' ');
+                        }
+                        if (teamName.Contains("AD"))
+                        {
+                            foundTeam = true;
+                            report.Sections[eventType].AD = report.Sections[eventType].AD.TrimStart('0');
+                            report.Sections[eventType].AD += $", {staffName.TrimStart(' ').TrimEnd(' ')} ({item.StartTime.ToShortTimeString()}-{item.EndTime.ToShortTimeString()})";
+                            report.Sections[eventType].AD = report.Sections[eventType].AD.TrimStart(',').TrimStart(' ');
+                        }
+                        if (teamName.Contains("IRC"))
+                        {
+                            foundTeam = true;
+                            report.Sections[eventType].IRC = report.Sections[eventType].IRC.TrimStart('0');
+                            report.Sections[eventType].IRC += $", {staffName.TrimStart(' ').TrimEnd(' ')} ({item.StartTime.ToShortTimeString()}-{item.EndTime.ToShortTimeString()})";
+                            report.Sections[eventType].IRC = report.Sections[eventType].IRC.TrimStart(',').TrimStart(' ');
+                        }
+                        if (teamName.ToLower().Contains("printer"))
+                        {
+                            foundTeam = true;
+                            report.Sections[eventType].PrinterOps = report.Sections[eventType].PrinterOps.TrimStart('0');
+                            report.Sections[eventType].PrinterOps += $", {staffName.TrimStart(' ').TrimEnd(' ')} ({item.StartTime.ToShortTimeString()}-{item.EndTime.ToShortTimeString()})";
+                            report.Sections[eventType].PrinterOps = report.Sections[eventType].PrinterOps.TrimStart(',').TrimStart(' ');
+                        }
+                        if (teamName.Contains("MGR"))
+                        {
+                            foundTeam = true;
+                            report.Sections[eventType].MGR = report.Sections[eventType].MGR.TrimStart('0');
+                            report.Sections[eventType].MGR += $", {staffName.TrimStart(' ').TrimEnd(' ')} ({item.StartTime.ToShortTimeString()}-{item.EndTime.ToShortTimeString()})";
+                            report.Sections[eventType].MGR = report.Sections[eventType].MGR.TrimStart(',').TrimStart(' ');
+                        }
+                        if (teamName.Contains("POA"))
+                        {
+                            foundTeam = true;
+                            report.Sections[eventType].POA = report.Sections[eventType].POA.TrimStart('0');
+                            report.Sections[eventType].POA += $", {staffName.TrimStart(' ').TrimEnd(' ')} ({item.StartTime.ToShortTimeString()}-{item.EndTime.ToShortTimeString()})";
+                            report.Sections[eventType].POA = report.Sections[eventType].POA.TrimStart(',').TrimStart(' ');
+                        }
+                        if (foundTeam)
+                        {
+                            report.TotalDown += fraction;
+                            report.Sections[eventType].TotalDown += fraction;
+                        }
                     }
                 }
+                return report;
             }
-            return report;
+            catch(Exception ex)
+            {
+                log.Error("Error in FillDownByReportSectionPartialDay", ex);
+                return null;
+            }
         }
 
         private static bool CreateDatabaseEvents(Events events)
         {
-            using (var db = new OnyxEntities())
-            using (var dbS = new inContact_NGEntities())
+            try
             {
-                foreach (var item in events.Items)
+                using (var db = new OnyxEntities())
+                using (var dbS = new inContact_NGEntities())
                 {
-                    string eventType = "Other";
+                    foreach (var item in events.Items)
+                    {
+                        string eventType = "Other";
 
-                    var lowerEventTitle = item.Summary.ToLower();
+                        var lowerEventTitle = item.Summary.ToLower();
 
-                    if (lowerEventTitle.Contains("pto"))
-                    {
-                        if (lowerEventTitle.Contains("unplanned"))
-                            eventType = "PTO (Unplanned)";
-                        else
-                            eventType = "PTO (Planned)";
-                    }
-                    if (lowerEventTitle.Contains("unpaid"))
-                    {
-                        eventType = "Unpaid Time Off";
-                    }
-                    if (lowerEventTitle.Contains("training"))
-                    {
-                        eventType = "Training";
-                    }
-                    if (lowerEventTitle.Contains("loa"))
-                    {
-                        eventType = "LOA";
-                    }
-                    
-                    var sections = item.Summary.Split('-');
-                    if (sections.Length > 1)
-                    {
-                        var teamName = sections[0];
-                        var staffName = sections[1];
-                        bool fullDay = true;
-
-                        var staffMember = dbS.Agents.Where(t => staffName.Contains(t.LastName.ToLower()) && t.Status == "Active").FirstOrDefault();
-                        if (staffMember != null)
+                        if (lowerEventTitle.Contains("pto"))
                         {
-                            var invitees = item.Attendees;
-                            var inviteeList = new List<BUS_WFMDashboard_Event_Invitee>();
+                            if (lowerEventTitle.Contains("unplanned"))
+                                eventType = "PTO (Unplanned)";
+                            else
+                                eventType = "PTO (Planned)";
+                        }
+                        if (lowerEventTitle.Contains("unpaid"))
+                        {
+                            eventType = "Unpaid Time Off";
+                        }
+                        if (lowerEventTitle.Contains("training"))
+                        {
+                            eventType = "Training";
+                        }
+                        if (lowerEventTitle.Contains("loa"))
+                        {
+                            eventType = "LOA";
+                        }
 
-                            var reminders = item.Reminders;
-                            var reminderList = new List<BUS_WFMDashboard_Event_Notification>();
+                        var sections = item.Summary.Split('-');
+                        if (sections.Length > 1)
+                        {
+                            var teamName = sections[0];
+                            var staffName = sections[1];
+                            bool fullDay = true;
 
-                            var repeatingInfo = item.Recurrence;
-                            if(invitees != null)
+                            var staffMember = dbS.Agents.Where(t => staffName.Contains(t.LastName.ToLower()) && t.Status == "Active").FirstOrDefault();
+                            if (staffMember != null)
                             {
-                                foreach (var invitee in invitees)
+                                var invitees = item.Attendees;
+                                var inviteeList = new List<BUS_WFMDashboard_Event_Invitee>();
+
+                                var reminders = item.Reminders;
+                                var reminderList = new List<BUS_WFMDashboard_Event_Notification>();
+
+                                var repeatingInfo = item.Recurrence;
+                                if (invitees != null)
                                 {
-                                    var newInvitee = new BUS_WFMDashboard_Event_Invitee();
-                                    newInvitee.Email = invitee.Email;
-                                    var agentInvitee = dbS.Agents.Where(t => t.Email == invitee.Email).FirstOrDefault();
-                                    if (agentInvitee != null)
+                                    foreach (var invitee in invitees)
                                     {
-                                        newInvitee.AgentNo = agentInvitee.AgentNo;
-                                        newInvitee.FirstName = agentInvitee.FirstName;
-                                        newInvitee.LastName = agentInvitee.LastName;
-                                        inviteeList.Add(newInvitee);
+                                        var newInvitee = new BUS_WFMDashboard_Event_Invitee();
+                                        newInvitee.Email = invitee.Email;
+                                        var agentInvitee = dbS.Agents.Where(t => t.Email == invitee.Email).FirstOrDefault();
+                                        if (agentInvitee != null)
+                                        {
+                                            newInvitee.AgentNo = agentInvitee.AgentNo;
+                                            newInvitee.FirstName = agentInvitee.FirstName;
+                                            newInvitee.LastName = agentInvitee.LastName;
+                                            inviteeList.Add(newInvitee);
+                                        }
                                     }
                                 }
-                            }
-                            
-                            if(reminders != null && (reminders.UseDefault != true))
-                            {
-                                foreach (var reminder in reminders.Overrides)
-                                {
-                                    var newNotification = new BUS_WFMDashboard_Event_Notification();
-                                    newNotification.NotificationTime = reminder.Minutes.Value;
-                                    newNotification.NotificationType = reminder.Method;
-                                    reminderList.Add(newNotification);
-                                }
-                            }
-                            
 
-                            //TODO make a way to parse that repeatingInfo variable
+                                if (reminders != null && (reminders.UseDefault != true))
+                                {
+                                    foreach (var reminder in reminders.Overrides)
+                                    {
+                                        var newNotification = new BUS_WFMDashboard_Event_Notification();
+                                        newNotification.NotificationTime = reminder.Minutes.Value;
+                                        newNotification.NotificationType = reminder.Method;
+                                        reminderList.Add(newNotification);
+                                    }
+                                }
 
-                            DateTime startTime = DateTime.Now;
-                            DateTime endTime = DateTime.Now;
-                            if (item.End.Date != null)
-                            {
-                                fullDay = true;
-                                startTime = DateTime.Parse(item.Start.Date);
-                                endTime = DateTime.Parse(item.End.Date);
-                            }
-                            else
-                            {
-                                fullDay = false;
-                                startTime = item.Start.DateTime.Value;
-                                endTime = item.End.DateTime.Value;
-                            }
-                            var prevEvent = db.BUS_WFMDashboard_Event.Where(t => t.CalendarEventId == item.Id).FirstOrDefault();
-                            if (prevEvent == null)
-                            {
-                                var description = item.Description;
-                                if (description == null)
-                                    description = "";
-                                var summary = item.Summary;
-                                if (summary == null)
-                                    summary = "";
-                                var newEvent = new BUS_WFMDashboard_Event()
+
+                                //TODO make a way to parse that repeatingInfo variable
+
+                                DateTime startTime = DateTime.Now;
+                                DateTime endTime = DateTime.Now;
+                                if (item.End.Date != null)
                                 {
-                                    FirstName = staffMember.FirstName,
-                                    Notes = description,
-                                    CalendarEventId = item.Id,
-                                    AgentNo = staffMember.AgentNo,
-                                    StartTime = startTime,
-                                    EndTime = endTime,
-                                    EventType = eventType,
-                                    FullDay = fullDay,
-                                    TeamId = staffMember.TeamNo,
-                                    TeamName = staffMember.TeamName,
-                                    LastName = staffName,
-                                    Description = summary,
-                                    Color = item.ColorId,
-                                    CreatedAt = DateTime.Now,
-                                    CreatedBy = "Google Calendar",
-                                    UpdatedAt = DateTime.Now,
-                                    UpdatedBy = "Google Calendar"
-                                };
-                                db.BUS_WFMDashboard_Event.Add(newEvent);
-                                db.SaveChanges();
-                                foreach (var inv in inviteeList)
-                                {
-                                    inv.EventId = newEvent.Id;
-                                    db.BUS_WFMDashboard_Event_Invitee.Add(inv);
+                                    fullDay = true;
+                                    startTime = DateTime.Parse(item.Start.Date);
+                                    endTime = DateTime.Parse(item.End.Date);
                                 }
-                                foreach (var rem in reminderList)
+                                else
                                 {
-                                    rem.EventId = newEvent.Id;
-                                    db.BUS_WFMDashboard_Event_Notification.Add(rem);
+                                    fullDay = false;
+                                    startTime = item.Start.DateTime.Value;
+                                    endTime = item.End.DateTime.Value;
                                 }
-                            }
-                            else
-                            {
-                                var description = item.Description;
-                                if (description == null)
-                                    description = "";
-                                prevEvent.FirstName = staffMember.FirstName;
-                                prevEvent.Notes = description;
-                                prevEvent.CalendarEventId = item.Id;
-                                prevEvent.AgentNo = staffMember.AgentNo;
-                                prevEvent.StartTime = startTime;
-                                prevEvent.EndTime = endTime;
-                                prevEvent.EventType = eventType;
-                                prevEvent.FullDay = fullDay;
-                                prevEvent.TeamId = staffMember.TeamNo;
-                                prevEvent.TeamName = staffMember.TeamName;
-                                prevEvent.LastName = staffName;
-                                prevEvent.Description = item.Summary;
-                                prevEvent.Color = item.ColorId;
-                                prevEvent.UpdatedAt = DateTime.Now;
-                                prevEvent.UpdatedBy = "Google Calendar";
-                                if(inviteeList.Count > 0)
+                                var prevEvent = db.BUS_WFMDashboard_Event.Where(t => t.CalendarEventId == item.Id).FirstOrDefault();
+                                if (prevEvent == null)
                                 {
-                                    var existingInvitees = db.BUS_WFMDashboard_Event_Invitee.Where(t => t.EventId == prevEvent.Id).ToList();
+                                    var description = item.Description;
+                                    if (description == null)
+                                        description = "";
+                                    var summary = item.Summary;
+                                    if (summary == null)
+                                        summary = "";
+                                    var newEvent = new BUS_WFMDashboard_Event()
+                                    {
+                                        FirstName = staffMember.FirstName,
+                                        Notes = description,
+                                        CalendarEventId = item.Id,
+                                        AgentNo = staffMember.AgentNo,
+                                        StartTime = startTime,
+                                        EndTime = endTime,
+                                        EventType = eventType,
+                                        FullDay = fullDay,
+                                        TeamId = staffMember.TeamNo,
+                                        TeamName = staffMember.TeamName,
+                                        LastName = staffName,
+                                        Description = summary,
+                                        Color = item.ColorId,
+                                        CreatedAt = DateTime.Now,
+                                        CreatedBy = "Google Calendar",
+                                        UpdatedAt = DateTime.Now,
+                                        UpdatedBy = "Google Calendar"
+                                    };
+                                    db.BUS_WFMDashboard_Event.Add(newEvent);
+                                    db.SaveChanges();
                                     foreach (var inv in inviteeList)
                                     {
-                                        if(!(existingInvitees.Where(t => t.Email == inv.Email).Count() > 0))
-                                        {
-                                            inv.EventId = prevEvent.Id;
-                                            db.BUS_WFMDashboard_Event_Invitee.Add(inv);
-                                        }
+                                        inv.EventId = newEvent.Id;
+                                        db.BUS_WFMDashboard_Event_Invitee.Add(inv);
                                     }
-                                }
-                                if(reminderList.Count > 0)
-                                {
-                                    var existingReminders = db.BUS_WFMDashboard_Event_Notification.Where(t => t.EventId == prevEvent.Id).ToList();
                                     foreach (var rem in reminderList)
                                     {
-                                        if(!(existingReminders.Where(t => t.NotificationTime == rem.NotificationTime && t.NotificationType == rem.NotificationType).Count() > 0))
-                                        {
-                                            rem.EventId = prevEvent.Id;
-                                            db.BUS_WFMDashboard_Event_Notification.Add(rem);
-                                        }
+                                        rem.EventId = newEvent.Id;
+                                        db.BUS_WFMDashboard_Event_Notification.Add(rem);
                                     }
                                 }
-                                
+                                else
+                                {
+                                    var description = item.Description;
+                                    if (description == null)
+                                        description = "";
+                                    prevEvent.FirstName = staffMember.FirstName;
+                                    prevEvent.Notes = description;
+                                    prevEvent.CalendarEventId = item.Id;
+                                    prevEvent.AgentNo = staffMember.AgentNo;
+                                    prevEvent.StartTime = startTime;
+                                    prevEvent.EndTime = endTime;
+                                    prevEvent.EventType = eventType;
+                                    prevEvent.FullDay = fullDay;
+                                    prevEvent.TeamId = staffMember.TeamNo;
+                                    prevEvent.TeamName = staffMember.TeamName;
+                                    prevEvent.LastName = staffName;
+                                    prevEvent.Description = item.Summary;
+                                    prevEvent.Color = item.ColorId;
+                                    prevEvent.UpdatedAt = DateTime.Now;
+                                    prevEvent.UpdatedBy = "Google Calendar";
+                                    if (inviteeList.Count > 0)
+                                    {
+                                        var existingInvitees = db.BUS_WFMDashboard_Event_Invitee.Where(t => t.EventId == prevEvent.Id).ToList();
+                                        foreach (var inv in inviteeList)
+                                        {
+                                            if (!(existingInvitees.Where(t => t.Email == inv.Email).Count() > 0))
+                                            {
+                                                inv.EventId = prevEvent.Id;
+                                                db.BUS_WFMDashboard_Event_Invitee.Add(inv);
+                                            }
+                                        }
+                                    }
+                                    if (reminderList.Count > 0)
+                                    {
+                                        var existingReminders = db.BUS_WFMDashboard_Event_Notification.Where(t => t.EventId == prevEvent.Id).ToList();
+                                        foreach (var rem in reminderList)
+                                        {
+                                            if (!(existingReminders.Where(t => t.NotificationTime == rem.NotificationTime && t.NotificationType == rem.NotificationType).Count() > 0))
+                                            {
+                                                rem.EventId = prevEvent.Id;
+                                                db.BUS_WFMDashboard_Event_Notification.Add(rem);
+                                            }
+                                        }
+                                    }
+
+                                }
                             }
                         }
-                    }
 
+                    }
+                    db.SaveChanges();
                 }
-                db.SaveChanges();
+                return true;
             }
-            return true;
+            catch(Exception ex)
+            {
+                log.Error("Error in CreateDatabaseEvents", ex);
+                return false;
+            }
         }
 
         private static DownByReport GenerateDownByReport(Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp.AuthResult googleAuth)
@@ -1670,79 +1651,87 @@ namespace WFMDashboard.Classes
 
         private static List<DateTime> GetRepeatingEventDateList(BUS_WFMDashboard_Repeating_Event repeatItem, DateTime minDate, DateTime maxDate)
         {
-            var dateList = new List<DateTime>();
-            if (!(repeatItem.EndType == "date" && repeatItem.EndDate <= repeatItem.StartDate))
+            try
             {
-
-
-                var startDate = repeatItem.StartDate;
-                var workingDate = startDate;
-                var repeatEvery = repeatItem.RepeatEveryNumber;
-
-                var repeatEndDate = repeatItem.CalculatedEndDate;
-                if (repeatEndDate > maxDate)
-                    repeatEndDate = maxDate;
-                var repeatEndType = repeatItem.EndType;
-                var repeatOccurences = repeatItem.EndAfterOccurences;
-
-                if (repeatEndType == "never")
+                var dateList = new List<DateTime>();
+                if (!(repeatItem.EndType == "date" && repeatItem.EndDate <= repeatItem.StartDate))
                 {
-                    repeatEndType = "date";
-                    repeatEndDate = maxDate;
-                }
 
-                switch (repeatItem.RepeatType)
-                {
-                    case "0": //Daily
-                        dateList = WFMConsole.Classes.DateTimeExtensions.GetSpecifiedDailyDaysFromDateWithMaxDate(workingDate, maxDate, repeatEvery.Value);
-                        break;
-                    case "1": // Weekdays
-                        dateList = WFMConsole.Classes.DateTimeExtensions.GetSpecifiedDaysFromDateWithMaxDate(workingDate, new List<DayOfWeek>() { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday }, maxDate, repeatEvery.Value);
-                        break;
-                    case "2": // M W F
-                        dateList = WFMConsole.Classes.DateTimeExtensions.GetSpecifiedDaysFromDateWithMaxDate(workingDate, new List<DayOfWeek>() { DayOfWeek.Monday, DayOfWeek.Wednesday, DayOfWeek.Friday }, maxDate, repeatEvery.Value);
-                        break;
-                    case "3": // TU TH
-                        dateList = WFMConsole.Classes.DateTimeExtensions.GetSpecifiedDaysFromDateWithMaxDate(workingDate, new List<DayOfWeek>() { DayOfWeek.Tuesday, DayOfWeek.Thursday }, maxDate, repeatEvery.Value);
-                        break;
-                    case "4": // Weekly on certain days
-                        var specifiedDays = repeatItem.RepeatOnDays.TrimEnd(',').Split(',');
-                        var importantDays = new List<DayOfWeek>();
-                        foreach (var item in specifiedDays)
-                        {
-                            switch (item)
+
+                    var startDate = repeatItem.StartDate;
+                    var workingDate = startDate;
+                    var repeatEvery = repeatItem.RepeatEveryNumber;
+
+                    var repeatEndDate = repeatItem.CalculatedEndDate;
+                    if (repeatEndDate > maxDate)
+                        repeatEndDate = maxDate;
+                    var repeatEndType = repeatItem.EndType;
+                    var repeatOccurences = repeatItem.EndAfterOccurences;
+
+                    if (repeatEndType == "never")
+                    {
+                        repeatEndType = "date";
+                        repeatEndDate = maxDate;
+                    }
+
+                    switch (repeatItem.RepeatType)
+                    {
+                        case "0": //Daily
+                            dateList = WFMConsole.Classes.DateTimeExtensions.GetSpecifiedDailyDaysFromDateWithMaxDate(workingDate, maxDate, repeatEvery.Value);
+                            break;
+                        case "1": // Weekdays
+                            dateList = WFMConsole.Classes.DateTimeExtensions.GetSpecifiedDaysFromDateWithMaxDate(workingDate, new List<DayOfWeek>() { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday }, maxDate, repeatEvery.Value);
+                            break;
+                        case "2": // M W F
+                            dateList = WFMConsole.Classes.DateTimeExtensions.GetSpecifiedDaysFromDateWithMaxDate(workingDate, new List<DayOfWeek>() { DayOfWeek.Monday, DayOfWeek.Wednesday, DayOfWeek.Friday }, maxDate, repeatEvery.Value);
+                            break;
+                        case "3": // TU TH
+                            dateList = WFMConsole.Classes.DateTimeExtensions.GetSpecifiedDaysFromDateWithMaxDate(workingDate, new List<DayOfWeek>() { DayOfWeek.Tuesday, DayOfWeek.Thursday }, maxDate, repeatEvery.Value);
+                            break;
+                        case "4": // Weekly on certain days
+                            var specifiedDays = repeatItem.RepeatOnDays.TrimEnd(',').Split(',');
+                            var importantDays = new List<DayOfWeek>();
+                            foreach (var item in specifiedDays)
                             {
-                                case "SU": importantDays.Add(DayOfWeek.Sunday); break;
-                                case "MO": importantDays.Add(DayOfWeek.Monday); break;
-                                case "TU": importantDays.Add(DayOfWeek.Tuesday); break;
-                                case "WE": importantDays.Add(DayOfWeek.Wednesday); break;
-                                case "TH": importantDays.Add(DayOfWeek.Thursday); break;
-                                case "FR": importantDays.Add(DayOfWeek.Friday); break;
-                                case "SA": importantDays.Add(DayOfWeek.Saturday); break;
+                                switch (item)
+                                {
+                                    case "SU": importantDays.Add(DayOfWeek.Sunday); break;
+                                    case "MO": importantDays.Add(DayOfWeek.Monday); break;
+                                    case "TU": importantDays.Add(DayOfWeek.Tuesday); break;
+                                    case "WE": importantDays.Add(DayOfWeek.Wednesday); break;
+                                    case "TH": importantDays.Add(DayOfWeek.Thursday); break;
+                                    case "FR": importantDays.Add(DayOfWeek.Friday); break;
+                                    case "SA": importantDays.Add(DayOfWeek.Saturday); break;
+                                }
                             }
-                        }
-                        dateList = WFMConsole.Classes.DateTimeExtensions.GetSpecifiedDaysFromDateWithMaxDate(workingDate, importantDays, maxDate, repeatEvery.Value);
-                        break;
-                    case "5": //Monthly
-                        while (workingDate < maxDate)
-                        {
-                            dateList.Add(workingDate);
-                            workingDate = workingDate.AddMonths(1 * repeatEvery.Value);
-                        }
-                        break;
-                    case "6": //Annually
-                        while (workingDate < maxDate)
-                        {
-                            dateList.Add(workingDate);
-                            workingDate = workingDate.AddYears(1 * repeatEvery.Value);
-                        }
-                        break;
-                    default:
-                        break;
-                }
+                            dateList = WFMConsole.Classes.DateTimeExtensions.GetSpecifiedDaysFromDateWithMaxDate(workingDate, importantDays, maxDate, repeatEvery.Value);
+                            break;
+                        case "5": //Monthly
+                            while (workingDate < maxDate)
+                            {
+                                dateList.Add(workingDate);
+                                workingDate = workingDate.AddMonths(1 * repeatEvery.Value);
+                            }
+                            break;
+                        case "6": //Annually
+                            while (workingDate < maxDate)
+                            {
+                                dateList.Add(workingDate);
+                                workingDate = workingDate.AddYears(1 * repeatEvery.Value);
+                            }
+                            break;
+                        default:
+                            break;
+                    }
 
+                }
+                return dateList;
             }
-            return dateList;
+            catch(Exception ex)
+            {
+                log.Error("Error in GetRepeatingEventDateList", ex);
+                return null;
+            }
 
         }
 
@@ -2083,7 +2072,6 @@ namespace WFMDashboard.Classes
             {
                 team = "IRC";
             }
-
             if (team.ToLower().Contains("ad"))
             {
                 team = "AD";

@@ -27,9 +27,7 @@
     };
 
     function loadInvitees(invitees) {
-        console.log(invitees)
         emails = $.map(invitees, function(invitee) { return {FirstName: invitee.FirstName, LastName: invitee.LastName, label: invitee.Email, value: invitee.Email, email: invitee.Email, name: invitee.FullName, agentNo: invitee.AgentNo, reportTo: invitee.ReportTo, reportToName: invitee.ReportToName, reportToFirstName: invitee.ReportToFirstName, reportToLastName: invitee.ReportToLastName, reportToEmail: invitee.ReportToEmail}; });
-        console.log(emails)
         //initialized.resolve();
     }
 
